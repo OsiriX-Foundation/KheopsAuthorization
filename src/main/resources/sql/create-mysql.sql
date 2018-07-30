@@ -96,7 +96,7 @@ CREATE TABLE capabilities (
   expiration_time DATETIME,
   revoked_time DATETIME,
   description VARCHAR(255),
-  secret VARCHAR(255),
+  secret VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_bin,
   user_fk BIGINT NOT NULL,
 
   PRIMARY KEY (pk),
