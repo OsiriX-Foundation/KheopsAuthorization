@@ -241,7 +241,16 @@ public class QIDOResource {
             for (String parameter: queryParameterEntry.getValue()) {
                 LOG.log(SEVERE, "    - " + parameter);
             }
-            webTarget = webTarget.queryParam(queryParameterEntry.getKey(), queryParameterEntry.getValue().toArray());
+
+            if (queryParameterEntry.getKey().equals("includefield")) {
+                final List<String> includeFieldParams = new ArrayList<>();
+                queryParameterEntry.getValue().forEach((String tag) -> {
+                    includeFieldParams.addAll(Arrays.asList(tag.split("\\s*,\\s*")));
+                });
+                webTarget = webTarget.queryParam(queryParameterEntry.getKey(), includeFieldParams.toArray());
+            } else {
+                webTarget = webTarget.queryParam(queryParameterEntry.getKey(), queryParameterEntry.getValue().toArray());
+            }
         }
 
         final Set<String> availableSeriesUIDs;
