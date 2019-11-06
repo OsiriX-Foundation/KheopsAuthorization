@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.sharing.Sending.availableSeriesUIDs;
@@ -236,6 +237,10 @@ public class QIDOResource {
         WebTarget webTarget = CLIENT.target(uri);
 
         for (Map.Entry<String, List<String>> queryParameterEntry: queryParameters.entrySet()) {
+            LOG.log(SEVERE, "query paramater:" + queryParameterEntry.getKey() + "parameter count:" + queryParameterEntry.getValue().size());
+            for (String parameter: queryParameterEntry.getValue()) {
+                LOG.log(SEVERE, "    - " + parameter);
+            }
             webTarget = webTarget.queryParam(queryParameterEntry.getKey(), queryParameterEntry.getValue().toArray());
         }
 
