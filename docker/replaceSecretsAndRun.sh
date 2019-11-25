@@ -44,7 +44,7 @@ if [ -z "$KHEOPS_AUTHDB_NAME" ]; then
     missing_env_var_secret=true
 fi
 if [ -z "$KHEOPS_AUTHDB_VERSION" ]; then
-    echo "Missing $KHEOPS_AUTHDB_VERSION environment variable"
+    echo "Missing KHEOPS_AUTHDB_VERSION environment variable"
     missing_env_var_secret=true
 fi
 if [ -z "KHEOPS_ROOT_SCHEME" ]; then
