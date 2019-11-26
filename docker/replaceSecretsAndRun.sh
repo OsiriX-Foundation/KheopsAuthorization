@@ -1,4 +1,4 @@
-docker/replaceSecretsAndRun.sh#! /bin/sh
+#! /bin/sh
 
 missing_env_var_secret=false
 
