@@ -145,6 +145,7 @@ public class Users {
             LOG.log(INFO, "About to try to share with the welcomebot");
             CLIENT.target("http://welcomebot:8080/share")
                     .queryParam("user", newUser.getKeycloakId())
+                    .queryParam("email", newUser.getEmail())
                     .request()
                     .post(Entity.text(""));
         } catch (ProcessingException | WebApplicationException e) {
