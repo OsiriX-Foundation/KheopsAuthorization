@@ -88,7 +88,7 @@ final class KeycloakAccessToken implements AccessToken {
             try {
                 jwt = JWT.require(Algorithm.RSA256(keyProvider))
                         .acceptLeeway(120)
-                        .withIssuer(getIssuer())
+                        //.withIssuer(getIssuer())
                         .acceptLeeway(60)
                         .build()
                         .verify(assertionToken);
