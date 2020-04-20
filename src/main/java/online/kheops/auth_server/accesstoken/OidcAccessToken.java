@@ -102,7 +102,7 @@ public final class OidcAccessToken implements AccessToken {
             try {
                 jwt = JWT.require(Algorithm.RSA256(keyProvider))
                         .acceptLeeway(120)
-                        .withIssuer(configurationURL.issuer)
+//                        .withIssuer(configurationURL.issuer)
                         .acceptLeeway(60)
                         .build()
                         .verify(assertionToken);
