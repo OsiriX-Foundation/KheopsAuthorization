@@ -15,9 +15,9 @@ ENV KHEOPS_AUTHDB_USER=kheopsuser \
     KHEOPS_CLIENT_ZIPPERCLIENTID=Zipper \
     KHEOPS_WELCOMEBOT_WEBHOOK="" \
     KHEOPS_USE_KHEOPS_SCOPE=true \
-    KHEOPS_AUTHDB_PASS_FILE=/run/secrets/kheops_authdb_pass
-    KHEOPS_AUTH_HMASECRET_FILE=/run/secrets/kheops_auth_hmasecret
-    KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE=/run/secrets/kheops_client_dicomwebproxysecret
+    KHEOPS_AUTHDB_PASS_FILE=/run/secrets/kheops_authdb_pass \
+    KHEOPS_AUTH_HMASECRET_FILE=/run/secrets/kheops_auth_hmasecret \
+    KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE=/run/secrets/kheops_client_dicomwebproxysecret \
     KHEOPS_CLIENT_ZIPPER_SECRET_FILE=/run/secrets/kheops_client_zippersecret
 
 COPY KheopsAuthorization.war /usr/local/tomcat/webapps/authorization.war
