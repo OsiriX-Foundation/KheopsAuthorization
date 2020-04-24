@@ -5,9 +5,7 @@ ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/OsiriX-Foundation/KheopsAuthorization"
 
-ENV SECRET_FILE_PATH=/run/secrets \
-    REPLACE_FILE_PATH=/usr/local/tomcat/conf/context.xml \
-    KHEOPS_AUTHDB_USER=kheopsuser \
+ENV KHEOPS_AUTHDB_USER=kheopsuser \
     KHEOPS_AUTHDB_URL=postgresql://authdb:5432 \
     KHEOPS_AUTHDB_NAME=kheops \
     KHEOPS_ROOT_URL= \

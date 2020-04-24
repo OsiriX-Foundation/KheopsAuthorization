@@ -2,6 +2,9 @@
 
 missing_env_var_secret=false
 
+SECRET_FILE_PATH=/run/secrets
+REPLACE_FILE_PATH=/usr/local/tomcat/conf/context.xml
+
 #Verify secrets
 if ! [ -f ${SECRET_FILE_PATH}/kheops_authdb_pass ]; then
     echo "Missing kheops_authdb_pass secret"
