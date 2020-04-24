@@ -3,22 +3,22 @@
 missing_env_var_secret=false
 
 SECRET_FILE_PATH=/run/secrets
-REPLACE_FILE_PATH=/usr/local/tomcat/conf/context.xml
+CONTEXT_FILE_PATH=/usr/local/tomcat/conf/context.xml
 
 #Verify secrets
-if ! [ -f ${SECRET_FILE_PATH}/kheops_authdb_pass ]; then
+if ! [ -f ${KHEOPS_AUTHDB_PASS_FILE} ]; then
     echo "Missing kheops_authdb_pass secret"
     missing_env_var_secret=true
 fi
-if ! [ -f ${SECRET_FILE_PATH}/kheops_auth_hmasecret ]; then
+if ! [ -f ${KHEOPS_AUTH_HMASECRET_FILE} ]; then
     echo "Missing kheops kheops_auth_hmasecret secret"
     missing_env_var_secret=true
 fi
-if ! [ -f ${SECRET_FILE_PATH}/kheops_client_dicomwebproxysecret ]; then
+if ! [ -f ${KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE} ]; then
     echo "Missing kheops_client_dicomwebproxysecret secret"
     missing_env_var_secret=true
 fi
-if ! [ -f ${SECRET_FILE_PATH}/kheops_client_zippersecret ]; then
+if ! [ -f ${KHEOPS_CLIENT_ZIPPER_SECRET_FILE} ]; then
     echo "Missing kheops_client_zippersecret secret"
     missing_env_var_secret=true
 fi
@@ -78,7 +78,9 @@ if [ "$missing_env_var_secret" = true ]; then
 fi
 
 #get secrets and verify content
-for f in ${SECRET_FILE_PATH}/*
+
+array_of_secrets_file=($KHEOPS_AUTHDB_PASS_FILE $KHEOPS_AUTH_HMASECRET_FILE $KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE $KHEOPS_CLIENT_ZIPPER_SECRET_FILE)
+for f in array_of_secrets_file
 do
   filename=$(basename "$f")
   
@@ -95,22 +97,22 @@ do
   fi
 
   value=$(cat ${f})
-  sed -i "s|\${$filename}|$value|" ${REPLACE_FILE_PATH}
+  sed -i "s|\${$filename}|$value|" ${CONTEXT_FILE_PATH}
 done
 
 
 #get env var
 
-sed -i "s|\${kheops_root_url}|$KHEOPS_ROOT_URL|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_postgresql_user}|$KHEOPS_AUTHDB_USER|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_postgresql_url}|$KHEOPS_AUTHDB_URL/$KHEOPS_AUTHDB_NAME|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_pacs_url}|$KHEOPS_PACS_PEP_URL|" ${REPLACE_FILE_PATH}
+sed -i "s|\${kheops_root_url}|$KHEOPS_ROOT_URL|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_postgresql_user}|$KHEOPS_AUTHDB_USER|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_postgresql_url}|$KHEOPS_AUTHDB_URL/$KHEOPS_AUTHDB_NAME|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_pacs_url}|$KHEOPS_PACS_PEP_URL|" ${CONTEXT_FILE_PATH}
 
-sed -i "s|\${kheops_client_dicomwebproxyclientid}|$KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_client_zipperclientid}|$KHEOPS_CLIENT_ZIPPERCLIENTID|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_oidc_provider}|$KHEOPS_OIDC_PROVIDER|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_use_kheops_scope}|$use_scope|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_welcomebot_webhook}|$KHEOPS_WELCOMEBOT_WEBHOOK|" ${REPLACE_FILE_PATH}
+sed -i "s|\${kheops_client_dicomwebproxyclientid}|$KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_client_zipperclientid}|$KHEOPS_CLIENT_ZIPPERCLIENTID|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_oidc_provider}|$KHEOPS_OIDC_PROVIDER|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_use_kheops_scope}|$use_scope|" ${CONTEXT_FILE_PATH}
+sed -i "s|\${kheops_welcomebot_webhook}|$KHEOPS_WELCOMEBOT_WEBHOOK|" ${CONTEXT_FILE_PATH}
 
 
 
