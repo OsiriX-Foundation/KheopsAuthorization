@@ -13,6 +13,7 @@ ENV SECRET_FILE_PATH=/run/secrets \
     KHEOPS_ROOT_URL="" \
     KHEOPS_PACS_PEP_HOST=pacsauthorizationproxy \
     KHEOPS_PACS_PEP_PORT=80 \
+    KHEOPS_PACS_PEP_URL=http://pacsauthorizationproxy:80 \
     KHEOPS_OIDC_PROVIDER="" \
     KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID=DICOMWebProxy \
     KHEOPS_CLIENT_ZIPPERCLIENTID=Zipper \
