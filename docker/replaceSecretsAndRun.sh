@@ -37,12 +37,8 @@ if [ -z "$KHEOPS_ROOT_URL" ]; then
     echo "Missing KHEOPS_ROOT_URL environment variable"
     missing_env_var_secret=true
 fi
-if [ -z "$KHEOPS_PACS_PEP_HOST" ]; then
-    echo "Missing KHEOPS_PACS_PEP_HOST environment variable"
-    missing_env_var_secret=true
-fi
-if [ -z "$KHEOPS_PACS_PEP_PORT" ]; then
-    echo "Missing KHEOPS_PACS_PEP_PORT environment variable"
+if [ -z "$KHEOPS_PACS_PEP_URL" ]; then
+    echo "Missing KHEOPS_PACS_PEP_URL environment variable"
     missing_env_var_secret=true
 fi
 if [ -z "$KHEOPS_OIDC_PROVIDER" ]; then
@@ -64,6 +60,9 @@ if [ -z "$KHEOPS_WELCOMEBOT_WEBHOOK" ]; then
 else
     kheops_welcomebot_webhook=$KHEOPS_WELCOMEBOT_WEBHOOK
 fi
+
+echo "welcombot print debug"
+echo $KHEOPS_WELCOMEBOT_WEBHOOK
 
 use_scope=true
 if [ -z "$KHEOPS_USE_KHEOPS_SCOPE" ]; then
@@ -105,7 +104,7 @@ done
 sed -i "s|\${kheops_root_url}|$KHEOPS_ROOT_URL|" ${REPLACE_FILE_PATH}
 sed -i "s|\${kheops_postgresql_user}|$KHEOPS_AUTHDB_USER|" ${REPLACE_FILE_PATH}
 sed -i "s|\${kheops_postgresql_url}|$KHEOPS_AUTHDB_URL/$KHEOPS_AUTHDB_NAME|" ${REPLACE_FILE_PATH}
-sed -i "s|\${kheops_pacs_url}|http://$KHEOPS_PACS_PEP_HOST:$KHEOPS_PACS_PEP_PORT|" ${REPLACE_FILE_PATH}
+sed -i "s|\${kheops_pacs_url}|$KHEOPS_PACS_PEP_URL|" ${REPLACE_FILE_PATH}
 
 sed -i "s|\${kheops_client_dicomwebproxyclientid}|$KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID|" ${REPLACE_FILE_PATH}
 sed -i "s|\${kheops_client_zipperclientid}|$KHEOPS_CLIENT_ZIPPERCLIENTID|" ${REPLACE_FILE_PATH}
