@@ -2,7 +2,6 @@
 
 missing_env_var_secret=false
 
-SECRET_FILE_PATH=/run/secrets
 CONTEXT_FILE_PATH=/usr/local/tomcat/conf/context.xml
 
 verify_and_write_secret() {
@@ -14,11 +13,6 @@ verify_and_write_secret() {
 
   word_count=$(wc -w $1 | cut -f1 -d" ")
   line_count=$(wc -l $1 | cut -f1 -d" ")
-
-  echo $1
-  echo $word_count
-  echo $line_count
-
 
   if [ ${word_count} != 1 ] || [ ${line_count} != 1 ]; then
     echo Error with secret $filename. He contains $word_count word and $line_count line
