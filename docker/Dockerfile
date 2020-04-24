@@ -16,7 +16,7 @@ ENV SECRET_FILE_PATH=/run/secrets \
     KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID=DICOMWebProxy \
     KHEOPS_CLIENT_ZIPPERCLIENTID=Zipper \
     KHEOPS_WELCOMEBOT_WEBHOOK="" \
-    KHEOPS_USE_KHEOPS_SCOPE=""
+    KHEOPS_USE_KHEOPS_SCOPE=true
 
 COPY KheopsAuthorization.war /usr/local/tomcat/webapps/authorization.war
 COPY context.xml /usr/local/tomcat/conf/context.xml

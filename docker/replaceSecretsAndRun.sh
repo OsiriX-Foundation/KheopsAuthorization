@@ -61,9 +61,6 @@ else
     kheops_welcomebot_webhook=$KHEOPS_WELCOMEBOT_WEBHOOK
 fi
 
-echo "welcombot print debug"
-echo $KHEOPS_WELCOMEBOT_WEBHOOK
-
 use_scope=true
 if [ -z "$KHEOPS_USE_KHEOPS_SCOPE" ]; then
     echo "KHEOPS_USE_KHEOPS_SCOPE not set default value is 'true'"
