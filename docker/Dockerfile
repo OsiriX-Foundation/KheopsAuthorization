@@ -6,7 +6,18 @@ LABEL org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/OsiriX-Foundation/KheopsAuthorization"
 
 ENV SECRET_FILE_PATH=/run/secrets \
-    REPLACE_FILE_PATH=/usr/local/tomcat/conf/context.xml
+    REPLACE_FILE_PATH=/usr/local/tomcat/conf/context.xml \
+    KHEOPS_AUTHDB_USER=kheopsuser \
+    KHEOPS_AUTHDB_URL=postgresql://authdb:5432 \
+    KHEOPS_AUTHDB_NAME=kheops \
+    KHEOPS_ROOT_URL="" \
+    KHEOPS_PACS_PEP_HOST=pacsauthorizationproxy \
+    KHEOPS_PACS_PEP_PORT=80 \
+    KHEOPS_OIDC_PROVIDER="" \
+    KHEOPS_CLIENT_DICOMWEBPROXYCLIENTID=DICOMWebProxy \
+    KHEOPS_CLIENT_ZIPPERCLIENTID=Zipper \
+    KHEOPS_WELCOMEBOT_WEBHOOK="" \
+    KHEOPS_USE_KHEOPS_SCOPE=""
 
 COPY KheopsAuthorization.war /usr/local/tomcat/webapps/authorization.war
 COPY context.xml /usr/local/tomcat/conf/context.xml
