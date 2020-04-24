@@ -5,6 +5,25 @@ missing_env_var_secret=false
 SECRET_FILE_PATH=/run/secrets
 CONTEXT_FILE_PATH=/usr/local/tomcat/conf/context.xml
 
+verify_and_write_secret() {
+  filename=$(basename "$1")
+
+  if [ "$filename" = "kubernetes.io" ]; then
+    continue
+  fi
+
+  word_count=$(wc -w $1 | cut -f1 -d" ")
+  line_count=$(wc -l $1 | cut -f1 -d" ")
+
+  if [ ${word_count} != 1 ] || [ ${line_count} != 1 ]; then
+    echo Error with secret $filename. He contains $word_count word and $line_count line
+    exit 1
+  fi
+
+  value=$(cat ${1})
+  sed -i "s|\${$filename}|$value|" ${CONTEXT_FILE_PATH}
+}
+
 #Verify secrets
 if ! [ -f ${KHEOPS_AUTHDB_PASS_FILE} ]; then
     echo "Missing kheops_authdb_pass secret"
@@ -78,28 +97,10 @@ if [ "$missing_env_var_secret" = true ]; then
 fi
 
 #get secrets and verify content
-
-array_of_secrets_file=($KHEOPS_AUTHDB_PASS_FILE $KHEOPS_AUTH_HMASECRET_FILE $KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE $KHEOPS_CLIENT_ZIPPER_SECRET_FILE)
-for f in array_of_secrets_file
-do
-  filename=$(basename "$f")
-  
-  if [ "$filename" = "kubernetes.io" ]; then
-    continue
-  fi
-  
-  word_count=$(wc -w $f | cut -f1 -d" ")
-  line_count=$(wc -l $f | cut -f1 -d" ")
-
-  if [ ${word_count} != 1 ] || [ ${line_count} != 1 ]; then
-    echo Error with secret $filename. He contains $word_count word and $line_count line
-    exit 1
-  fi
-
-  value=$(cat ${f})
-  sed -i "s|\${$filename}|$value|" ${CONTEXT_FILE_PATH}
-done
-
+verify_and_write_secret $KHEOPS_AUTHDB_PASS_FILE
+verify_and_write_secret $KHEOPS_AUTH_HMASECRET_FILE
+verify_and_write_secret $KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE
+verify_and_write_secret $KHEOPS_CLIENT_ZIPPER_SECRET_FILE
 
 #get env var
 
