@@ -15,12 +15,12 @@ verify_and_write_secret() {
   line_count=$(wc -l $1 | cut -f1 -d" ")
 
   if [ ${word_count} != 1 ] || [ ${line_count} != 1 ]; then
-    echo Error with secret $filename. He contains $word_count word and $line_count line
+    echo Error with secret $1. He contains $word_count word and $line_count line
     exit 1
   fi
 
   value=$(cat ${1})
-  sed -i "s|\${$filename}|$value|" ${CONTEXT_FILE_PATH}
+  sed -i "s|\${$2}|$value|" ${CONTEXT_FILE_PATH}
 }
 
 #Verify secrets
@@ -96,10 +96,10 @@ if [ "$missing_env_var_secret" = true ]; then
 fi
 
 #get secrets and verify content
-verify_and_write_secret $KHEOPS_AUTHDB_PASS_FILE
-verify_and_write_secret $KHEOPS_AUTH_HMASECRET_FILE
-verify_and_write_secret $KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE
-verify_and_write_secret $KHEOPS_CLIENT_ZIPPER_SECRET_FILE
+verify_and_write_secret $KHEOPS_AUTHDB_PASS_FILE kheops_authdb_pass
+verify_and_write_secret $KHEOPS_AUTH_HMASECRET_FILE kheops_auth_hmasecret
+verify_and_write_secret $KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE kheops_client_dicomwebproxysecret
+verify_and_write_secret $KHEOPS_CLIENT_ZIPPER_SECRET_FILE kheops_client_zippersecret
 
 #get env var
 
