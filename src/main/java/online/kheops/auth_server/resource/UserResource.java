@@ -1,5 +1,6 @@
 package online.kheops.auth_server.resource;
 
+import online.kheops.auth_server.OIDCProviderContextListener;
 import online.kheops.auth_server.accesstoken.AccessTokenVerificationException;
 import online.kheops.auth_server.accesstoken.OidcAccessToken;
 import online.kheops.auth_server.album.AlbumNotFoundException;
@@ -217,16 +218,17 @@ public class UserResource {
             return Response.status(BAD_REQUEST).build();
         }
 
-        String userInfoUrl = userInfoURLsCache.get(accessToken.getIssuer().get());
+        final String oidcProvider = OIDCProviderContextListener.getOIDCProvider();
+        String userInfoUrl = userInfoURLsCache.get(oidcProvider);
         if (userInfoUrl == null) {
-            final String openidConfiguration = accessToken.getIssuer().get() + "/.well-known/openid-configuration";
+            final String openidConfiguration = OIDCProviderContextListener.getOIDCConfigurationString();
             final URI openidConfigurationURI;
 
             try {
                 openidConfigurationURI = new URI(openidConfiguration);
                 ConfigurationEntity res = CLIENT.target(openidConfigurationURI).request(MediaType.APPLICATION_JSON).get(ConfigurationEntity.class);
                 userInfoUrl = res.userinfoEndpoint;
-                userInfoURLsCache.put(accessToken.getIssuer().get(), userInfoUrl);
+                userInfoURLsCache.put(oidcProvider, userInfoUrl);
             } catch (ProcessingException | WebApplicationException e) {
                 return Response.status(BAD_GATEWAY).build();
             } catch (URISyntaxException e) {
