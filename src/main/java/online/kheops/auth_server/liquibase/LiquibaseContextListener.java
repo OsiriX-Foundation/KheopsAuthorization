@@ -5,13 +5,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import online.kheops.auth_server.util.JOOQTools;
-//import org.hibernate.boot.MetadataSources;
-//import org.hibernate.boot.registry.StandardServiceRegistry;
-//import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import online.kheops.auth_server.EntityManagerListener;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
-//import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -48,14 +44,7 @@ public class LiquibaseContextListener implements ServletContextListener {
         final Configuration cfg = new Configuration();
         cfg.setProperties(properties);
 
-            try (Connection con = JOOQTools.getDataSource().getConnection()){
-
-//                // Prepare the Hibernate configuration
-//                StandardServiceRegistry reg = new StandardServiceRegistryBuilder().applySettings(cfg.getProperties()).build();
-//                MetadataSources metaDataSrc = new MetadataSources(reg);
-//
-//                // Get database connection
-//                Connection con = metaDataSrc.getServiceRegistry().getService(ConnectionProvider.class).getConnection();
+            try (Connection con = EntityManagerListener.getConnection()){
                 JdbcConnection jdbcCon = new JdbcConnection(con);
 
                 // Initialize Liquibase and run the update
