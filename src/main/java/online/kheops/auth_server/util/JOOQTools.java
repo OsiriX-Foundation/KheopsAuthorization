@@ -1,28 +1,21 @@
 package online.kheops.auth_server.util;
 
-import com.mchange.v2.c3p0.C3P0Registry;
 import online.kheops.auth_server.album.BadQueryParametersException;
 import org.jooq.Condition;
 import org.jooq.Field;
 
-import javax.sql.DataSource;
 import javax.ws.rs.core.MultivaluedMap;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.OptionalInt;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static online.kheops.auth_server.util.ErrorResponse.Message.BAD_QUERY_PARAMETER;
 
 public abstract class JOOQTools {
 
     private JOOQTools() { throw new IllegalStateException("Utility class"); }
-
-    private static final Logger LOG = Logger.getLogger(JOOQTools.class.getName());
 
     public static OptionalInt getLimit(MultivaluedMap<String, String> queryParameters) throws BadQueryParametersException {
         final Integer limit;
@@ -131,19 +124,4 @@ public abstract class JOOQTools {
             }
         }
     }
-
-    public static DataSource getDataSource() {
-        Iterator iterator = C3P0Registry.getPooledDataSources().iterator();
-
-        if (!iterator.hasNext()) {
-            throw new IllegalStateException("No C3P0 DataSource available");
-        }
-        DataSource dataSource = (DataSource) iterator.next();
-        if (iterator.hasNext()) {
-            LOG.log(Level.SEVERE, "More than one C3P0 Datasource present, picked the first one");
-        }
-
-        return dataSource;
-    }
-
 }
