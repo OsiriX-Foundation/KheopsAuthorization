@@ -96,6 +96,9 @@ public class Series {
     @OneToMany(mappedBy = "series")
     private Set<AlbumSeries> albumsSeries = new HashSet<>();
 
+    @OneToMany(mappedBy = "series")
+    private Set<Instances> instances = new HashSet<>();
+
     public Series() {}
 
     public Series(String newSeriesInstanceUID) {
@@ -222,4 +225,8 @@ public class Series {
     public String getBodyPartExamined() { return bodyPartExamined; }
 
     public void setBodyPartExamined(String bodyPartExamined) { this.bodyPartExamined = bodyPartExamined; }
+
+    public Set<Instances> getInstances() { return instances; }
+
+    public void setInstances(Instances instance) { instances.add(instance); }
 }

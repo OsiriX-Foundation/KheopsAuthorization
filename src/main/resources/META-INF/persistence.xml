@@ -6,8 +6,9 @@
         <class>online.kheops.auth_server.entity.Album</class>
         <class>online.kheops.auth_server.entity.UserPermission</class>
         <class>online.kheops.auth_server.entity.User</class>
-        <class>online.kheops.auth_server.entity.Series</class>
         <class>online.kheops.auth_server.entity.Study</class>
+        <class>online.kheops.auth_server.entity.Series</class>
+        <class>online.kheops.auth_server.entity.Instances</class>
         <class>online.kheops.auth_server.entity.Capability</class>
         <class>online.kheops.auth_server.entity.AlbumUser</class>
         <class>online.kheops.auth_server.entity.AlbumSeries</class>

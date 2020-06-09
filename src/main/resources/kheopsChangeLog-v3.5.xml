@@ -1,0 +1,183 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:appdba="http://www.datical.net/xml/ns/appdba" xmlns:datical="http://www.datical.net/xml/ns/datical" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+    <changeSet author="kheops" id="v3.5-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="instances" schemaName="public"/>
+            </not>
+        </preConditions>
+        <createTable tableName="instances">
+            <column autoIncrement="true" name="pk" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="instances_pk"/>
+            </column>
+            <column name="series_fk" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creation_time" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="instance_uid" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-2">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM album_series AS al_s
+            WHERE al_s.series_fk IN (SELECT s.pk FROM series AS s
+            LEFT JOIN studies st ON st.pk = s.study_fk
+            WHERE s.populated = false OR st.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-3">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM event_series AS e_s
+            WHERE e_s.series_fk IN (SELECT s.pk FROM series AS s
+            LEFT JOIN studies st ON st.pk = s.study_fk
+            WHERE s.populated = false OR st.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-4">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM events AS e
+            WHERE e.study_fk IN (SELECT st.pk FROM studies AS st
+            WHERE st.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-5">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM events AS e
+            WHERE e.pk IN (SELECT ev.pk FROM events AS ev
+            LEFT JOIN event_series AS e_s ON e_s.event_fk = ev.pk
+            WHERE (ev.mutation_type = 'IMPORT_SERIES' OR ev.mutation_type = 'REMOVE_SERIES') AND e_s.pk IS NULL)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-5.1">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM events AS e
+            WHERE e.pk IN (SELECT ev.pk FROM events AS ev
+            LEFT JOIN event_series AS e_s ON e_s.event_fk = ev.pk
+            LEFT JOIN series AS s ON e_s.series_fk = s.pk
+            RIGHT JOIN studies AS st ON s.study_fk = st.pk
+            WHERE s.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-6">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM webhook_trigger_series AS wts
+            WHERE wts.series_fk IN (SELECT s.pk FROM webhook_trigger_series AS w
+            LEFT JOIN series AS s ON s.pk = w.series_fk
+            LEFT JOIN studies AS st ON st.pk = s.study_fk
+            WHERE s.populated = false OR st.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-7">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM webhook_attempts AS wa
+            WHERE wa.pk IN (SELECT w.pk FROM webhook_attempts AS w
+            LEFT JOIN webhook_triggers AS wt ON w.webhook_trigger_fk = wt.pk
+            LEFT JOIN webhook_trigger_series AS wts ON wts.webhook_trigger_fk = wt.pk
+            WHERE wts.pk IS NULL AND wt.new_series = true)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-8">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM webhook_triggers AS wt
+            WHERE wt.pk IN (SELECT w.pk FROM webhook_triggers AS w
+            LEFT JOIN webhook_trigger_series AS wts ON wts.webhook_trigger_fk = w.pk
+            WHERE wts.pk IS NULL AND w.new_series = true)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-9">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM series AS s WHERE s.study_fk IN (SELECT st.pk FROM studies AS st
+            WHERE st.populated = false)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-10">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <sql>DELETE FROM studies AS st WHERE st.pk IN (SELECT stu.pk FROM series AS s
+            RIGHT JOIN studies stu ON stu.pk = s.study_fk
+            WHERE s.pk IS NULL)</sql>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-11">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <delete tableName="studies">
+            <where>populated=false</where>
+        </delete>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-12">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+        </preConditions>
+        <delete tableName="series">
+            <where>populated=false</where>
+        </delete>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-13">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="series" schemaName="public"/>
+        </preConditions>
+        <dropColumn tableName="series" columnName="populated">
+        </dropColumn>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-14">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="populated" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <dropColumn tableName="studies" columnName="populated">
+        </dropColumn>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-15">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="number_of_series_related_instances" tableName="studies" schemaName="public"/>
+        </preConditions>
+        <dropColumn tableName="studies" columnName="number_of_series_related_instances">
+        </dropColumn>
+    </changeSet>
+
+    <changeSet author="kheops" id="v3.5-16">
+       <tagDatabase tag="v3.5"/>
+    </changeSet>
+
+</databaseChangeLog>
