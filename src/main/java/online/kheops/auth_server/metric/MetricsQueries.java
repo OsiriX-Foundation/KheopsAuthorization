@@ -40,22 +40,13 @@ class MetricsQueries {
                 .getSingleResult();
     }
 
-    static Long getNumberOfUnpopulatedSeries (EntityManager em) {
-        return em.createQuery("SELECT COUNT(s) FROM Series s WHERE s.populated = false", Long.class)
-                .getSingleResult();
-    }
-    static Long getNumberOfUnpopulatedStudies (EntityManager em) {
-        return em.createQuery("SELECT COUNT(s) FROM Study s WHERE s.populated = false", Long.class)
-                .getSingleResult();
-    }
-
     static Long getNumberOfSeries(EntityManager em) {
         return em.createQuery("SELECT COUNT(s) FROM Series s", Long.class)
                 .getSingleResult();
     }
 
     static Long getNumberOfInstances(EntityManager em) {
-        return em.createQuery("SELECT SUM(s.numberOfSeriesRelatedInstances) FROM Series s", Long.class)
+        return em.createQuery("SELECT COUNT(i) FROM Instances i", Long.class)
                 .getSingleResult();
     }
 

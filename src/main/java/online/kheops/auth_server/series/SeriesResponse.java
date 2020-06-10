@@ -12,7 +12,7 @@ public class SeriesResponse {
     private String seriesDescription;
     @XmlElement(name = "series_uid")
     private String seriesUid;
-    @XmlElement(name = "number_of_series_related_instance")
+    @XmlElement(name = "number_of_series_related_instances")
     private Long numberOfSeriesRelatedInstance;
     @XmlElement(name = "time_zone_offset_from_utc")
     private String timeZoneOffsetFromUTC;
@@ -26,7 +26,7 @@ public class SeriesResponse {
 
     private SeriesResponse() { /*empty*/ }
 
-    public SeriesResponse(Series series, String instance) {
+    public SeriesResponse(Series series, String kheopsInstance) {
         modality = series.getModality();
         numberOfSeriesRelatedInstance = Long.valueOf(series.getNumberOfSeriesRelatedInstances());
         seriesDescription = series.getSeriesDescription();
@@ -34,7 +34,7 @@ public class SeriesResponse {
         timeZoneOffsetFromUTC = series.getTimezoneOffsetFromUTC();
         seriesNumber = Long.valueOf(series.getSeriesNumber());
         bodyPartExamined = series.getBodyPartExamined();
-        retrieveUrl = instance + "/api/studies/" + series.getStudy().getStudyInstanceUID() + "/series/" + series.getSeriesInstanceUID();
+        retrieveUrl = kheopsInstance + "/api/studies/" + series.getStudy().getStudyInstanceUID() + "/series/" + series.getSeriesInstanceUID();
     }
 
     public SeriesResponse(Series series) {

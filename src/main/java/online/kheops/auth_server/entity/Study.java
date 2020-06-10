@@ -79,10 +79,6 @@ public class Study {
     @Column(name = "study_id")
     private String studyID;
 
-    @Basic(optional = false)
-    @Column(name = "populated")
-    private boolean populated = false;
-
     @OneToMany(mappedBy = "study")
     private Set<Series> series = new HashSet<>();
 
@@ -109,10 +105,6 @@ public class Study {
 
     // This method does not set Tag.NumberOfStudyRelatedSeries, Tag.NumberOfStudyRelatedInstances, Tag.ModalitiesInStudy
     public Attributes getAttributes() {
-        if (!isPopulated()) {
-            throw new IllegalStateException();
-        }
-
         Attributes attributes = new Attributes();
 
         safeAttributeSetString(attributes, Tag.StudyDate, VR.DA, getStudyDate());
@@ -132,7 +124,6 @@ public class Study {
         return attributes;
     }
 
-    // this method does not set populated, but the calling method will probably need to
     public void mergeAttributes(Attributes attributes) {
         setStudyDate(attributes.getString(Tag.StudyDate, getStudyDate()));
         setStudyTime(attributes.getString(Tag.StudyTime, getStudyTime()));
@@ -239,14 +230,6 @@ public class Study {
 
     public void setStudyID(String studyID) {
         this.studyID = studyID;
-    }
-
-    public boolean isPopulated() {
-        return populated;
-    }
-
-    public void setPopulated(boolean populated) {
-        this.populated = populated;
     }
 
     public void addSeries (Series series) {

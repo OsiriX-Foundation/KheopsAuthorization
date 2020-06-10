@@ -1,6 +1,7 @@
 package online.kheops.auth_server.fetch;
 
 import online.kheops.auth_server.PepAccessTokenBuilder;
+import online.kheops.auth_server.instances.InstancesContextListener;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -22,6 +23,8 @@ public class FetchContextListener implements ServletContextListener {
 
         try {
             Fetcher.setDicomWebURI(new URI(sce.getServletContext().getInitParameter("online.kheops.pacs.uri")));
+            //TODOO remove this line when removing InstanceContextListener
+            InstancesContextListener.setDicomWebURI(new URI(sce.getServletContext().getInitParameter("online.kheops.pacs.uri")));
         } catch (URISyntaxException e) {
             LOG.log(Level.SEVERE, "URI in context param online.kheops.pacs.uri is not valid", e);
         }

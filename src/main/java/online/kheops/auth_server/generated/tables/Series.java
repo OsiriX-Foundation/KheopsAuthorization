@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Series extends TableImpl<SeriesRecord> {
 
-    private static final long serialVersionUID = 548764732;
+    private static final long serialVersionUID = -1729179077;
 
     /**
      * The reference instance of <code>public.series</code>
@@ -102,19 +102,9 @@ public class Series extends TableImpl<SeriesRecord> {
     public final TableField<SeriesRecord, String> BODY_PART_EXAMINED = createField("body_part_examined", org.jooq.impl.SQLDataType.VARCHAR(32), this, "");
 
     /**
-     * The column <code>public.series.number_of_series_related_instances</code>.
-     */
-    public final TableField<SeriesRecord, Integer> NUMBER_OF_SERIES_RELATED_INSTANCES = createField("number_of_series_related_instances", org.jooq.impl.SQLDataType.INTEGER, this, "");
-
-    /**
      * The column <code>public.series.study_fk</code>.
      */
     public final TableField<SeriesRecord, Long> STUDY_FK = createField("study_fk", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>public.series.populated</code>.
-     */
-    public final TableField<SeriesRecord, Boolean> POPULATED = createField("populated", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
      * Create a <code>public.series</code> table reference
@@ -162,7 +152,7 @@ public class Series extends TableImpl<SeriesRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.SERIES_MODALITY_INDEX, Indexes.SERIES_PK, Indexes.SERIES_POPULATED_INDEX, Indexes.SERIES_UID_UNIQUE, Indexes.STUDY_FK_INDEX);
+        return Arrays.<Index>asList(Indexes.SERIES_MODALITY_INDEX, Indexes.SERIES_PK, Indexes.SERIES_UID_UNIQUE, Indexes.STUDY_FK_INDEX);
     }
 
     /**

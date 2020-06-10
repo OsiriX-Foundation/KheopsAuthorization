@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Studies extends TableImpl<StudiesRecord> {
 
-    private static final long serialVersionUID = 654842953;
+    private static final long serialVersionUID = -1346403991;
 
     /**
      * The reference instance of <code>public.studies</code>
@@ -132,11 +132,6 @@ public class Studies extends TableImpl<StudiesRecord> {
     public final TableField<StudiesRecord, String> STUDY_ID = createField("study_id", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
 
     /**
-     * The column <code>public.studies.populated</code>.
-     */
-    public final TableField<StudiesRecord, Boolean> POPULATED = createField("populated", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
-
-    /**
      * Create a <code>public.studies</code> table reference
      */
     public Studies() {
@@ -182,7 +177,7 @@ public class Studies extends TableImpl<StudiesRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.ACCESSION_NUMBER_INDEX, Indexes.PATIENT_ID_INDEX, Indexes.POPULATED_INDEX, Indexes.STUDIES_PK, Indexes.STUDY_DATE_INDEX, Indexes.STUDY_ID_INDEX, Indexes.STUDY_TIME_INDEX, Indexes.STUDY_UID_UNIQUE);
+        return Arrays.<Index>asList(Indexes.ACCESSION_NUMBER_INDEX, Indexes.PATIENT_ID_INDEX, Indexes.STUDIES_PK, Indexes.STUDY_DATE_INDEX, Indexes.STUDY_ID_INDEX, Indexes.STUDY_TIME_INDEX, Indexes.STUDY_UID_UNIQUE);
     }
 
     /**

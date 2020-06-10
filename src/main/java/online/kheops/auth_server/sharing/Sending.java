@@ -257,16 +257,15 @@ public class Sending {
 
             final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
 
-            if (availableSeries.isPopulated() && availableSeries.getStudy().isPopulated()) {
-                for (Webhook webhook : targetAlbum.getWebhooks()) {
-                    if (webhook.getNewSeries() && webhook.isEnabled()) {
-                        final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                        em.persist(webhookTrigger);
-                        webhookTrigger.addSeries(availableSeries);
-                        webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
-                    }
+            for (Webhook webhook : targetAlbum.getWebhooks()) {
+                if (webhook.getNewSeries() && webhook.isEnabled()) {
+                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                    em.persist(webhookTrigger);
+                    webhookTrigger.addSeries(availableSeries);
+                    webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
                 }
             }
+
             tx.commit();
             for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests) {
                 webhookAsyncRequest.firstRequest();
@@ -302,10 +301,8 @@ public class Sending {
                     final AlbumSeries albumSeries = new AlbumSeries(targetAlbum, series);
                     em.persist(albumSeries);
                     allSeriesAlreadyExist = false;
-                    if(series.isPopulated() && series.getStudy().isPopulated()) {
-                        newSeriesWebhook.addSeries(series);
-                        seriesListWebhook.add(series);
-                    }
+                    newSeriesWebhook.addSeries(series);
+                    seriesListWebhook.add(series);
                     seriesListEvent.add(series);
                 }
                 kheopsLogBuilder.series(series.getSeriesInstanceUID());

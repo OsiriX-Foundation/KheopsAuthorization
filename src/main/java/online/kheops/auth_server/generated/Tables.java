@@ -10,8 +10,11 @@ import online.kheops.auth_server.generated.tables.AlbumSeries;
 import online.kheops.auth_server.generated.tables.AlbumUser;
 import online.kheops.auth_server.generated.tables.Albums;
 import online.kheops.auth_server.generated.tables.Capabilities;
+import online.kheops.auth_server.generated.tables.Databasechangelog;
+import online.kheops.auth_server.generated.tables.Databasechangeloglock;
 import online.kheops.auth_server.generated.tables.EventSeries;
 import online.kheops.auth_server.generated.tables.Events;
+import online.kheops.auth_server.generated.tables.Instances;
 import online.kheops.auth_server.generated.tables.ReportProviders;
 import online.kheops.auth_server.generated.tables.Series;
 import online.kheops.auth_server.generated.tables.Studies;
@@ -56,6 +59,16 @@ public class Tables {
     public static final Capabilities CAPABILITIES = online.kheops.auth_server.generated.tables.Capabilities.CAPABILITIES;
 
     /**
+     * The table <code>public.databasechangelog</code>.
+     */
+    public static final Databasechangelog DATABASECHANGELOG = online.kheops.auth_server.generated.tables.Databasechangelog.DATABASECHANGELOG;
+
+    /**
+     * The table <code>public.databasechangeloglock</code>.
+     */
+    public static final Databasechangeloglock DATABASECHANGELOGLOCK = online.kheops.auth_server.generated.tables.Databasechangeloglock.DATABASECHANGELOGLOCK;
+
+    /**
      * The table <code>public.event_series</code>.
      */
     public static final EventSeries EVENT_SERIES = online.kheops.auth_server.generated.tables.EventSeries.EVENT_SERIES;
@@ -64,6 +77,11 @@ public class Tables {
      * The table <code>public.events</code>.
      */
     public static final Events EVENTS = online.kheops.auth_server.generated.tables.Events.EVENTS;
+
+    /**
+     * The table <code>public.instances</code>.
+     */
+    public static final Instances INSTANCES = online.kheops.auth_server.generated.tables.Instances.INSTANCES;
 
     /**
      * The table <code>public.report_providers</code>.

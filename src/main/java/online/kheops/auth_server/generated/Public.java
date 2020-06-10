@@ -14,8 +14,11 @@ import online.kheops.auth_server.generated.tables.AlbumSeries;
 import online.kheops.auth_server.generated.tables.AlbumUser;
 import online.kheops.auth_server.generated.tables.Albums;
 import online.kheops.auth_server.generated.tables.Capabilities;
+import online.kheops.auth_server.generated.tables.Databasechangelog;
+import online.kheops.auth_server.generated.tables.Databasechangeloglock;
 import online.kheops.auth_server.generated.tables.EventSeries;
 import online.kheops.auth_server.generated.tables.Events;
+import online.kheops.auth_server.generated.tables.Instances;
 import online.kheops.auth_server.generated.tables.ReportProviders;
 import online.kheops.auth_server.generated.tables.Series;
 import online.kheops.auth_server.generated.tables.Studies;
@@ -43,7 +46,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1403191217;
+    private static final long serialVersionUID = 411159445;
 
     /**
      * The reference instance of <code>public</code>
@@ -71,6 +74,16 @@ public class Public extends SchemaImpl {
     public final Capabilities CAPABILITIES = online.kheops.auth_server.generated.tables.Capabilities.CAPABILITIES;
 
     /**
+     * The table <code>public.databasechangelog</code>.
+     */
+    public final Databasechangelog DATABASECHANGELOG = online.kheops.auth_server.generated.tables.Databasechangelog.DATABASECHANGELOG;
+
+    /**
+     * The table <code>public.databasechangeloglock</code>.
+     */
+    public final Databasechangeloglock DATABASECHANGELOGLOCK = online.kheops.auth_server.generated.tables.Databasechangeloglock.DATABASECHANGELOGLOCK;
+
+    /**
      * The table <code>public.event_series</code>.
      */
     public final EventSeries EVENT_SERIES = online.kheops.auth_server.generated.tables.EventSeries.EVENT_SERIES;
@@ -79,6 +92,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.events</code>.
      */
     public final Events EVENTS = online.kheops.auth_server.generated.tables.Events.EVENTS;
+
+    /**
+     * The table <code>public.instances</code>.
+     */
+    public final Instances INSTANCES = online.kheops.auth_server.generated.tables.Instances.INSTANCES;
 
     /**
      * The table <code>public.report_providers</code>.
@@ -149,8 +167,11 @@ public class Public extends SchemaImpl {
             AlbumUser.ALBUM_USER,
             Albums.ALBUMS,
             Capabilities.CAPABILITIES,
+            Databasechangelog.DATABASECHANGELOG,
+            Databasechangeloglock.DATABASECHANGELOGLOCK,
             EventSeries.EVENT_SERIES,
             Events.EVENTS,
+            Instances.INSTANCES,
             ReportProviders.REPORT_PROVIDERS,
             Series.SERIES,
             Studies.STUDIES,

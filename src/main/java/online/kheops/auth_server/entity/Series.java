@@ -82,13 +82,6 @@ public class Series {
     @Column(name = "series_number")
     private int seriesNumber;
 
-    @Column(name = "number_of_series_related_instances")
-    private int numberOfSeriesRelatedInstances;
-
-    @Basic(optional = false)
-    @Column(name = "populated")
-    private boolean populated = false;
-
     @ManyToOne
     @JoinColumn(name = "study_fk", insertable = true, updatable=false)
     private Study study;
@@ -118,10 +111,6 @@ public class Series {
     }
 
     public Attributes getAttributes() {
-        if (!isPopulated()) {
-            throw new IllegalStateException();
-        }
-
         Attributes attributes = new Attributes();
 
         safeAttributeSetString(attributes, Tag.Modality, VR.CS, getModality());
@@ -136,14 +125,12 @@ public class Series {
         return attributes;
     }
 
-    // doesn't set populated, but the caller probably will want to set populated after calling this method
     public void mergeAttributes(Attributes attributes) {
         setModality(attributes.getString(Tag.Modality, getModality()));
         setBodyPartExamined(attributes.getString(Tag.BodyPartExamined, getBodyPartExamined()));
         setSeriesDescription(attributes.getString(Tag.SeriesDescription, getSeriesDescription()));
         setTimezoneOffsetFromUTC(attributes.getString(Tag.TimezoneOffsetFromUTC, getTimezoneOffsetFromUTC()));
         setSeriesNumber(attributes.getInt(Tag.SeriesNumber, getSeriesNumber()));
-        setNumberOfSeriesRelatedInstances(attributes.getInt(Tag.NumberOfSeriesRelatedInstances, getNumberOfSeriesRelatedInstances()));
     }
 
     public long getPk() {
@@ -178,14 +165,6 @@ public class Series {
         this.study = study;
     }
 
-    public boolean isPopulated() {
-        return populated;
-    }
-
-    public void setPopulated(boolean populated) {
-        this.populated = populated;
-    }
-
     public String getTimezoneOffsetFromUTC() {
         return timezoneOffsetFromUTC;
     }
@@ -210,19 +189,13 @@ public class Series {
         this.seriesNumber = seriesNumber;
     }
 
-    public int getNumberOfSeriesRelatedInstances() {
-        return numberOfSeriesRelatedInstances;
-    }
-
-    public void setNumberOfSeriesRelatedInstances(int numberOfSeriesRelatedInstances) {
-        this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
-    }
-
     public void addAlbumSeries(AlbumSeries albumSeries) { albumsSeries.add(albumSeries); }
 
     public void removeAlbumSeries(AlbumSeries albumSeries) { albumsSeries.remove(albumSeries); }
 
     public String getBodyPartExamined() { return bodyPartExamined; }
+
+    public int getNumberOfSeriesRelatedInstances() { return instances.size(); }
 
     public void setBodyPartExamined(String bodyPartExamined) { this.bodyPartExamined = bodyPartExamined; }
 

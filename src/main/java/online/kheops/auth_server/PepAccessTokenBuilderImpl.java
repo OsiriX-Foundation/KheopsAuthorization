@@ -27,7 +27,7 @@ public class PepAccessTokenBuilderImpl extends PepAccessTokenBuilder {
     private Algorithm algorithm;
     private long expiresIn;
 
-    PepAccessTokenBuilderImpl(String secret, TokenProvenance provenance) {
+    public PepAccessTokenBuilderImpl(String secret, TokenProvenance provenance) {
         claims = new HashMap<>();
         try {
             algorithm = Algorithm.HMAC256(secret);

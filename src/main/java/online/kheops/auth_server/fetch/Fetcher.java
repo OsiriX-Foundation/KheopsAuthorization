@@ -86,7 +86,6 @@ public abstract class Fetcher {
             final Study study = queryStudy.getSingleResult();
 
             study.mergeAttributes(attributes);
-            study.setPopulated(true);
 
             final TypedQuery<String> query = em.createQuery("select s.seriesInstanceUID from Series s where s.study.studyInstanceUID = :studyInstanceUID", String.class);
             query.setParameter("studyInstanceUID", studyInstanceUID);
@@ -133,7 +132,6 @@ public abstract class Fetcher {
 
             final Series series = findSeriesBySeriesUID(seriesUID, em);
             series.mergeAttributes(attributes);
-            series.setPopulated(true);
 
             tx.commit();
         } catch (Exception e) {

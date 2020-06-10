@@ -23,7 +23,13 @@
         <listener-class>online.kheops.auth_server.EntityManagerListener</listener-class>
     </listener>
     <listener>
+        <listener-class>online.kheops.auth_server.fetch.FetchContextListener</listener-class>
+    </listener>
+    <listener>
         <listener-class>online.kheops.auth_server.liquibase.LiquibaseContextListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>online.kheops.auth_server.instances.InstancesContextListener</listener-class>
     </listener>
 
 
