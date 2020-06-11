@@ -61,7 +61,7 @@ public abstract class Fetcher {
             String authToken = PepAccessTokenBuilder.newBuilder(new TokenProvenance() {})
                     .withStudyUID(studyInstanceUID).withAllSeries()
                     .withSubject("Fetcher").build();
-            List<Attributes> studyList = CLIENT.target(studyUri).request().accept("application/dicom+json").header("Authorization", "Bearer "+authToken).get(new GenericType<List<Attributes>>() {});
+            List<Attributes> studyList = CLIENT.target(studyUri).request().accept("application/dicom+json").header("Authorization", "Bearer " + authToken).get(new GenericType<List<Attributes>>() {});
             if (studyList == null || studyList.isEmpty()) {
                 throw new WebApplicationException("GET to fetch study returned nothing");
             }
@@ -112,8 +112,7 @@ public abstract class Fetcher {
                     .withSeriesUID(seriesUID)
                     .withSubject("Fetcher")
                     .build();
-            List<Attributes> seriesList = CLIENT.target(uri).request().accept("application/dicom+json").header("Authorization", "Bearer " + authToken).get(new GenericType<List<Attributes>>() {
-            });
+            List<Attributes> seriesList = CLIENT.target(uri).request().accept("application/dicom+json").header("Authorization", "Bearer " + authToken).get(new GenericType<List<Attributes>>() {});
             if (seriesList == null || seriesList.isEmpty()) {
                 throw new WebApplicationException("GET to fetch series returned nothing");
             }

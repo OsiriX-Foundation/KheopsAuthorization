@@ -13,7 +13,7 @@ public class Instances {
     private long pk;
 
     @Basic(optional = false)
-    @Column(name = "created_time", updatable = false)
+    @Column(name = "creation_time", updatable = false)
     private LocalDateTime createdTime;
 
     @Basic(optional = false)
@@ -30,7 +30,13 @@ public class Instances {
         createdTime = now;
     }
 
-    public Instances(String instanceUID) { this.instanceUID = instanceUID; }
+    public Instances() {}
+
+    public Instances(String instanceUID, Series series) {
+        this.series = series;
+        series.addInstances(this);
+        this.instanceUID = instanceUID;
+    }
 
     public long getPk() { return pk; }
     public LocalDateTime getCreatedTime() { return createdTime; }

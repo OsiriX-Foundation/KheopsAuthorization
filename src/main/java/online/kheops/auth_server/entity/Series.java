@@ -201,5 +201,5 @@ public class Series {
 
     public Set<Instances> getInstances() { return instances; }
 
-    public void setInstances(Instances instance) { instances.add(instance); }
+    public void addInstances(Instances instance) { instances.add(instance); }
 }
