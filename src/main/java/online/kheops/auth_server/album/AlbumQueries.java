@@ -4,7 +4,6 @@ import online.kheops.auth_server.EntityManagerListener;
 import online.kheops.auth_server.entity.Album;
 import online.kheops.auth_server.entity.AlbumUser;
 import online.kheops.auth_server.entity.User;
-import online.kheops.auth_server.generated.tables.Instances;
 import online.kheops.auth_server.util.ErrorResponse;
 import online.kheops.auth_server.util.PairListXTotalCount;
 import org.jooq.*;

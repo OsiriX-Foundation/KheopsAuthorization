@@ -19,7 +19,6 @@ import online.kheops.auth_server.util.KheopsLogBuilder.ActionType;
 import online.kheops.auth_server.util.KheopsLogBuilder;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.servlet.ServletContext;
 import javax.validation.constraints.Min;
