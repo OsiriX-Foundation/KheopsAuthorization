@@ -217,7 +217,7 @@ public class SendingResource
                 return Response.status(NOT_FOUND).entity(e.getErrorResponse()).build();
             }
         } else {
-            if (!kheopsPrincipal.hasSeriesAddAccess(studyInstanceUID, seriesInstanceUID)) {
+            if (!kheopsPrincipal.hasSeriesShareAccess(studyInstanceUID, seriesInstanceUID)) {
                 final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                         .message(SERIES_NOT_FOUND)
                         .detail("The series does not exist or you don't have access")
@@ -474,7 +474,7 @@ public class SendingResource
             }
 
         } else {
-            if (!kheopsPrincipal.hasSeriesAddAccess(studyInstanceUID, seriesInstanceUID)) {
+            if (!kheopsPrincipal.hasSeriesShareAccess(studyInstanceUID, seriesInstanceUID)) {
                 final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                         .message(SERIES_NOT_FOUND)
                         .detail("The series does not exist or you don't have the send permission")

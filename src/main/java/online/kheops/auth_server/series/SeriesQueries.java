@@ -78,6 +78,7 @@ public class SeriesQueries {
             throw new SeriesNotFoundException(errorResponse);
         }
     }
+
     public static Series findSeriesByStudyUIDandSeriesUID(User callingUser, String studyInstanceUID, String seriesInstanceUID, EntityManager em)
             throws SeriesNotFoundException {
 
@@ -141,7 +142,7 @@ public class SeriesQueries {
         } catch (NoResultException e) {
             final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                     .message(SERIES_NOT_FOUND)
-                    .detail("The series does not exist or you don't have access")
+                    .detail("The series does not exist")
                     .build();
             throw new SeriesNotFoundException(errorResponse);
         }

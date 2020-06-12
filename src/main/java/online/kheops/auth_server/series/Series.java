@@ -11,12 +11,10 @@ import org.dcm4che3.data.VR;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
 
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
 import static online.kheops.auth_server.series.SeriesQueries.*;
-import static online.kheops.auth_server.study.Studies.getOrCreateStudy;
 
 public class Series {
 
@@ -34,43 +32,10 @@ public class Series {
             throws SeriesNotFoundException{
         return findSeriesByStudyUIDandSeriesUID(studyInstanceUID, seriesInstanceUID, em);
     }
-
-    public static online.kheops.auth_server.entity.Series getOrCreateSeries(String studyInstanceUID, String seriesInstanceUID, EntityManager em)
-            throws SeriesNotFoundException {
-
-        online.kheops.auth_server.entity.Series series;
-        try {
-            series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-        } catch (SeriesNotFoundException ignored) {
-            // from here the series does not exists
-            // find if the study already exists
-            final EntityManager localEm = EntityManagerListener.createEntityManager();
-            final EntityTransaction tx = localEm.getTransaction();
-            final Study study = getOrCreateStudy(studyInstanceUID, localEm);
-            try {
-                tx.begin();
-                series = new online.kheops.auth_server.entity.Series(seriesInstanceUID);
-                study.addSeries(series);
-                series.setStudy(study);
-                localEm.persist(series);
-                tx.commit();
-                series = em.merge(series);
-            } catch (PersistenceException ignored2) {
-                ignored2.printStackTrace();
-                try {
-                    tx.rollback();
-                    series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-                } catch (SeriesNotFoundException e) {
-                    throw e;
-                }
-            } finally {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
-                localEm.close();
-            }
-        }
-        return series;
+    
+    public static online.kheops.auth_server.entity.Series getSeries(String seriesInstanceUID, EntityManager em)
+            throws SeriesNotFoundException{
+        return findSeriesBySeriesUID(seriesInstanceUID, em);
     }
 
     public static boolean seriesExist(String studyInstanceUID, String seriesInstanceUID, EntityManager em) {

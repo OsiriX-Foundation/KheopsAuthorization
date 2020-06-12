@@ -20,7 +20,6 @@ import org.jooq.impl.DSL;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
 import javax.ws.rs.BadRequestException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -409,40 +408,17 @@ public class Studies {
     public static Study getStudy(String studyInstanceUID, EntityManager em)
             throws StudyNotFoundException
     {
-            return findStudyByStudyUID(studyInstanceUID, em);
+        return findStudyByStudyUID(studyInstanceUID, em);
     }
 
-    public static Study getOrCreateStudy(String studyInstanceUID, EntityManager em) {
-
-        Study study;
+    public static boolean studyExist(String studyInstanceUID, EntityManager em)
+    {
         try {
-            study = getStudy(studyInstanceUID, em);
-        } catch (StudyNotFoundException ignored) {
-            // the study doesn't exist, we need to create it
-            final EntityManager localEm = EntityManagerListener.createEntityManager();
-            final EntityTransaction tx = localEm.getTransaction();
-
-            try {
-                tx.begin();
-                study = new Study(studyInstanceUID);
-                localEm.persist(study);
-                tx.commit();
-                study = em.merge(study);
-            } catch (PersistenceException ignored2) {
-                try {
-                    tx.rollback();
-                    study = getStudy(studyInstanceUID, em);
-                } catch (StudyNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            } finally {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
-                localEm.close();
-            }
+            findStudyByStudyUID(studyInstanceUID, em);
+            return true;
+        } catch (StudyNotFoundException e) {
+            return false;
         }
-        return study;
     }
 
     public static boolean canAccessStudy(User user, Study study, EntityManager em) {

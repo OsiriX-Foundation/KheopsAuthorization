@@ -98,6 +98,12 @@ public class Series {
         seriesInstanceUID = newSeriesInstanceUID;
     }
 
+    public Series(String newSeriesInstanceUID, Study study) {
+        seriesInstanceUID = newSeriesInstanceUID;
+        this.study = study;
+        study.addSeries(this);
+    }
+
     @PrePersist
     public void onPrePersist() {
         final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);

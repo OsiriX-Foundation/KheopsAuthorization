@@ -5,7 +5,9 @@ import java.io.Serializable;
 
 public class ErrorResponse implements Serializable {
 
-    public class Message {
+    public static class Message {
+
+        private Message() {}
 
         public static final String BAD_QUERY_PARAMETER = "Bad Query Parameter";
         public static final String BAD_FORM_PARAMETER = "Bad Form Parameter";
@@ -13,9 +15,9 @@ public class ErrorResponse implements Serializable {
         public static final String ALBUM_NOT_FOUND = "Album Not Found";
         public static final String WEBHOOK_NOT_FOUND = "Webhook Not Found";
         public static final String SERIES_NOT_FOUND = "Series Not Found";
+        public static final String INSTANCES_NOT_FOUND = "Instances Not Found";
         public static final String STUDY_NOT_FOUND = "Study Not Found";
         public static final String AUTHORIZATION_ERROR = "Authorization error";
-
     }
 
     public static class ErrorResponseBuilder {

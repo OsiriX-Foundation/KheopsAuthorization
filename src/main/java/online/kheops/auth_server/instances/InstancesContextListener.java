@@ -18,9 +18,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.ws.rs.client.ClientBuilder.newClient;
@@ -45,6 +47,12 @@ public class InstancesContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+
+        try {
+            setDicomWebURI(new URI(sce.getServletContext().getInitParameter("online.kheops.pacs.uri")));
+        } catch (URISyntaxException e) {
+            LOG.log(Level.SEVERE, "URI in context param online.kheops.pacs.uri is not valid", e);
+        }
 
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();

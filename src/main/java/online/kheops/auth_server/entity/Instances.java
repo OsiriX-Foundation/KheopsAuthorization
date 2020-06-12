@@ -4,6 +4,11 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+@NamedQueries({
+        @NamedQuery(name = "Instances.findByInstancesUID",
+                query = "SELECT i FROM Instances i WHERE i.instanceUID = :InstanceUID")
+})
+
 @Entity
 @Table(name = "instances")
 public class Instances {
