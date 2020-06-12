@@ -23,8 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import java.time.Instant;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.instances.Instances.instancesExist;
 import static online.kheops.auth_server.series.Series.getSeries;
@@ -129,6 +128,7 @@ public class STOWResource {
 
                 } else {
                     //error
+                    return Response.status(BAD_REQUEST).build();
                 }
             } else if (seriesExist(studyInstanceUID, seriesInstanceUID, em)) {
                 //obtenir et comparer (study series)
@@ -141,6 +141,7 @@ public class STOWResource {
                     em.persist(instances);
                 } else {
                     //error
+                    return Response.status(BAD_REQUEST).build();
                 }
             } else if (studyExist(studyInstanceUID, em)) {
                 //obtenir et comparer (study)
@@ -170,6 +171,7 @@ public class STOWResource {
 
                 } else {
                     //error
+                    return Response.status(BAD_REQUEST).build();
                 }
             } else {
                 study = new Study(studyInstanceUID);
@@ -194,7 +196,7 @@ public class STOWResource {
                 em.persist(study);
                 em.persist(series);
                 em.persist(instances);
-                
+
                 //add series in destination
                 final Album destination;
                 if (albumId == null) {
