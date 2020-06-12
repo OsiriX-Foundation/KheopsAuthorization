@@ -5,9 +5,7 @@ import online.kheops.auth_server.NotAlbumScopeTypeException;
 import online.kheops.auth_server.album.AlbumNotFoundException;
 import online.kheops.auth_server.annotation.Secured;
 import online.kheops.auth_server.annotation.UIDValidator;
-import online.kheops.auth_server.entity.Instances;
-import online.kheops.auth_server.entity.Series;
-import online.kheops.auth_server.entity.Study;
+import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.principal.KheopsPrincipal;
 import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.study.StudyNotFoundException;
@@ -27,6 +25,7 @@ import java.time.Instant;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.instances.Instances.instancesExist;
 import static online.kheops.auth_server.series.Series.getSeries;
 import static online.kheops.auth_server.series.Series.seriesExist;
@@ -69,8 +68,9 @@ public class STOWResource {
             @FormParam("seriesDescription") String seriesDescription,
             @FormParam("seriesNumber") int seriesNumber,
             @FormParam("bodyPartExamined") String bodyPartExamined,
+
             @FormParam("instancesUID") String instancesUID)
-            throws SeriesNotFoundException, StudyNotFoundException {
+            throws SeriesNotFoundException, StudyNotFoundException, AlbumNotFoundException {
 
         KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
 
@@ -148,12 +148,63 @@ public class STOWResource {
                 if (compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
                     //créer instances + series
                     series = new Series(seriesInstanceUID, study);
+                    series.setModality(modality);
+                    series.setBodyPartExamined(bodyPartExamined);
+                    series.setSeriesDescription(seriesDescription);
+                    series.setSeriesNumber(seriesNumber);
+                    series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
+
                     instances = new Instances(instancesUID, series);
                     em.persist(series);
                     em.persist(instances);
+
+                    //add series in destination
+                    final Album destination;
+                    if (albumId == null) {
+                       destination = kheopsPrincipal.getUser().getInbox();
+                    } else {
+                        destination = getAlbum(albumId, em);
+                    }
+                    AlbumSeries albumSeries = new AlbumSeries(destination, series);
+                    em.persist(albumSeries);
+
                 } else {
                     //error
                 }
+            } else {
+                study = new Study(studyInstanceUID);
+                study.setStudyDescription(studyDescription);
+                study.setAccessionNumber(accessionNumber);
+                study.setPatientBirthDate(patientBirthDate);
+                study.setPatientName(patientName);
+                study.setPatientID(patientId);
+                study.setPatientSex(patientSex);
+                study.setReferringPhysicianName(referringPhysicianName);
+                study.setStudyDate(studyDate);
+                study.setStudyTime(studyTime);
+                study.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
+                study.setStudyID(studyId);
+                series = new Series(seriesInstanceUID, study);
+                series.setModality(modality);
+                series.setBodyPartExamined(bodyPartExamined);
+                series.setSeriesDescription(seriesDescription);
+                series.setSeriesNumber(seriesNumber);
+                series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
+                instances = new Instances(instancesUID, series);
+                em.persist(study);
+                em.persist(series);
+                em.persist(instances);
+                
+                //add series in destination
+                final Album destination;
+                if (albumId == null) {
+                    destination = kheopsPrincipal.getUser().getInbox();
+                } else {
+                    destination = getAlbum(albumId, em);
+                }
+                AlbumSeries albumSeries = new AlbumSeries(destination, series);
+                em.persist(albumSeries);
+
             }
 
             tx.commit();
