@@ -14,6 +14,7 @@ import online.kheops.auth_server.util.ErrorResponse;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -25,6 +26,7 @@ import java.time.Instant;
 
 import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
+import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
 import static online.kheops.auth_server.instances.Instances.instancesExist;
 import static online.kheops.auth_server.series.Series.getSeries;
 import static online.kheops.auth_server.series.Series.seriesExist;
@@ -68,7 +70,7 @@ public class STOWResource {
             @FormParam("seriesNumber") int seriesNumber,
             @FormParam("bodyPartExamined") String bodyPartExamined,
 
-            @FormParam("instancesUID") String instancesUID)
+            @FormParam("instancesUID") @UIDValidator String instancesUID)
             throws SeriesNotFoundException, StudyNotFoundException, AlbumNotFoundException {
 
         KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
@@ -158,17 +160,6 @@ public class STOWResource {
                     instances = new Instances(instancesUID, series);
                     em.persist(series);
                     em.persist(instances);
-
-                    //add series in destination
-                    final Album destination;
-                    if (albumId == null) {
-                       destination = kheopsPrincipal.getUser().getInbox();
-                    } else {
-                        destination = getAlbum(albumId, em);
-                    }
-                    AlbumSeries albumSeries = new AlbumSeries(destination, series);
-                    em.persist(albumSeries);
-
                 } else {
                     //error
                     return Response.status(BAD_REQUEST).build();
@@ -196,17 +187,20 @@ public class STOWResource {
                 em.persist(study);
                 em.persist(series);
                 em.persist(instances);
+            }
 
-                //add series in destination
-                final Album destination;
-                if (albumId == null) {
-                    destination = kheopsPrincipal.getUser().getInbox();
-                } else {
-                    destination = getAlbum(albumId, em);
-                }
+            //add series in destination if not present
+            final Album destination;
+            if (albumId == null) {
+                destination = kheopsPrincipal.getUser().getInbox();
+            } else {
+                destination = getAlbum(albumId, em);
+            }
+            try {
+                getAlbumSeries(destination, series, em);
+            } catch (NoResultException e) {
                 AlbumSeries albumSeries = new AlbumSeries(destination, series);
                 em.persist(albumSeries);
-
             }
 
             tx.commit();

@@ -54,12 +54,6 @@ public class Consts {
     public static final int UID_VALIDATOR_PRIORITY = Priorities.USER - 1;
     public static final int VIEWER_TOKEN_ACCESS_PRIORITY = Priorities.USER - 2;
 
-    //Cache
-    public static class CACHE_USER {
-        public static final Duration DURATION = Duration.ofMinutes(20);
-        public static final int SIZE = 100;
-    }
-
     //size column in db
     public static class DB_COLUMN_SIZE {
         public static final int ALBUM_NAME = 255;

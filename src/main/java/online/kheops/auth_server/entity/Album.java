@@ -120,7 +120,7 @@ public class Album {
     public void addSeries(AlbumSeries albumSeries) { this.albumSeries.add(albumSeries); }
 
     public void removeSeries(Series series, EntityManager em) {
-        AlbumSeries localAlbumSeries = em.createQuery("SELECT alS from AlbumSeries alS where :series = alS.series and :album = alS.album", AlbumSeries.class)
+        AlbumSeries localAlbumSeries = em.createNamedQuery("AlbumSeries.findByAlbumAndSeries", AlbumSeries.class)
                 .setParameter("series", series)
                 .setParameter("album", this)
                 .getSingleResult();

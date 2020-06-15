@@ -102,7 +102,7 @@ dependencies {
     compile group: 'org.jooq', name: 'jooq-codegen', version: '3.12.3'
 
     // https://mvnrepository.com/artifact/org.ehcache/ehcache
-    compile group: 'org.ehcache', name: 'ehcache', version: '3.6.3'
+    compile group: 'org.ehcache', name: 'ehcache', version: '3.8.1'
 
     
     compile (group: 'org.dcm4che', name: 'dcm4che-dcmr', version: '5.13.0') {

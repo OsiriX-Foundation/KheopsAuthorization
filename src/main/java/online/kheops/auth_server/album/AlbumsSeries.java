@@ -5,6 +5,7 @@ import online.kheops.auth_server.entity.AlbumSeries;
 import online.kheops.auth_server.entity.Series;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 public class AlbumsSeries {
 
@@ -13,7 +14,7 @@ public class AlbumsSeries {
     }
 
     public static AlbumSeries getAlbumSeries(Album album, Series series, EntityManager em) {
-        return em.createQuery("SELECT alS from AlbumSeries alS where :series = alS.series and :album = alS.album", AlbumSeries.class)
+        return em.createNamedQuery("AlbumSeries.findByAlbumAndSeries", AlbumSeries.class)
                 .setParameter("series", series)
                 .setParameter("album", album)
                 .getSingleResult();
