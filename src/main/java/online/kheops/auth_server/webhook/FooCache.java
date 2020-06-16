@@ -2,6 +2,7 @@ package online.kheops.auth_server.webhook;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.config.CacheRuntimeConfiguration;
 import org.ehcache.config.builders.*;
 import org.ehcache.event.*;
 import org.ehcache.impl.events.CacheEventAdapter;
@@ -43,10 +44,9 @@ public class FooCache {
     private FooCache() {
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder()
                 .withCache(CACHE_ALIAS, CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class, ResourcePoolsBuilder.heap(30))
-                        .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(5))).withService(cacheEventListenerConfiguration))
+                        .withExpiry(ExpiryPolicyBuilder.expiry().access(Duration.ofSeconds(5)).create(Duration.ofSeconds(10)).update(Duration.ofSeconds(15)).build()/*timeToLiveExpiration(Duration.ofSeconds(5))*/).withService(cacheEventListenerConfiguration))
                 .build();
         cacheManager.init();
-
         userCache = cacheManager.getCache(CACHE_ALIAS, String.class, String.class);
     }
 
@@ -63,5 +63,9 @@ public class FooCache {
     public void get(String a) { LOG.info("GET key:"+a+" value:"+userCache.get(a)); }
     public void p() {
         userCache.forEach(val -> LOG.info(val.getKey()+"-"+val.getValue()));
+        CacheRuntimeConfiguration<String, String> toto =userCache.getRuntimeConfiguration();
+        LOG.info(toto.toString());
+
+
     }
 }
