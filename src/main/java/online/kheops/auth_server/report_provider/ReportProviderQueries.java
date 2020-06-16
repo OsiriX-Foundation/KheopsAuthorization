@@ -5,15 +5,6 @@ import online.kheops.auth_server.entity.ReportProvider;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import online.kheops.auth_server.util.ErrorResponse;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import java.util.List;
-
-import static online.kheops.auth_server.util.ErrorResponse.Message.REPORT_PROVIDER_NOT_FOUND;
-
 public class ReportProviderQueries {
 
     private ReportProviderQueries() {

@@ -1,7 +1,6 @@
 package online.kheops.auth_server.entity;
 
 import online.kheops.auth_server.event.Events;
-import online.kheops.auth_server.event.MutationType;
 
 import javax.persistence.*;
 import java.util.List;
