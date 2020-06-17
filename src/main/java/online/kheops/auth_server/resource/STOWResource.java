@@ -51,7 +51,7 @@ public class STOWResource {
     public Response getStudies(
             @FormParam(ALBUM) String albumId,
 
-            @FormParam(StudyInstanceUID) @UIDValidator String studyInstanceUID,
+            @FormParam("studyInstanceUID") @UIDValidator String studyInstanceUID,
             @FormParam("studyDate") String studyDate,
             @FormParam("studyTime") String studyTime,
             @FormParam("studyDescription") String studyDescription,
