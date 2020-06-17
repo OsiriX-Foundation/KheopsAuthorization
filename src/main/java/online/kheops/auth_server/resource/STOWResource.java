@@ -11,6 +11,7 @@ import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.AlbumUserPermissions;
 import online.kheops.auth_server.util.ErrorResponse;
+import online.kheops.auth_server.webhook.FooHashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
