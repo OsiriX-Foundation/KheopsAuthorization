@@ -1,7 +1,6 @@
 package online.kheops.auth_server.webhook;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class HashMapSeriesData extends HashMap<String, PairDataInstanceDestination>{

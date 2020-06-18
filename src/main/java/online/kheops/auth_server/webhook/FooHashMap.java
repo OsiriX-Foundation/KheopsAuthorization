@@ -13,9 +13,8 @@ public class FooHashMap {
     private static final Logger LOG = Logger.getLogger(FooHashMap.class.getName());
 
     private static FooHashMap instance = null;
-    private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
-    private static final int TIME_TO_LIVE = 10;//seconds
-
+    private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+    private final int TIME_TO_LIVE = 10;//seconds
 
     private HashMapStudyData hashMapData;
     private HashMap<String, ScheduledFuture<?>> hashMap30sec;
@@ -33,22 +32,18 @@ public class FooHashMap {
         return instance = new FooHashMap();
     }
 
-    public HashMapSeriesData getHashMapData(String studyUID) {
-        return hashMapData.get(studyUID);
-    }
-
-    public ScheduledFuture getHashMap30Sec(String studyUID) {
-        return hashMap30sec.get(studyUID);
-    }
-
     public void addHashMapData(String studyUID, String seriesUID, String instancesUID, String destination) {
+        SCHEDULER.schedule(() -> adddata(studyUID, seriesUID, instancesUID, destination), 0, TimeUnit.SECONDS);
+    }
+
+
+    private void adddata(String studyUID, String seriesUID, String instancesUID, String destination) {
         if (hashMap30sec.containsKey(studyUID)) {
             hashMap30sec.get(studyUID).cancel(true);
         }
         hashMapData.put(studyUID, seriesUID, instancesUID, destination);
         hashMap30sec.put(studyUID, SCHEDULER.schedule(() -> callWebhook(studyUID), TIME_TO_LIVE, TimeUnit.SECONDS));
     }
-
 
     private void callWebhook(String studyUID) {
         String log = "callWebhook: study:"+studyUID + " series/instances:";
