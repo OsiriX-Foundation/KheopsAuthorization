@@ -5,6 +5,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -99,4 +100,17 @@ public class ReportProvider {
     public boolean isRemoved() { return removed; }
 
     public void setAsRemoved() { this.removed = true; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReportProvider that = (ReportProvider) o;
+        return pk == that.pk;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk);
+    }
 }

@@ -2,6 +2,7 @@ package online.kheops.auth_server.entity;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -127,5 +128,19 @@ public class User {
     @Override
     public String toString() {
         return "[User sub:" + getSub() + " email:" + getEmail() + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return pk == user.pk &&
+                sub.equals(user.sub);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, sub);
     }
 }

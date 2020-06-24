@@ -1,10 +1,7 @@
 package online.kheops.auth_server.webhook;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -16,13 +13,11 @@ public class FooHashMap {
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private final int TIME_TO_LIVE = 10;//seconds
 
-    private HashMapStudyData hashMapData;
-    private HashMap<String, ScheduledFuture<?>> hashMap30sec;
+    private Level0 level0;
 
 
     private FooHashMap() {
-        hashMapData = new HashMapStudyData();
-        hashMap30sec = new HashMap<>();
+        level0 = new Level0();
     }
 
     public static synchronized FooHashMap getInstance() {
@@ -32,36 +27,24 @@ public class FooHashMap {
         return instance = new FooHashMap();
     }
 
-    public void addHashMapData(String studyUID, String seriesUID, String instancesUID, String destination) {
-        SCHEDULER.schedule(() -> adddata(studyUID, seriesUID, instancesUID, destination), 0, TimeUnit.SECONDS);
+    public void addHashMapData(String studyUID, String seriesUID, String instancesUID, String destination, boolean isNewStudy, boolean isNewSeries, boolean isNewInstance, Source source) {
+        SCHEDULER.schedule(() -> adddata(studyUID, seriesUID, instancesUID, isNewStudy,isNewSeries,isNewInstance, destination, source), 0, TimeUnit.SECONDS);
     }
 
 
-    private void adddata(String studyUID, String seriesUID, String instancesUID, String destination) {
-        if (hashMap30sec.containsKey(studyUID)) {
-            hashMap30sec.get(studyUID).cancel(true);
+
+    private void adddata(String studyUID, String seriesUID, String instancesUID, boolean isNewStudy, boolean isNewSeries, boolean isNewInstances, String destination, Source source) {
+        if (level0.containsStudy(studyUID)) {
+            level0.cancelScheduledFuture(studyUID);
         }
-        hashMapData.put(studyUID, seriesUID, instancesUID, destination);
-        hashMap30sec.put(studyUID, SCHEDULER.schedule(() -> callWebhook(studyUID), TIME_TO_LIVE, TimeUnit.SECONDS));
+        level0.put(SCHEDULER.schedule(() -> callWebhook(studyUID), TIME_TO_LIVE, TimeUnit.SECONDS), studyUID, seriesUID, instancesUID, isNewStudy, isNewSeries, isNewInstances, destination, source);
     }
+
 
     private void callWebhook(String studyUID) {
-        String log = "callWebhook: study:"+studyUID + " series/instances:";
-        for (Map.Entry<String, PairDataInstanceDestination> i:hashMapData.get(studyUID).entrySet()) {
-            log += i.getKey() +"/[";
-            for (String j:i.getValue().getInstances()) {
-                log += j + ",";
-            }
-            log += "destination: ";
-            for (String j:i.getValue().getDestinations()) {
-                log += j + ",";
-            }
-            log = log.substring(0,log.length()-1);
-            log += "]--";
-        }
-        log = log.substring(0,log.length()-2);
+        String log = "callWebhook:";
+        log += level0.toString(studyUID);
         LOG.info(log);
-        hashMap30sec.remove(studyUID);
-        hashMapData.remove(studyUID);
+        level0.remove(studyUID);
     }
 }
