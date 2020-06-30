@@ -7,7 +7,7 @@ import java.util.concurrent.ScheduledFuture;
 public class Level1 {
     private ScheduledFuture scheduledFuture;
     private boolean isNewStudy;
-    private HashMap<String, Level2> level2;
+    private HashMap<Source, Level2> level2;
 
     public Level1(ScheduledFuture scheduledFuture, boolean isNewStudy) {
         level2 = new HashMap<>();
@@ -15,17 +15,17 @@ public class Level1 {
         this.isNewStudy = isNewStudy;
     }
 
-    public void addSeries(ScheduledFuture scheduledFuture, String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, Source source) {
+    public void addSeries(ScheduledFuture scheduledFuture, String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, Source source, String destination, boolean isNewInDestination) {
         this.scheduledFuture = scheduledFuture;
         if (level2.containsKey(seriesUID)) {
-            level2.get(seriesUID).addInstances(instancesUID, isNewInstances, destination, source);
+            level2.get(source).addInstances(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination);
         } else {
-            level2.put(seriesUID, new Level2(instancesUID, isNewSeries, isNewInstances, destination, source));
+            level2.put(source, new Level2(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination));
         }
     }
 
     public boolean isNewStudy() { return isNewStudy; }
-    public HashMap<String, Level2> getSeries() { return level2; }
+    public HashMap<Source, Level2> getSeries() { return level2; }
     public boolean cancelScheduledFuture() {
         return scheduledFuture.cancel(true);
     }
@@ -34,8 +34,8 @@ public class Level1 {
     public String toString() {
                 String s = "{" +
                 "isNewStudy=" + isNewStudy + " ";
-        for(Map.Entry<String, Level2> level2Entry:level2.entrySet()) {
-            s += "series:"+level2Entry.getKey() +" instances:"+ level2Entry.getValue().toString();
+        for(Map.Entry<Source, Level2> level2Entry:level2.entrySet()) {
+            s += "\n\tsource:"+level2Entry.getKey() +""+ level2Entry.getValue().toString();
         }
         return s += '}';
     }

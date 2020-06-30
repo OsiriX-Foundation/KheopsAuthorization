@@ -3,38 +3,39 @@ package online.kheops.auth_server.webhook;
 import java.util.*;
 
 public class Level3 {
-    private HashMap<String, Set<Source>> destinations;
-    private boolean isNewInstances;
 
-    public Level3(boolean isNewInstances, String destination, Source source) {
-        this.destinations = new HashMap<>();
-        addDestination(destination, source);
-        this.isNewInstances = isNewInstances;
+    private HashMap<String, Boolean> instances;
+    private boolean isNewInDestination;
+
+    public Level3(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+        this.instances = new HashMap<>();
+        addInstances(instancesUID, isNewInstances);
+        this.isNewInDestination = isNewInDestination;
+
     }
 
-    public void addDestination(String destination, Source source) {
-        if (destination != null) {
-            if (destinations.containsKey(destination)) {
-                destinations.get(destination).add(source);
-            } else {
-                Set<Source> sources = new HashSet<>();
-                sources.add(source);
-                destinations.put(destination, sources);
+
+    public void addInstances(String instancesUID, boolean isNewInstances) {
+        if (instances != null) {
+            if (!instances.containsKey(instancesUID)) {
+                instances.put(instancesUID, isNewInstances);
             }
         }
     }
 
     @Override
     public String toString() {
-        String s = "{";
-        for(Map.Entry<String, Set<Source>> stringSetEntry:destinations.entrySet()) {
-            s += "destinations:" +stringSetEntry.getKey();
-            for (Source source: stringSetEntry.getValue()) {
-                s += " " + source.toString();
-            }
+        String s = "\n\t\t\t{";
+        for(Map.Entry<String, Boolean> stringSetEntry:destinations.entrySet()) {
+            s += "{destinations:" +stringSetEntry.getKey() +
+                    " new_in_destination:" + stringSetEntry.getValue()+ "}";
         }
-        s += ", isNewInstances=" + isNewInstances +
-                '}';
+        s += "\n\t\t\t";
+        for(Map.Entry<String, Boolean> stringSetEntry:instances.entrySet()) {
+            s += "{instances:" +stringSetEntry.getKey() +
+                    " is_new:" + stringSetEntry.getValue() + "}";
+        }
+        s += '}';
         return s;
     }
 }

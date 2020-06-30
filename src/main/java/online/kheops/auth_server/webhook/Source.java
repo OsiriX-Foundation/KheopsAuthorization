@@ -55,7 +55,7 @@ public class Source {
 
     @Override
     public String toString() {
-        String s = "Source{";
+        String s = "\n\t\tSource{";
         if (reportProvider.isPresent()) {
             s += reportProvider.get().toString();
         }

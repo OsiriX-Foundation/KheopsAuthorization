@@ -1,39 +1,35 @@
 package online.kheops.auth_server.webhook;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Level2 {
-    private boolean isNewSeries;
     private HashMap<String, Level3> level3;
 
-    public Level2(boolean isNewSeries) {
+    public Level2() {
         level3 = new HashMap<>();
-        this.isNewSeries = isNewSeries;
     }
-    public Level2(String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, Source source) {
+    public Level2(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
         level3 = new HashMap<>();
-        level3.put(instancesUID, new Level3(isNewInstances, destination, source));
-        this.isNewSeries = isNewSeries;
+        level3.put(destination, new Level3(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
     }
 
-    public void addInstances(String instancesUID, boolean isNewInstances, String destination, Source source) {
-        if (level3.containsKey(instancesUID)) {
-            level3.get(instancesUID).addDestination(destination, source);
+    public void addInstances(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
+        if (level3.containsKey(destination)) {
+            level3.get(destination).addInstances(instancesUID, isNewInstances);
         } else {
-            level3.put(instancesUID, new Level3(isNewInstances, destination, source));
+            level3.put(destination, new Level3(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
         }
     }
 
-    public boolean isNewSeries() { return isNewSeries; }
-    public HashMap<String, Level3> getInstances() { return level3; }
 
     @Override
     public String toString() {
-        String s = "{" +
-                "isNewSeries=" + isNewSeries + " ";
-        for(Map.Entry<String, Level3> level3Entry:level3.entrySet()) {
-            s += "instanceUID:" +level3Entry.getKey() + level3Entry.getValue().toString();
+        String s = "{";
+        for(Map.Entry<Source, Level3> level3Entry:level3.entrySet()) {
+            s += level3Entry.getKey() + level3Entry.getValue().toString();
         }
         return s + '}';
     }
