@@ -274,7 +274,7 @@ public class Albums {
                 final AlbumUser albumCallingUser = getAlbumUser(album, callingUser, em);
                 final NewUserWebhook newUserWebhook = new NewUserWebhook(albumId, albumCallingUser, targetAlbumUser, context.getInitParameter(HOST_ROOT_PARAMETER),false);
                 for (Webhook webhook : album.getWebhooks()) {
-                    if (webhook.getNewUser() && webhook.isEnabled()) {
+                    if (webhook.isNewUser() && webhook.isEnabled()) {
                         WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_USER, webhook);
                         webhookTrigger.setUser(targetUser);
                         em.persist(webhookTrigger);

@@ -3,37 +3,33 @@ package online.kheops.auth_server.webhook;
 import java.util.*;
 
 public class Level3 {
-
-    private HashMap<String, Boolean> instances;
-    private boolean isNewInDestination;
+    //              SeriesUID
+    private HashMap<String, Level4> series;
 
     public Level3(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
-        this.instances = new HashMap<>();
-        addInstances(instancesUID, isNewInstances);
-        this.isNewInDestination = isNewInDestination;
-
+        this.series = new HashMap<>();
+        addSeries(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination);
     }
 
 
-    public void addInstances(String instancesUID, boolean isNewInstances) {
-        if (instances != null) {
-            if (!instances.containsKey(instancesUID)) {
-                instances.put(instancesUID, isNewInstances);
+    public void addSeries(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+        if (series != null) {
+            if (series.containsKey(seriesUID)) {
+                series.get(seriesUID).addInstances(instancesUID, isNewInstances);
+            } else {
+                series.put(seriesUID, new Level4(instancesUID, isNewSeries, isNewInstances, isNewInDestination));
             }
         }
     }
 
+    public HashMap<String, Level4> getSeries() { return series; }
+
     @Override
     public String toString() {
         String s = "\n\t\t\t{";
-        for(Map.Entry<String, Boolean> stringSetEntry:destinations.entrySet()) {
-            s += "{destinations:" +stringSetEntry.getKey() +
-                    " new_in_destination:" + stringSetEntry.getValue()+ "}";
-        }
-        s += "\n\t\t\t";
-        for(Map.Entry<String, Boolean> stringSetEntry:instances.entrySet()) {
-            s += "{instances:" +stringSetEntry.getKey() +
-                    " is_new:" + stringSetEntry.getValue() + "}";
+        for(Map.Entry<String, Level4> stringSetEntry:series.entrySet()) {
+            s += "{series:" +stringSetEntry.getKey() +
+                    stringSetEntry.getValue()+ "}";
         }
         s += '}';
         return s;

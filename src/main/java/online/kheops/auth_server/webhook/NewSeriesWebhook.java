@@ -8,14 +8,12 @@ import online.kheops.auth_server.user.UserResponse;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 public class NewSeriesWebhook implements WebhookResult{
 
     @XmlElement(name = "host")
-    private String instance;
+    private String kheopsInstance;
     @XmlElement(name = "album_id")
     private String albumId;
     @XmlElement(name = "event_time")
@@ -26,8 +24,6 @@ public class NewSeriesWebhook implements WebhookResult{
     private boolean isManualTrigger;
     @XmlElement(name = "import_source")
     private String importSource;
-    @XmlElement(name = "instances")
-    private Set<String> instances;
 
     @XmlElement(name = "updated_study")
     private StudyResponse updatedStudy;
@@ -35,19 +31,31 @@ public class NewSeriesWebhook implements WebhookResult{
 
     private NewSeriesWebhook() { /*empty*/ }
 
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Study study, String instance, boolean isManualTrigger) {
-        this(albumId, sourceUser, instance, isManualTrigger);
-        updatedStudy = new StudyResponse(study, instance);
+    private NewSeriesWebhook(Builder builder) {
+        kheopsInstance = builder.kheopsInstance;
+        albumId = builder.albumId;
+        eventTime = LocalDateTime.now();
+        sourceUser = builder.sourceUser;
+        isManualTrigger = builder.isManualTrigger;
+        importSource = builder.importSource;
+        updatedStudy = builder.updatedStudy;
     }
 
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Series series, String instance, boolean isManualTrigger) {
-        this(albumId, sourceUser, instance, isManualTrigger);
-        updatedStudy = new StudyResponse(series.getStudy(), instance);
+    public static Builder builder() { return new Builder(); }
+
+    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Study study, String kheopsInstance, boolean isManualTrigger) {
+        this(albumId, sourceUser, kheopsInstance, isManualTrigger);
+        updatedStudy = new StudyResponse(study, kheopsInstance);
+    }
+
+    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Series series, String kheopsInstance, boolean isManualTrigger) {
+        this(albumId, sourceUser, kheopsInstance, isManualTrigger);
+        updatedStudy = new StudyResponse(series.getStudy(), kheopsInstance);
         updatedStudy.addSeries(series);
     }
 
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, String instance, boolean isManualTrigger) {
-        this.instance = instance;
+    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, String kheopsInstance, boolean isManualTrigger) {
+        this.kheopsInstance = kheopsInstance;
         this.albumId = albumId;
         this.eventTime = LocalDateTime.now();
         this.sourceUser = new UserResponse(sourceUser);
@@ -55,8 +63,8 @@ public class NewSeriesWebhook implements WebhookResult{
         importSource = "send";
     }
 
-    public NewSeriesWebhook(String albumId, User user, String instance, boolean isManualTrigger) {
-        this.instance = instance;
+    public NewSeriesWebhook(String albumId, User user, String kheopsInstance, boolean isManualTrigger) {
+        this.kheopsInstance = kheopsInstance;
         this.albumId = albumId;
         this.eventTime = LocalDateTime.now();
         this.sourceUser = new UserResponse(user);
@@ -66,16 +74,9 @@ public class NewSeriesWebhook implements WebhookResult{
 
     public void addSeries(Series series) {
         if(updatedStudy == null) {
-            updatedStudy = new StudyResponse(series.getStudy(), instance);
+            updatedStudy = new StudyResponse(series.getStudy(), kheopsInstance);
         }
         updatedStudy.addSeries(series);
-    }
-
-    public void addInstances(String instance) {
-        if(instances == null) {
-            instances = new HashSet<>();
-        }
-        instances.add(instance);
     }
 
     public void setReportProvider(ReportProvider reportProvider) { sourceUser.setReportProvider(reportProvider, ReportProviderResponse.Type.WEBHOOK); }
@@ -98,10 +99,9 @@ public class NewSeriesWebhook implements WebhookResult{
     }
 
 
-    public class Builder {
-        private String instance;
+    public static class Builder {
+        private String kheopsInstance;
         private String albumId;
-        private LocalDateTime eventTime;
         private UserResponse sourceUser;
         private boolean isManualTrigger;
         private String importSource;
@@ -109,9 +109,71 @@ public class NewSeriesWebhook implements WebhookResult{
         private Set<SeriesResponse> series;
         private StudyResponse updatedStudy;
 
-
-
         public Builder() {
         }
+
+        public Builder setDestination(String destination) {
+            if (destination == null) {
+                throw new IllegalStateException("destiation is null");
+            }
+            albumId = destination;
+            return this;
+        }
+
+        public Builder setKheopsInstance(String kheopsInstance) {
+            if (kheopsInstance == null) {
+                throw new IllegalStateException("instance is null");
+            }
+            this.kheopsInstance = kheopsInstance;
+            return this;
+        }
+
+        public Builder setSource(Source source) {
+            if (source == null) {
+                throw new IllegalStateException("source is null");
+            }
+            sourceUser = new UserResponse(source.getUser().get());
+            source.getCapabilityTokenId().ifPresent(capability -> sourceUser.setCapabilityToken(capability));
+            source.getReportProvider().ifPresent(reportProvider -> sourceUser.setReportProvider(reportProvider, ReportProviderResponse.Type.WEBHOOK));
+            return this;
+        }
+
+        public Builder setIsManualTrigger(boolean isManualTrigger) {
+            this.isManualTrigger = isManualTrigger;
+            return this;
+        }
+
+        public Builder isUpload() {
+            importSource = "upload";
+            return this;
+        }
+
+        public Builder isSent() {
+            importSource = "send";
+            return this;
+        }
+
+        public Builder setStudy(Study study, String kheopsInstance) {
+            if (updatedStudy != null) {
+                throw new IllegalStateException("updatedStudy is already set");
+            }
+            this.updatedStudy = new StudyResponse(study, kheopsInstance);
+            return this;
+        }
+
+        public Builder addSeries(Series series) {
+            updatedStudy.addSeries(series);
+            return this;
+        }
+
+        public Builder addInstances(Instances instances) {
+            updatedStudy.addInstances(instances);
+            return this;
+        }
+
+        public NewSeriesWebhook build() {
+            return new NewSeriesWebhook(this);
+        }
+
     }
 }

@@ -12,6 +12,7 @@ import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.AlbumUserPermissions;
 import online.kheops.auth_server.util.ErrorResponse;
 import online.kheops.auth_server.webhook.FooHashMap;
+import online.kheops.auth_server.webhook.Source;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -29,10 +30,12 @@ import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
 import static online.kheops.auth_server.instances.Instances.instancesExist;
+import static online.kheops.auth_server.report_provider.ReportProviderQueries.getReportProviderWithClientId;
 import static online.kheops.auth_server.series.Series.getSeries;
 import static online.kheops.auth_server.series.Series.seriesExist;
 import static online.kheops.auth_server.study.Studies.getStudy;
 import static online.kheops.auth_server.study.Studies.studyExist;
+import static online.kheops.auth_server.user.Users.getUser;
 import static online.kheops.auth_server.util.Consts.*;
 import static online.kheops.auth_server.util.ErrorResponse.Message.*;
 
@@ -113,6 +116,14 @@ public class STOWResource {
                //non => action non autorisée
                //oui => gestion de mutation / webhook ==> return already exist
 
+
+        String destinationId = null;
+        boolean isNewStudy = false;
+        boolean isNewSeries = false;
+        boolean isNewInstance = false;
+        Source source = new Source();
+        boolean isNewInDestination = false;
+
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
         try {
@@ -141,6 +152,7 @@ public class STOWResource {
                         compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
                     //créer instances
                     instances = new Instances(instancesUID, series);
+                    isNewInstance = true;
                     em.persist(instances);
                 } else {
                     //error
@@ -159,6 +171,8 @@ public class STOWResource {
                     series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
 
                     instances = new Instances(instancesUID, series);
+                    isNewSeries = true;
+                    isNewInstance = true;
                     em.persist(series);
                     em.persist(instances);
                 } else {
@@ -185,6 +199,9 @@ public class STOWResource {
                 series.setSeriesNumber(seriesNumber);
                 series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
                 instances = new Instances(instancesUID, series);
+                isNewStudy = true;
+                isNewSeries = true;
+                isNewInstance = true;
                 em.persist(study);
                 em.persist(series);
                 em.persist(instances);
@@ -196,16 +213,24 @@ public class STOWResource {
                 destination = kheopsPrincipal.getUser().getInbox();
             } else {
                 destination = getAlbum(albumId, em);
+                destinationId = destination.getId();
             }
             try {
                 getAlbumSeries(destination, series, em);
             } catch (NoResultException e) {
                 AlbumSeries albumSeries = new AlbumSeries(destination, series);
+                isNewInDestination = true;
                 em.persist(albumSeries);
             }
 
             tx.commit();
 
+            //Webhook
+            source.setUser(kheopsPrincipal.getUser());
+            kheopsPrincipal.getCapability().ifPresent(capability -> source.setCapabilityToken(capability));
+            kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
+            FooHashMap.getInstance().addHashMapData(studyInstanceUID, seriesInstanceUID, instancesUID, destinationId, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
+            FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
@@ -214,7 +239,8 @@ public class STOWResource {
         }
 
         //LOG
-        
+
+
         return Response.ok().build();
     }
 

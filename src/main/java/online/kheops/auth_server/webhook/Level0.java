@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 
 public class Level0 {
-
+    //              StudyUID
     private HashMap<String, Level1> studyHashMap;
 
     public Level0() {
@@ -33,7 +33,7 @@ public class Level0 {
 
     public String toString(String studyUID) {
         if(this.containsStudy(studyUID)) {
-            return "study:" + studyUID + studyHashMap.get(studyUID).toString();
+            return "\nstudy:" + studyUID + studyHashMap.get(studyUID).toString();
         } else {
             return "empty";
         }

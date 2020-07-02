@@ -55,7 +55,7 @@ public class Source {
 
     @Override
     public String toString() {
-        String s = "\n\t\tSource{";
+        String s = "";
         if (reportProvider.isPresent()) {
             s += reportProvider.get().toString();
         }
@@ -66,6 +66,6 @@ public class Source {
             s += user.get().toString();
         }
 
-        return s += '}';
+        return s;
     }
 }

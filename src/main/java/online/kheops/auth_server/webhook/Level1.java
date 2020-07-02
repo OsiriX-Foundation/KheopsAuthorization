@@ -17,23 +17,22 @@ public class Level1 {
 
     public void addSeries(ScheduledFuture scheduledFuture, String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, Source source, String destination, boolean isNewInDestination) {
         this.scheduledFuture = scheduledFuture;
-        if (level2.containsKey(seriesUID)) {
-            level2.get(source).addInstances(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination);
+        if (level2.containsKey(source)) {
+            level2.get(source).addDestination(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination);
         } else {
             level2.put(source, new Level2(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination));
         }
     }
 
     public boolean isNewStudy() { return isNewStudy; }
-    public HashMap<Source, Level2> getSeries() { return level2; }
+    public HashMap<Source, Level2> getSources() { return level2; }
     public boolean cancelScheduledFuture() {
         return scheduledFuture.cancel(true);
     }
 
     @Override
     public String toString() {
-                String s = "{" +
-                "isNewStudy=" + isNewStudy + " ";
+                String s = "\n\t{isNewStudy=" + isNewStudy + " ";
         for(Map.Entry<Source, Level2> level2Entry:level2.entrySet()) {
             s += "\n\tsource:"+level2Entry.getKey() +""+ level2Entry.getValue().toString();
         }

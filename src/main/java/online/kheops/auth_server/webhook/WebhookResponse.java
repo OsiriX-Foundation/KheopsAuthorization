@@ -38,10 +38,10 @@ public class WebhookResponse {
         url = webhook.getUrl();
         useSecret = webhook.useSecret();
         events = new ArrayList<>();
-        if(webhook.getNewSeries()) {
+        if(webhook.isNewSeries()) {
             events.add(WebhookType.NEW_SERIES.name().toLowerCase());
         }
-        if(webhook.getNewUser()) {
+        if(webhook.isNewUser()) {
             events.add(WebhookType.NEW_USER.name().toLowerCase());
         }
 

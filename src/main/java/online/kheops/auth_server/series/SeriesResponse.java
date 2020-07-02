@@ -3,6 +3,8 @@ package online.kheops.auth_server.series;
 import online.kheops.auth_server.entity.Series;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SeriesResponse {
 
@@ -21,6 +23,9 @@ public class SeriesResponse {
     @XmlElement(name = "body_part_examined")
     private String bodyPartExamined;
 
+    @XmlElement(name = "instances_uid")
+    private Set<String> instances;
+
     @XmlElement(name = "retrieve_url")
     private String retrieveUrl;
 
@@ -35,6 +40,13 @@ public class SeriesResponse {
         seriesNumber = Long.valueOf(series.getSeriesNumber());
         bodyPartExamined = series.getBodyPartExamined();
         retrieveUrl = kheopsInstance + "/api/studies/" + series.getStudy().getStudyInstanceUID() + "/series/" + series.getSeriesInstanceUID();
+    }
+
+    public void addInstances(String instanceUID) {
+        if(instances == null) {
+            instances = new HashSet<>();
+        }
+        instances.add(instanceUID);
     }
 
     public SeriesResponse(Series series) {

@@ -1,11 +1,12 @@
 package online.kheops.auth_server.study;
 
+import online.kheops.auth_server.entity.Instances;
 import online.kheops.auth_server.entity.Series;
 import online.kheops.auth_server.entity.Study;
 import online.kheops.auth_server.series.SeriesResponse;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StudyResponse {
 
@@ -38,7 +39,7 @@ public class StudyResponse {
     private String retrieveUrl;
 
     @XmlElement(name = "series")
-    private ArrayList<SeriesResponse> series;
+    private HashMap<String,SeriesResponse> series;
 
     private String instance;
 
@@ -67,13 +68,20 @@ public class StudyResponse {
 
     public void addSeries(Series series) {
         if(this.series == null) {
-            this.series = new ArrayList<>();
+            this.series = new HashMap<>();
         }
         if (instance != null) {
-            this.series.add(new SeriesResponse(series, instance));
+            this.series.put(series.getSeriesInstanceUID(), new SeriesResponse(series, instance));
         } else {
-            this.series.add(new SeriesResponse(series));
+            this.series.put(series.getSeriesInstanceUID(), new SeriesResponse(series));
         }
+    }
+
+    public void addInstances(Instances instances) {
+        if(series == null || !series.containsKey(instances.getSeries().getSeriesInstanceUID())) {
+            addSeries(instances.getSeries());
+        }
+        series.get(instances.getSeries().getSeriesInstanceUID()).addInstances(instances.getInstanceUID());
     }
 
     public boolean containSeries() {

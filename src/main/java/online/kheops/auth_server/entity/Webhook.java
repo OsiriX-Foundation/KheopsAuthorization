@@ -120,11 +120,9 @@ public class Webhook {
         return url;
     }
 
-    public boolean getNewSeries() { return newSeries; }
+    public boolean isNewSeries() { return newSeries; }
 
-    public boolean getNewUser() {
-        return newUser;
-    }
+    public boolean isNewUser() { return newUser; }
 
     public Boolean isEnabled() { return enabled; }
 

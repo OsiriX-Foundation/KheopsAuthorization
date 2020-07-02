@@ -1,0 +1,38 @@
+package online.kheops.auth_server.webhook;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Level4 {
+    private boolean isNewSeries;
+    private boolean isNewInDestination;
+    private HashMap<String, Boolean> instances;
+
+    public Level4(String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+        this.isNewSeries = isNewSeries;
+        this.isNewInDestination = isNewInDestination;
+        this.instances = new HashMap<>();
+        instances.put(instancesUID, isNewInstances);
+    }
+
+    public void addInstances(String instancesUID, boolean isNewInstances)  {
+        instances.put(instancesUID, isNewInstances);
+    }
+
+    public HashMap<String, Boolean> getInstances() { return instances; }
+
+    public boolean isNewSeries() { return isNewSeries; }
+    public boolean isNewInDestination() { return isNewInDestination; }
+
+    @Override
+    public String toString() {
+        String s = "\n\t\t\t\t{";
+        s += "is_new_series:" + isNewSeries;
+        s += "\n\t\t\t\tis_new_in_destination:" + isNewInDestination;
+        for(Map.Entry<String, Boolean> stringSetEntry:instances.entrySet()) {
+            s += "\n\t\t\t\t{instances:" +stringSetEntry.getKey() +
+                    " is_new_instances:"+stringSetEntry.getValue()+ "}";
+        }
+        return s;
+    }
+}

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Level2 {
+    //             Destination
     private HashMap<String, Level3> level3;
 
     public Level2() {
@@ -16,20 +17,21 @@ public class Level2 {
         level3.put(destination, new Level3(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
     }
 
-    public void addInstances(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
+    public void addDestination(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
         if (level3.containsKey(destination)) {
-            level3.get(destination).addInstances(instancesUID, isNewInstances);
+            level3.get(destination).addSeries(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination);
         } else {
             level3.put(destination, new Level3(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
         }
     }
 
+    public HashMap<String, Level3> getDestination() { return level3; }
 
     @Override
     public String toString() {
         String s = "{";
-        for(Map.Entry<Source, Level3> level3Entry:level3.entrySet()) {
-            s += level3Entry.getKey() + level3Entry.getValue().toString();
+        for(Map.Entry<String, Level3> level3Entry:level3.entrySet()) {
+            s += "\n\t\tdestination:" + level3Entry.getKey() + level3Entry.getValue().toString();
         }
         return s + '}';
     }

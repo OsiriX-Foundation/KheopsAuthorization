@@ -255,7 +255,7 @@ public class Sending {
             final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
 
             for (Webhook webhook : targetAlbum.getWebhooks()) {
-                if (webhook.getNewSeries() && webhook.isEnabled()) {
+                if (webhook.isNewSeries() && webhook.isEnabled()) {
                     final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                     em.persist(webhookTrigger);
                     webhookTrigger.addSeries(availableSeries);
@@ -345,7 +345,7 @@ public class Sending {
 
             if(newSeriesWebhook.containSeries()) {
                 for (Webhook webhook : targetAlbum.getWebhooks()) {
-                    if (webhook.getNewSeries() && webhook.isEnabled()) {
+                    if (webhook.isNewSeries() && webhook.isEnabled()) {
                         final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                         em.persist(webhookTrigger);
                         for (Series series : seriesListWebhook) {
