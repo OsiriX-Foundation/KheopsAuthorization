@@ -26,6 +26,7 @@ public class Level1 {
 
     public boolean isNewStudy() { return isNewStudy; }
     public HashMap<Source, Level2> getSources() { return level2; }
+    public Level2 getSource(Source source) { return level2.get(source); }
     public boolean cancelScheduledFuture() {
         return scheduledFuture.cancel(true);
     }

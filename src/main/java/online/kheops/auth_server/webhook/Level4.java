@@ -2,6 +2,7 @@ package online.kheops.auth_server.webhook;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Level4 {
     private boolean isNewSeries;
@@ -20,6 +21,9 @@ public class Level4 {
     }
 
     public HashMap<String, Boolean> getInstances() { return instances; }
+    public Set<String> getInstancesUIDLst() { return instances.keySet(); }
+
+    public boolean isNewInstances(String instanceUID) { return instances.get(instanceUID); }
 
     public boolean isNewSeries() { return isNewSeries; }
     public boolean isNewInDestination() { return isNewInDestination; }

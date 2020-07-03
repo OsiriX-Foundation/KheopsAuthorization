@@ -27,7 +27,7 @@ public class FooHashMap {
     private static FooHashMap instance = null;
     private static String kheopsInstance;
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
-    private final int TIME_TO_LIVE = 10;//seconds
+    private static final int TIME_TO_LIVE = 10;//seconds
 
     private Level0 level0;
 
@@ -40,7 +40,8 @@ public class FooHashMap {
         if(instance != null) {
             return instance;
         }
-        return instance = new FooHashMap();
+        instance = new FooHashMap();
+        return instance;
     }
 
     public void setKheopsInstance(String kheopsInstance) {
@@ -65,7 +66,7 @@ public class FooHashMap {
         log += level0.toString(studyUID);
         LOG.info(log);
 
-        Level1 level1 = level0.get(studyUID);
+        final Level1 level1 = level0.get(studyUID);
 
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
@@ -74,38 +75,139 @@ public class FooHashMap {
             tx.begin();
 
             if (level1.isNewStudy()) {
-                //nouvelle study on enoie uniquement aux destination en fonction de chaque source
+                //new study => call webhook only from destination
+                for (Map.Entry<Source, Level2> entry : level1.getSources().entrySet()) {
+                    final Source source = entry.getKey();
+                    final Level2 level2 = entry.getValue();
 
-                for (Source source:level1.getSources().keySet()) {
-                    for (String destination:level1.getSources().get(source).getDestination().keySet()) {
-                        NewSeriesWebhook.Builder builder = NewSeriesWebhook.builder();
-                        builder.setDestination(destination)
+                    for (Map.Entry<String, Level3> entry1 : level2.getDestinations().entrySet()) {
+                        final String albumDestinationId = entry1.getKey();
+                        final Level3 level3 = entry1.getValue();
+
+                        final Album album = getAlbum(albumDestinationId, em);
+                        if  (!album.getWebhooks().isEmpty()) {
+                            //if destination contain webhooks
+
+                            final NewSeriesWebhook.Builder builder = NewSeriesWebhook.builder()
+                                    .setDestination(albumDestinationId)
+                                    .isUpload()
+                                    .setIsManualTrigger(false)
+                                    .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                    .setSource(source)
+                                    .setKheopsInstance(kheopsInstance);
+
+                            for (Map.Entry<String, Level4> entry2 : level3.getSeries().entrySet()) {
+                                final String seriesUID = entry2.getKey();
+                                final Level4 level4 = entry2.getValue();
+
+                                final Series series = getSeries(seriesUID, em);
+                                builder.addSeries(series);
+                                for (String instanceUID : level4.getInstancesUIDLst()) {
+                                    builder.addInstances(getInstances(instanceUID, em));
+                                }
+                            }
+
+                            final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
+                            for (Webhook webhook : album.getWebhooks()) {
+                                if (webhook.isEnabled() && webhook.isNewSeries()) {
+                                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                    builder.getSeriesInstancesHashMap().forEach((series, instances) -> webhookTrigger.addSeries(series));
+                                    em.persist(webhookTrigger);
+                                    webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, builder.build(), webhookTrigger));
+                                }
+                            }
+                            for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests) {
+                                webhookAsyncRequest.firstRequest();
+                            }
+                        }
+                    }
+                }
+
+
+
+
+
+
+
+
+            } else {
+                //pas une nouvelle study mais des series (nouvelle + ancienne)
+                for (Source source : level1.getSources().keySet()) {
+
+
+                    //debug
+                    //extraire la liste des NOUVELLES instances  quelque soit la dstination et quelque soit la séries (nouvelle ou pas)
+                    final HashMap<Series, Set<String>> testLstOfNewInstances = new HashMap<>();
+                    for (String destination : level1.getSource(source).getDestinations().keySet()) {
+                        for (String seriesUID : level1.getSource(source).getDestination(destination).getSeries().keySet()) {
+                            final Series series = getSeries(seriesUID, em);
+                            for (String instanceUID : level1.getSource(source).getDestination(destination).getSeries(seriesUID).getInstances().keySet()) {
+                                if (level1.getSource(source).getDestination(destination).getSeries(seriesUID).isNewInstances(instanceUID)) {
+                                    if (testLstOfNewInstances.containsKey(series)) {
+                                        testLstOfNewInstances.get(series).add(instanceUID);
+                                    } else {
+                                        Set<String> lst = new HashSet<>();
+                                        lst.add(instanceUID);
+                                        testLstOfNewInstances.put(series, lst);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //end debug
+
+
+
+
+                    //obtenir la liste des albums qui contienent la study et des webhooks actif avec new_series
+                    final List<Album> albumsLst = findAlbumLstForWebhook(studyUID, em);
+                    HashMap<Series, Set<String>> newInstancesLstBySeries = new HashMap<>();
+                    for (String destination : level1.getSource(source).getDestinations().keySet()) {
+                        final Album album = getAlbum(destination, em);
+                        albumsLst.remove(album);
+
+
+                        final NewSeriesWebhook.Builder builder = NewSeriesWebhook.builder()
+                                .setDestination(destination)
                                 .isUpload()
                                 .setIsManualTrigger(false)
                                 .setStudy(getStudy(studyUID, em), kheopsInstance)
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
 
-                        ArrayList<Series> seriesLst = new ArrayList<>();
+                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
 
-                        for (String seriesUID:level1.getSources().get(source).getDestination().get(destination).getSeries().keySet()) {
+                        for (String seriesUID : level1.getSource(source).getDestination(destination).getSeries().keySet()) {
                             final Series series = getSeries(seriesUID, em);
+                            final boolean isNewSeries = level1.getSource(source).getDestination(destination).getSeries(seriesUID).isNewSeries();
+                            seriesLstForWebhookTrigger.add(series);
                             builder.addSeries(series);
-                            seriesLst.add(series);
-                            for (String instanceUID:level1.getSources().get(source).getDestination().get(destination).getSeries().get(seriesUID).getInstances().keySet()) {
-                                // 1 studyUID => all source => all destination => all series => all instances
+                            for (String instanceUID : level1.getSource(source).getDestination(destination).getSeries(seriesUID).getInstances().keySet()) {
                                 builder.addInstances(getInstances(instanceUID, em));
+                                if (!isNewSeries && level1.getSource(source).getDestination(destination).getSeries(seriesUID).isNewInstances(instanceUID)) {
+                                    if (newInstancesLstBySeries.containsKey(series)) {
+                                        newInstancesLstBySeries.get(series).add(instanceUID);
+                                    } else {
+                                        Set<String> lst = new HashSet<>();
+                                        lst.add(instanceUID);
+                                        newInstancesLstBySeries.put(series, lst);
+                                    }
+                                }
+                            }
+                            if (testLstOfNewInstances.containsKey(series)) {
+                                for (String instanceUID : testLstOfNewInstances.get(series)) {
+                                    builder.addInstances(getInstances(instanceUID, em));
+                                }
                             }
                         }
 
-                        //send in all webhook in the destination
+                        //send in all enabled newSeries webhook in the destination
                         final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
-                        final Album album = getAlbum(destination, em);
 
                         for (Webhook webhook : album.getWebhooks()) {
                             if (webhook.isEnabled() && webhook.isNewSeries()) {
                                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                seriesLst.forEach(webhookTrigger::addSeries);
+                                seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
                                 em.persist(webhookTrigger);
                                 webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, builder.build(), webhookTrigger));
                             }
@@ -114,107 +216,46 @@ public class FooHashMap {
                             webhookAsyncRequest.firstRequest();
                         }
                     }
-                }
-            } else {
-                //pas une nouvelle study mais des series (nouvelle + ancienne)
-                for (Source source:level1.getSources().keySet()) {
-                    //obtenir la liste des albums qui contienent la study et des webhooks actif avec new_series
-                    List<Album> albumsLst = findAlbumLstForWebhook(studyUID, em);
-                    HashMap<Series, Set<String>> newInstancesLst = new HashMap<>();
-                    for (String destination:level1.getSources().get(source).getDestination().keySet()) {
-                        final Album album = getAlbum(destination, em);
-                        albumsLst.remove(album);
 
-                        NewSeriesWebhook.Builder builder = NewSeriesWebhook.builder() ;
-                        builder.setDestination(destination)
-                                .isUpload()
-                                .setIsManualTrigger(false)
-                                .setStudy(getStudy(studyUID, em), kheopsInstance)
-                                .setSource(source)
-                                .setKheopsInstance(kheopsInstance);
 
-                        ArrayList<Series> newSeriesLst = new ArrayList<>();
-                        ArrayList<Series> oldSeriesLst = new ArrayList<>();
 
-                        for (String seriesUID:level1.getSources().get(source).getDestination().get(destination).getSeries().keySet()) {
-                            final Series series = getSeries(seriesUID, em);
-                            final boolean isNewSeries = level1.getSources().get(source).getDestination().get(destination).getSeries().get(seriesUID).isNewSeries();
-                            if (isNewSeries) {
-                                newSeriesLst.add(series);
-                                //uniquement à la destination
-                            } else {
-                                //si pas de nouvelle instances => uniquement à la destination
-                                //sinon a tous les albums qui ont la séries
-                                oldSeriesLst.add(series);
-                            }
-                            builder.addSeries(series);
-                            for (String instanceUID:level1.getSources().get(source).getDestination().get(destination).getSeries().get(seriesUID).getInstances().keySet()) {
-                                builder.addInstances(getInstances(instanceUID, em));
-                                if (level1.getSources().get(source).getDestination().get(destination).getSeries().get(seriesUID).getInstances().get(instanceUID)) {
-                                    if(!isNewSeries) {
-                                        if (newInstancesLst.containsKey(series)) {
-                                            newInstancesLst.get(series).add(instanceUID);
-                                        } else {
-                                            Set<String> lst = new HashSet<>();
-                                            lst.add(instanceUID);
-                                            newInstancesLst.put(series, lst);
-                                        }
+
+
+
+
+                    //gestion des albums non destination
+                    if (!newInstancesLstBySeries.isEmpty()) {
+                        for(Album albumDestination : albumsLst) {
+                            final ArrayList<Series> seriesLst = new ArrayList<>();
+                            final NewSeriesWebhook.Builder builder2 = NewSeriesWebhook.builder()
+                                    .setDestination(albumDestination.getId())
+                                    .isUpload()
+                                    .setIsManualTrigger(false)
+                                    .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                    .setSource(source)
+                                    .setKheopsInstance(kheopsInstance);
+                            for (Series seriesWithNewInstances : newInstancesLstBySeries.keySet()) {
+                                if (albumDestination.containsSeries(seriesWithNewInstances, em)) {
+                                    seriesLst.add(seriesWithNewInstances);
+                                    builder2.addSeries(seriesWithNewInstances);
+                                    for (String i : newInstancesLstBySeries.get(seriesWithNewInstances)) {
+                                        builder2.addInstances(getInstances(i, em));
                                     }
                                 }
                             }
-                        }
+                            if (!seriesLst.isEmpty()) {
+                                final List<WebhookAsyncRequest> webhookAsyncRequests2 = new ArrayList<>();
 
-                        //send in all webhook in the destination
-                        final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
-
-                        for (Webhook webhook : album.getWebhooks()) {
-                            if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                newSeriesLst.forEach(webhookTrigger::addSeries);
-                                oldSeriesLst.forEach(webhookTrigger::addSeries);
-                                em.persist(webhookTrigger);
-                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, builder.build(), webhookTrigger));
-                            }
-                        }
-                        for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests) {
-                            webhookAsyncRequest.firstRequest();
-                        }
-
-                        //gestion des albums non destination
-                        if (!newInstancesLst.isEmpty()) {
-                            for(Album al:albumsLst) {
-                                boolean containSeries = false;
-                                NewSeriesWebhook.Builder builder2 = NewSeriesWebhook.builder();
-                                builder2.setDestination(al.getId())
-                                        .isUpload()
-                                        .setIsManualTrigger(false)
-                                        .setStudy(getStudy(studyUID, em), kheopsInstance)
-                                        .setSource(source)
-                                        .setKheopsInstance(kheopsInstance);
-                                for (Series s : newInstancesLst.keySet()) {
-                                    if (al.containsSeries(s, em)) {
-                                        containSeries = true;
-                                        builder2.addSeries(s);
-                                        for (String i : newInstancesLst.get(s)) {
-                                            builder2.addInstances(getInstances(i, em));
-                                        }
+                                for (Webhook webhook : albumDestination.getWebhooks()) {
+                                    if (webhook.isEnabled() && webhook.isNewSeries()) {
+                                        final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                        seriesLst.forEach(webhookTrigger::addSeries);
+                                        em.persist(webhookTrigger);
+                                        webhookAsyncRequests2.add(new WebhookAsyncRequest(webhook, builder2.build(), webhookTrigger));
                                     }
                                 }
-                                if (containSeries) {
-                                    final List<WebhookAsyncRequest> webhookAsyncRequests2 = new ArrayList<>();
-
-                                    for (Webhook webhook : album.getWebhooks()) {
-                                        if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                            final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                            newSeriesLst.forEach(webhookTrigger::addSeries);
-                                            oldSeriesLst.forEach(webhookTrigger::addSeries);
-                                            em.persist(webhookTrigger);
-                                            webhookAsyncRequests2.add(new WebhookAsyncRequest(webhook, builder2.build(), webhookTrigger));
-                                        }
-                                    }
-                                    for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests2) {
-                                        webhookAsyncRequest.firstRequest();
-                                    }
+                                for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests2) {
+                                    webhookAsyncRequest.firstRequest();
                                 }
                             }
                         }

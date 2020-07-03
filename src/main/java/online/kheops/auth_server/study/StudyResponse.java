@@ -6,7 +6,8 @@ import online.kheops.auth_server.entity.Study;
 import online.kheops.auth_server.series.SeriesResponse;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class StudyResponse {
 
@@ -39,13 +40,13 @@ public class StudyResponse {
     private String retrieveUrl;
 
     @XmlElement(name = "series")
-    private HashMap<String,SeriesResponse> series;
+    private ArrayList<SeriesResponse> series;
 
-    private String instance;
+    private String kheopsInstance;
 
     private StudyResponse() { /*empty*/ }
 
-    public StudyResponse(Study study, String instance) {
+    public StudyResponse(Study study, String kheopsInstance) {
         patientName = study.getPatientName();
         studyInstanceUID = study.getStudyInstanceUID();
         studyDate = study.getStudyDate();
@@ -58,8 +59,8 @@ public class StudyResponse {
         studyId = study.getStudyID();
         timezoneOffsetFromUtc = study.getTimezoneOffsetFromUTC();
         studyTime = study.getStudyTime();
-        retrieveUrl = instance + "/api/studies/" + study.getStudyInstanceUID();
-        this.instance = instance;
+        retrieveUrl = kheopsInstance + "/api/studies/" + study.getStudyInstanceUID();
+        this.kheopsInstance = kheopsInstance;
     }
 
     public StudyResponse(Study study) {
@@ -68,20 +69,20 @@ public class StudyResponse {
 
     public void addSeries(Series series) {
         if(this.series == null) {
-            this.series = new HashMap<>();
+            this.series = new ArrayList<>();
         }
-        if (instance != null) {
-            this.series.put(series.getSeriesInstanceUID(), new SeriesResponse(series, instance));
-        } else {
-            this.series.put(series.getSeriesInstanceUID(), new SeriesResponse(series));
-        }
+        final SeriesResponse seriesResponse = new SeriesResponse(series, kheopsInstance);
+        series.getInstances().forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
+        this.series.add(seriesResponse);
     }
 
-    public void addInstances(Instances instances) {
-        if(series == null || !series.containsKey(instances.getSeries().getSeriesInstanceUID())) {
-            addSeries(instances.getSeries());
+    public void addSeriesWithInstances(Series series, Set<Instances> instancesSet) {
+        if(this.series == null) {
+            this.series = new ArrayList<>();
         }
-        series.get(instances.getSeries().getSeriesInstanceUID()).addInstances(instances.getInstanceUID());
+        final SeriesResponse seriesResponse = new SeriesResponse(series, kheopsInstance);
+        instancesSet.forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
+        this.series.add(seriesResponse);
     }
 
     public boolean containSeries() {

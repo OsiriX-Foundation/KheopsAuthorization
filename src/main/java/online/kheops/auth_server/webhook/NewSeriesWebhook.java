@@ -8,6 +8,9 @@ import online.kheops.auth_server.user.UserResponse;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class NewSeriesWebhook implements WebhookResult{
@@ -105,9 +108,8 @@ public class NewSeriesWebhook implements WebhookResult{
         private UserResponse sourceUser;
         private boolean isManualTrigger;
         private String importSource;
-        private Set<String> instances;
-        private Set<SeriesResponse> series;
         private StudyResponse updatedStudy;
+        private HashMap<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
 
         public Builder() {
         }
@@ -162,16 +164,29 @@ public class NewSeriesWebhook implements WebhookResult{
         }
 
         public Builder addSeries(Series series) {
-            updatedStudy.addSeries(series);
+            if (!seriesInstancesHashMap.containsKey(series)) {
+                seriesInstancesHashMap.put(series, new HashSet<>());
+            }
+            //updatedStudy.addSeries(series);
             return this;
         }
 
         public Builder addInstances(Instances instances) {
-            updatedStudy.addInstances(instances);
+            if (!seriesInstancesHashMap.containsKey(instances.getSeries())) {
+                seriesInstancesHashMap.put(instances.getSeries(), new HashSet<>());
+            }
+            seriesInstancesHashMap.get(instances.getSeries()).add(instances);
+
+            //updatedStudy.addInstances(instances);
             return this;
         }
 
+        public Map<Series, Set<Instances>> getSeriesInstancesHashMap() { return seriesInstancesHashMap; }
+
         public NewSeriesWebhook build() {
+            for(Series s:seriesInstancesHashMap.keySet()) {
+                updatedStudy.addSeriesWithInstances(s, seriesInstancesHashMap.get(s));
+            }
             return new NewSeriesWebhook(this);
         }
 

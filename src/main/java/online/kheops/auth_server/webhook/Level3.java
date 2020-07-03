@@ -23,6 +23,7 @@ public class Level3 {
     }
 
     public HashMap<String, Level4> getSeries() { return series; }
+    public Level4 getSeries(String series) { return this.series.get(series); }
 
     @Override
     public String toString() {

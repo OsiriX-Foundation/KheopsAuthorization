@@ -25,7 +25,8 @@ public class Level2 {
         }
     }
 
-    public HashMap<String, Level3> getDestination() { return level3; }
+    public HashMap<String, Level3> getDestinations() { return level3; }
+    public Level3 getDestination(String destination) { return level3.get(destination); }
 
     @Override
     public String toString() {

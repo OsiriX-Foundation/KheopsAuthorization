@@ -22,12 +22,12 @@ public class SeriesResponse {
     private Long seriesNumber;
     @XmlElement(name = "body_part_examined")
     private String bodyPartExamined;
-
+    @XmlElement(name = "retrieve_url")
+    private String retrieveUrl;
     @XmlElement(name = "instances_uid")
     private Set<String> instances;
 
-    @XmlElement(name = "retrieve_url")
-    private String retrieveUrl;
+
 
     private SeriesResponse() { /*empty*/ }
 
