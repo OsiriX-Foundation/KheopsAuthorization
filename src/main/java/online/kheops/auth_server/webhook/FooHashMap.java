@@ -181,38 +181,43 @@ public class FooHashMap {
                         }
 
                         //gestion des albums non destination
-                        for(Album al:albumsLst) {
-                            NewSeriesWebhook.Builder builder2 = NewSeriesWebhook.builder();
-                            builder2.setDestination(al.getId())
-                                    .isUpload()
-                                    .setIsManualTrigger(false)
-                                    .setStudy(getStudy(studyUID, em), kheopsInstance)
-                                    .setSource(source)
-                                    .setKheopsInstance(kheopsInstance);
-                            for(Series s: newInstancesLst.keySet()) {
-                                if (al.containsSeries(s, em)) {
-                                    builder2.addSeries(s);
-                                    for(String i:newInstancesLst.get(s)) {
-                                        builder2.addInstances(getInstances(i, em));
+                        if (!newInstancesLst.isEmpty()) {
+                            for(Album al:albumsLst) {
+                                boolean containSeries = false;
+                                NewSeriesWebhook.Builder builder2 = NewSeriesWebhook.builder();
+                                builder2.setDestination(al.getId())
+                                        .isUpload()
+                                        .setIsManualTrigger(false)
+                                        .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                        .setSource(source)
+                                        .setKheopsInstance(kheopsInstance);
+                                for (Series s : newInstancesLst.keySet()) {
+                                    if (al.containsSeries(s, em)) {
+                                        containSeries = true;
+                                        builder2.addSeries(s);
+                                        for (String i : newInstancesLst.get(s)) {
+                                            builder2.addInstances(getInstances(i, em));
+                                        }
+                                    }
+                                }
+                                if (containSeries) {
+                                    final List<WebhookAsyncRequest> webhookAsyncRequests2 = new ArrayList<>();
+
+                                    for (Webhook webhook : album.getWebhooks()) {
+                                        if (webhook.isEnabled() && webhook.isNewSeries()) {
+                                            final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                            newSeriesLst.forEach(webhookTrigger::addSeries);
+                                            oldSeriesLst.forEach(webhookTrigger::addSeries);
+                                            em.persist(webhookTrigger);
+                                            webhookAsyncRequests2.add(new WebhookAsyncRequest(webhook, builder2.build(), webhookTrigger));
+                                        }
+                                    }
+                                    for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests2) {
+                                        webhookAsyncRequest.firstRequest();
                                     }
                                 }
                             }
-                            final List<WebhookAsyncRequest> webhookAsyncRequests2 = new ArrayList<>();
-
-                            for (Webhook webhook : album.getWebhooks()) {
-                                if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                    newSeriesLst.forEach(webhookTrigger::addSeries);
-                                    oldSeriesLst.forEach(webhookTrigger::addSeries);
-                                    em.persist(webhookTrigger);
-                                    webhookAsyncRequests2.add(new WebhookAsyncRequest(webhook, builder2.build(), webhookTrigger));
-                                }
-                            }
-                            for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests2) {
-                                webhookAsyncRequest.firstRequest();
-                            }
                         }
-
                     }
                 }
             }
