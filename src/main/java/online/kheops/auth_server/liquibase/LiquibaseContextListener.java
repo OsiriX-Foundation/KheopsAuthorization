@@ -31,7 +31,7 @@ public class LiquibaseContextListener implements ServletContextListener {
         JdbcConnection jdbcCon = null;
         try (Connection con = EntityManagerListener.getConnection()) {
             try {
-                /*jdbcCon = new JdbcConnection(con);
+                jdbcCon = new JdbcConnection(con);
 
                 // Initialize Liquibase and run the update
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcCon);
@@ -52,7 +52,7 @@ public class LiquibaseContextListener implements ServletContextListener {
                 liquibase.validate();
             } catch (LiquibaseException e) {
                 LOG.log(Level.SEVERE, "Unable to use liquibase", e);
-                exit(1);*/
+                exit(1);
             } finally {
                 if (jdbcCon != null) {
                     jdbcCon.close();
