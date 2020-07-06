@@ -13,7 +13,7 @@ import java.util.Set;
 @NamedQueries({
         @NamedQuery(name = "Albums.findById",
         query = "SELECT a FROM Album a WHERE :albumId = a.id"),
-        @NamedQuery(name = "Albums.findForWebhook",
+        @NamedQuery(name = "Albums.findWithEnabledNewSeriesWebhooks",
         query = "SELECT distinct a FROM Album a JOIN a.albumSeries alS JOIN alS.series s JOIN s.study st JOIN a.webhooks w WHERE w.newSeries = true AND w.enabled = true AND st.studyInstanceUID = :studyInstanceUID"),
 
 })

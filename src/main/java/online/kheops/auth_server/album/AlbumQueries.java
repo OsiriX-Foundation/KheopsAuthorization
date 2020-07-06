@@ -62,8 +62,8 @@ public class AlbumQueries {
         }
     }
 
-    public static List<Album> findAlbumLstForWebhook(String studyInstanceUID, EntityManager em ) {
-        return em.createNamedQuery("Albums.findForWebhook", Album.class)
+    public static List<Album> findAlbumsWithEnabledNewSeriesWebhooks(String studyInstanceUID, EntityManager em ) {
+        return em.createNamedQuery("Albums.findWithEnabledNewSeriesWebhooks", Album.class)
                 .setParameter("studyInstanceUID", studyInstanceUID)
                 .getResultList();
     }
