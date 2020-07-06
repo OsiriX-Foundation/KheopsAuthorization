@@ -36,7 +36,7 @@ public class Level2_DestinationLevel {
     }
 
     public Set<String> getSeriesNewInstances(String seriesUID) {
-        return seriesNewInstances.get(seriesUID);
+        return seriesNewInstances.containsKey(seriesUID) ? seriesNewInstances.get(seriesUID) : new HashSet<>();
     }
     public HashMap<String, Set<String>> getSeriesNewInstances() { return seriesNewInstances; }
 

@@ -136,7 +136,7 @@ public class FooHashMap {
 
 
 
-
+                    /*
 
 
                     //obtenir la liste des albums qui contienent la study et des webhooks actif avec new_series
@@ -145,7 +145,7 @@ public class FooHashMap {
                         final Album album = getAlbum(destination, em);
                         albumsLst.remove(album);
 
-
+                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                 .setDestination(destination)
                                 .isUpload()
@@ -153,8 +153,6 @@ public class FooHashMap {
                                 .setStudy(getStudy(studyUID, em), kheopsInstance)
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
-
-                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
 
                         for (String seriesUID : level1SourceLevel.getSource(source).getDestination(destination).getSeries().keySet()) {
                             final Series series = getSeries(seriesUID, em);
@@ -189,6 +187,7 @@ public class FooHashMap {
                     //gestion des albums non destination
                     if (!level1SourceLevel.getSource(source).getSeriesNewInstances().isEmpty()) {
                         for(Album albumDestination : albumsLst) {
+
                             final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                     .setDestination(albumDestination.getId())
@@ -197,6 +196,7 @@ public class FooHashMap {
                                     .setStudy(getStudy(studyUID, em), kheopsInstance)
                                     .setSource(source)
                                     .setKheopsInstance(kheopsInstance);
+
                             for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level1SourceLevel.getSource(source).getSeriesNewInstances().entrySet()) {
                                 final String seriesUID = seriesUIDSetInstancesUID.getKey();
                                 final Set<String> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
@@ -220,7 +220,68 @@ public class FooHashMap {
                                 }
                             }
                         }
+                    }*/
+
+
+
+
+
+
+
+
+
+
+                    final List<Album> albumsLst = findAlbumLstForWebhook(studyUID, em);
+                    for (Album album : albumsLst) {
+
+                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
+                        final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
+                                .setDestination(album.getId())
+                                .isUpload()
+                                .setIsManualTrigger(false)
+                                .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                .setSource(source)
+                                .setKheopsInstance(kheopsInstance);
+
+                        if (level1SourceLevel.getSource(source).getDestinations().containsKey(album.getId())) {
+                            for (String seriesUID : level1SourceLevel.getSource(source).getDestination(album.getId()).getSeries().keySet()) {
+                                final Series series = getSeries(seriesUID, em);
+                                seriesLstForWebhookTrigger.add(series);
+                                newSeriesWebhookBuilder.addSeries(series);
+                                for (String instanceUID : level1SourceLevel.getSource(source).getDestination(album.getId()).getSeries(seriesUID).getInstances().keySet()) {
+                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                }
+                                for (String instanceUID : level1SourceLevel.getSource(source).getSeriesNewInstances(seriesUID)) {
+                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                }
+                            }
+                        } else {
+                            for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level1SourceLevel.getSource(source).getSeriesNewInstances().entrySet()) {
+                                final String seriesUID = seriesUIDSetInstancesUID.getKey();
+                                final Set<String> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
+                                final Series series = getSeries(seriesUID, em);
+                                if (album.containsSeries(series, em)) {
+                                    seriesLstForWebhookTrigger.add(series);
+                                    newSeriesWebhookBuilder.addSeries(series);
+                                    for (String i : instancesUIDSet) {
+                                        newSeriesWebhookBuilder.addInstances(getInstances(i, em));
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!seriesLstForWebhookTrigger.isEmpty()) {
+                            for (Webhook webhook : album.getWebhooks()) {
+                                if (webhook.isEnabled() && webhook.isNewSeries()) {
+                                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                    seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
+                                    em.persist(webhookTrigger);
+                                    new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
+                                }
+                            }
+                        }
                     }
+
                 }
             }
 
