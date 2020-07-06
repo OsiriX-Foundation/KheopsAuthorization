@@ -133,106 +133,7 @@ public class FooHashMap {
                 //pas une nouvelle study mais des series (nouvelle + ancienne)
                 for (Source source : level1SourceLevel.getSources().keySet()) {
 
-
-
-
-                    /*
-
-
-                    //obtenir la liste des albums qui contienent la study et des webhooks actif avec new_series
-                    final List<Album> albumsLst = findAlbumLstForWebhook(studyUID, em);
-                    for (String destination : level1SourceLevel.getSource(source).getDestinations().keySet()) {
-                        final Album album = getAlbum(destination, em);
-                        albumsLst.remove(album);
-
-                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
-                        final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
-                                .setDestination(destination)
-                                .isUpload()
-                                .setIsManualTrigger(false)
-                                .setStudy(getStudy(studyUID, em), kheopsInstance)
-                                .setSource(source)
-                                .setKheopsInstance(kheopsInstance);
-
-                        for (String seriesUID : level1SourceLevel.getSource(source).getDestination(destination).getSeries().keySet()) {
-                            final Series series = getSeries(seriesUID, em);
-                            seriesLstForWebhookTrigger.add(series);
-                            newSeriesWebhookBuilder.addSeries(series);
-                            for (String instanceUID : level1SourceLevel.getSource(source).getDestination(destination).getSeries(seriesUID).getInstances().keySet()) {
-                                newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
-                            }
-                            for (String instanceUID : level1SourceLevel.getSource(source).getSeriesNewInstances(seriesUID)) {
-                                newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
-                            }
-                        }
-
-                        //send in all enabled newSeries webhook in the destination
-
-                        for (Webhook webhook : album.getWebhooks()) {
-                            if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
-                                em.persist(webhookTrigger);
-                                new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
-                            }
-                        }
-                    }
-
-
-
-
-
-
-
-                    //gestion des albums non destination
-                    if (!level1SourceLevel.getSource(source).getSeriesNewInstances().isEmpty()) {
-                        for(Album albumDestination : albumsLst) {
-
-                            final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
-                            final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
-                                    .setDestination(albumDestination.getId())
-                                    .isUpload()
-                                    .setIsManualTrigger(false)
-                                    .setStudy(getStudy(studyUID, em), kheopsInstance)
-                                    .setSource(source)
-                                    .setKheopsInstance(kheopsInstance);
-
-                            for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level1SourceLevel.getSource(source).getSeriesNewInstances().entrySet()) {
-                                final String seriesUID = seriesUIDSetInstancesUID.getKey();
-                                final Set<String> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
-                                final Series series = getSeries(seriesUID, em);
-                                if (albumDestination.containsSeries(series, em)) {
-                                    seriesLstForWebhookTrigger.add(series);
-                                    newSeriesWebhookBuilder.addSeries(series);
-                                    for (String i : instancesUIDSet) {
-                                        newSeriesWebhookBuilder.addInstances(getInstances(i, em));
-                                    }
-                                }
-                            }
-                            if (!seriesLstForWebhookTrigger.isEmpty()) {
-                                for (Webhook webhook : albumDestination.getWebhooks()) {
-                                    if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                        final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                        seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
-                                        em.persist(webhookTrigger);
-                                        new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
-                                    }
-                                }
-                            }
-                        }
-                    }*/
-
-
-
-
-
-
-
-
-
-
-                    final List<Album> albumsLst = findAlbumLstForWebhook(studyUID, em);
-                    for (Album album : albumsLst) {
+                    for (Album album : findAlbumLstForWebhook(studyUID, em)) {
 
                         final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
@@ -281,7 +182,6 @@ public class FooHashMap {
                             }
                         }
                     }
-
                 }
             }
 

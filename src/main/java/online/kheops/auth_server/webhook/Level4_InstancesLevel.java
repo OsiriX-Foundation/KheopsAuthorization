@@ -32,7 +32,6 @@ public class Level4_InstancesLevel {
     public HashMap<String, Boolean> getInstances() { return instances; }
     public Set<String> getInstancesUIDLst() { return instances.keySet(); }
 
-    public boolean isNewInstances(String instanceUID) { return instances.get(instanceUID); }
 
     public boolean isNewSeries() { return isNewSeries; }
     public boolean isNewInDestination() { return isNewInDestination; }
