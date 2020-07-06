@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
-public class Level1 {
+public class Level1_SourceLevel {
     private ScheduledFuture scheduledFuture;
     private boolean isNewStudy;
-    private HashMap<Source, Level2> level2;
+    private HashMap<Source, Level2_DestinationLevel> level2;
 
-    public Level1(ScheduledFuture scheduledFuture, boolean isNewStudy) {
+    public Level1_SourceLevel(ScheduledFuture scheduledFuture, boolean isNewStudy) {
         level2 = new HashMap<>();
         this.scheduledFuture = scheduledFuture;
         this.isNewStudy = isNewStudy;
@@ -20,13 +20,16 @@ public class Level1 {
         if (level2.containsKey(source)) {
             level2.get(source).addDestination(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination);
         } else {
-            level2.put(source, new Level2(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination));
+            level2.put(source, new Level2_DestinationLevel(seriesUID, instancesUID, isNewSeries, isNewInstances, destination, isNewInDestination));
+        }
+        if (isNewStudy) {
+            this.isNewStudy = isNewStudy;
         }
     }
 
     public boolean isNewStudy() { return isNewStudy; }
-    public HashMap<Source, Level2> getSources() { return level2; }
-    public Level2 getSource(Source source) { return level2.get(source); }
+    public HashMap<Source, Level2_DestinationLevel> getSources() { return level2; }
+    public Level2_DestinationLevel getSource(Source source) { return level2.get(source); }
     public boolean cancelScheduledFuture() {
         return scheduledFuture.cancel(true);
     }
@@ -34,7 +37,7 @@ public class Level1 {
     @Override
     public String toString() {
                 String s = "\n\t{isNewStudy=" + isNewStudy + " ";
-        for(Map.Entry<Source, Level2> level2Entry:level2.entrySet()) {
+        for(Map.Entry<Source, Level2_DestinationLevel> level2Entry:level2.entrySet()) {
             s += "\n\tsource:"+level2Entry.getKey() +""+ level2Entry.getValue().toString();
         }
         return s += '}';

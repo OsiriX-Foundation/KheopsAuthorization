@@ -46,12 +46,12 @@
     <context-param>
         <description>Base URI for the pacs from which study and series metadata can be acquired</description>
         <param-name>online.kheops.pacs.uri</param-name>
-        <param-value>http://192.168.217.187:8080/dcm4chee-arc/aets/DCM4CHEE/rs</param-value>
+        <param-value>http://192.168.54.3:8080/dcm4chee-arc/aets/DCM4CHEE/rs</param-value>
     </context-param>
     <context-param>
         <description>URL for the connection to the PostgreSQL database</description>
         <param-name>online.kheops.jdbc.url</param-name>
-        <param-value>jdbc:postgresql://192.168.217.187/kheops</param-value>
+        <param-value>jdbc:postgresql://192.168.54.3/kheops</param-value>
     </context-param>
     <context-param>
         <description>User name for the PostgreSQL databse</description>

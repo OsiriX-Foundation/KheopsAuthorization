@@ -4,20 +4,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Level4 {
+public class Level4_InstancesLevel {
     private boolean isNewSeries;
     private boolean isNewInDestination;
     private HashMap<String, Boolean> instances;
 
-    public Level4(String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+    public Level4_InstancesLevel(String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
         this.isNewSeries = isNewSeries;
         this.isNewInDestination = isNewInDestination;
         this.instances = new HashMap<>();
         instances.put(instancesUID, isNewInstances);
     }
 
-    public void addInstances(String instancesUID, boolean isNewInstances)  {
-        instances.put(instancesUID, isNewInstances);
+    public void addInstances(String instancesUID, boolean isNewSeries, boolean isNewInstances)  {
+        if (instances.containsKey(instancesUID)) {
+            if (isNewInstances) {
+                instances.put(instancesUID, isNewInstances);
+            }
+        } else {
+            instances.put(instancesUID, isNewInstances);
+        }
+        if (isNewSeries) {
+            this.isNewSeries = isNewSeries;
+        }
     }
 
     public HashMap<String, Boolean> getInstances() { return instances; }
