@@ -1,52 +1,56 @@
 package online.kheops.auth_server.webhook;
 
+import online.kheops.auth_server.entity.Album;
+import online.kheops.auth_server.entity.Instances;
+import online.kheops.auth_server.entity.Series;
+
 import java.util.*;
 
 public class Level2_DestinationLevel {
     //             Destination
-    private HashMap<String, Level3_SeriesLevel> level3;
-    private HashMap<String, Set<String>> seriesNewInstances;
+    private HashMap<Album, Level3_SeriesLevel> level3;
+    private HashMap<Series, Set<Instances>> seriesNewInstances;
 
-    public Level2_DestinationLevel(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
+    public Level2_DestinationLevel(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Album destination, boolean isNewInDestination) {
         level3 = new HashMap<>();
         seriesNewInstances = new HashMap<>();
-        level3.put(destination, new Level3_SeriesLevel(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
+        level3.put(destination, new Level3_SeriesLevel(series, instances, isNewSeries, isNewInstances, isNewInDestination));
         if (isNewInstances) {
-            final Set<String> instanceSet = new HashSet<>();
-            instanceSet.add(instancesUID);
-            seriesNewInstances.put(seriesUID, instanceSet);
+            final Set<Instances> instanceSet = new HashSet<>();
+            instanceSet.add(instances);
+            seriesNewInstances.put(series, instanceSet);
         }
     }
 
-    public void addDestination(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, String destination, boolean isNewInDestination) {
+    public void addDestination(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Album destination, boolean isNewInDestination) {
         if (level3.containsKey(destination)) {
-            level3.get(destination).addSeries(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination);
+            level3.get(destination).addSeries(series, instances, isNewSeries, isNewInstances, isNewInDestination);
         } else {
-            level3.put(destination, new Level3_SeriesLevel(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination));
+            level3.put(destination, new Level3_SeriesLevel(series, instances, isNewSeries, isNewInstances, isNewInDestination));
         }
         if (isNewInstances) {
-            if (seriesNewInstances.containsKey(seriesUID)) {
-                seriesNewInstances.get(seriesUID).add(instancesUID);
+            if (seriesNewInstances.containsKey(series)) {
+                seriesNewInstances.get(series).add(instances);
             } else {
-                final Set<String> instanceSet = new HashSet<>();
-                instanceSet.add(instancesUID);
-                seriesNewInstances.put(seriesUID, instanceSet);
+                final Set<Instances> instanceSet = new HashSet<>();
+                instanceSet.add(instances);
+                seriesNewInstances.put(series, instanceSet);
             }
         }
     }
 
-    public Set<String> getSeriesNewInstances(String seriesUID) {
-        return seriesNewInstances.containsKey(seriesUID) ? seriesNewInstances.get(seriesUID) : new HashSet<>();
+    public Set<Instances> getSeriesNewInstances(Series series) {
+        return seriesNewInstances.containsKey(series) ? seriesNewInstances.get(series) : new HashSet<>();
     }
-    public HashMap<String, Set<String>> getSeriesNewInstances() { return seriesNewInstances; }
+    public HashMap<Series, Set<Instances>> getSeriesNewInstances() { return seriesNewInstances; }
 
-    public HashMap<String, Level3_SeriesLevel> getDestinations() { return level3; }
+    public HashMap<Album, Level3_SeriesLevel> getDestinations() { return level3; }
     public Level3_SeriesLevel getDestination(String destination) { return level3.get(destination); }
 
     @Override
     public String toString() {
         String s = "{";
-        for(Map.Entry<String, Level3_SeriesLevel> level3Entry:level3.entrySet()) {
+        for(Map.Entry<Album, Level3_SeriesLevel> level3Entry:level3.entrySet()) {
             s += "\n\t\tdestination:" + level3Entry.getKey() + level3Entry.getValue().toString();
         }
         return s + '}';

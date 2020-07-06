@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static online.kheops.auth_server.series.Series.safeAttributeSetString;
@@ -89,7 +90,7 @@ public class Series {
     @OneToMany(mappedBy = "series")
     private Set<AlbumSeries> albumsSeries = new HashSet<>();
 
-    @OneToMany(mappedBy = "series")
+    @OneToMany(mappedBy = "series", fetch = FetchType.EAGER)
     private Set<Instances> instances = new HashSet<>();
 
     public Series() {}
@@ -208,4 +209,20 @@ public class Series {
     public Set<Instances> getInstances() { return instances; }
 
     public void addInstances(Instances instance) { instances.add(instance); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Series series = (Series) o;
+        return pk == series.pk &&
+                seriesNumber == series.seriesNumber &&
+                seriesInstanceUID.equals(series.seriesInstanceUID) &&
+                Objects.equals(modality, series.modality);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, seriesInstanceUID, modality, seriesNumber);
+    }
 }

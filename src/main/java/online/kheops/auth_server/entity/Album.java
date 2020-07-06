@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -163,5 +164,19 @@ public class Album {
     @Override
     public String toString() {
         return "[Album_id:"+id+"]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Album album = (Album) o;
+        return pk == album.pk &&
+                id.equals(album.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, id);
     }
 }

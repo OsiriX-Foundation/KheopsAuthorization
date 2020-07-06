@@ -1,34 +1,37 @@
 package online.kheops.auth_server.webhook;
 
+import online.kheops.auth_server.entity.Instances;
+import online.kheops.auth_server.entity.Series;
+
 import java.util.*;
 
 public class Level3_SeriesLevel {
     //              SeriesUID
-    private HashMap<String, Level4_InstancesLevel> series;
+    private HashMap<Series, Level4_InstancesLevel> series;
 
-    public Level3_SeriesLevel(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+    public Level3_SeriesLevel(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
         this.series = new HashMap<>();
-        addSeries(seriesUID, instancesUID, isNewSeries, isNewInstances, isNewInDestination);
+        addSeries(series, instances, isNewSeries, isNewInstances, isNewInDestination);
     }
 
 
-    public void addSeries(String seriesUID, String instancesUID, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
-        if (series != null) {
-            if (series.containsKey(seriesUID)) {
-                series.get(seriesUID).addInstances(instancesUID, isNewSeries, isNewInstances);
+    public void addSeries(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
+        if (this.series != null) {
+            if (this.series.containsKey(series)) {
+                this.series.get(series).addInstances(instances, isNewSeries, isNewInstances);
             } else {
-                series.put(seriesUID, new Level4_InstancesLevel(instancesUID, isNewSeries, isNewInstances, isNewInDestination));
+                this.series.put(series, new Level4_InstancesLevel(instances, isNewSeries, isNewInstances, isNewInDestination));
             }
         }
     }
 
-    public HashMap<String, Level4_InstancesLevel> getSeries() { return series; }
+    public HashMap<Series, Level4_InstancesLevel> getSeries() { return series; }
     public Level4_InstancesLevel getSeries(String series) { return this.series.get(series); }
 
     @Override
     public String toString() {
         String s = "\n\t\t\t{";
-        for(Map.Entry<String, Level4_InstancesLevel> stringSetEntry:series.entrySet()) {
+        for(Map.Entry<Series, Level4_InstancesLevel> stringSetEntry:series.entrySet()) {
             s += "{series:" +stringSetEntry.getKey() +
                     stringSetEntry.getValue()+ "}";
         }

@@ -1,10 +1,7 @@
 package online.kheops.auth_server.webhook;
 
 import online.kheops.auth_server.EntityManagerListener;
-import online.kheops.auth_server.entity.Album;
-import online.kheops.auth_server.entity.Series;
-import online.kheops.auth_server.entity.Webhook;
-import online.kheops.auth_server.entity.WebhookTrigger;
+import online.kheops.auth_server.entity.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -48,25 +45,25 @@ public class FooHashMap {
         this.kheopsInstance = kheopsInstance;
     }
 
-    public void addHashMapData(String studyUID, String seriesUID, String instancesUID, String destination, boolean isNewStudy, boolean isNewSeries, boolean isNewInstance, Source source, boolean isNewInDestination) {
-        SCHEDULER.schedule(() -> addData(studyUID, seriesUID, instancesUID, isNewStudy, isNewSeries, isNewInstance, destination, source, isNewInDestination), 0, TimeUnit.SECONDS);
+    public void addHashMapData(Study study, Series series, Instances instances, Album destination, boolean isNewStudy, boolean isNewSeries, boolean isNewInstance, Source source, boolean isNewInDestination) {
+        SCHEDULER.schedule(() -> addData(study, series, instances, isNewStudy, isNewSeries, isNewInstance, destination, source, isNewInDestination), 0, TimeUnit.SECONDS);
     }
 
 
-    private void addData(String studyUID, String seriesUID, String instancesUID, boolean isNewStudy, boolean isNewSeries, boolean isNewInstances, String destination, Source source, boolean isNewInDestination) {
-        if (level0StudyLevel.containsStudy(studyUID)) {
-            level0StudyLevel.get(studyUID).cancelScheduledFuture();
+    private void addData(Study study, Series series, Instances instances, boolean isNewStudy, boolean isNewSeries, boolean isNewInstances, Album destination, Source source, boolean isNewInDestination) {
+        if (level0StudyLevel.containsStudy(study)) {
+            level0StudyLevel.get(study).cancelScheduledFuture();
         }
-        level0StudyLevel.put(SCHEDULER.schedule(() -> callWebhook(studyUID), TIME_TO_LIVE, TimeUnit.SECONDS), studyUID, seriesUID, instancesUID, isNewStudy, isNewSeries, isNewInstances, source, destination, isNewInDestination);
+        level0StudyLevel.put(SCHEDULER.schedule(() -> callWebhook(study), TIME_TO_LIVE, TimeUnit.SECONDS), study, series, instances, isNewStudy, isNewSeries, isNewInstances, source, destination, isNewInDestination);
     }
 
 
-    private void callWebhook(String studyUID) {
+    private void callWebhook(Study study) {
         String log = "callWebhook:";
-        log += level0StudyLevel.toString(studyUID);
+        log += level0StudyLevel.toString(study);
         LOG.info(log);
 
-        final Level1_SourceLevel level1SourceLevel = level0StudyLevel.get(studyUID);
+        final Level1_SourceLevel level1SourceLevel = level0StudyLevel.get(study);
 
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
@@ -74,38 +71,38 @@ public class FooHashMap {
         try {
             tx.begin();
 
+            study = em.merge(study);
+
             for (Map.Entry<Source, Level2_DestinationLevel> entry : level1SourceLevel.getSources().entrySet()) {
                 final Source source = entry.getKey();
                 final Level2_DestinationLevel level2DestinationLevel = entry.getValue();
 
                 if (level1SourceLevel.isNewStudy()) {
-                    for (Map.Entry<String, Level3_SeriesLevel> entry1 : level2DestinationLevel.getDestinations().entrySet()) {
-                        final String albumDestinationId = entry1.getKey();
+                    for (Map.Entry<Album, Level3_SeriesLevel> entry1 : level2DestinationLevel.getDestinations().entrySet()) {
+                        final Album album = em.merge(entry1.getKey());
                         final Level3_SeriesLevel level3SeriesLevel = entry1.getValue();
 
-                        final Album album = getAlbum(albumDestinationId, em);
                         if (!album.getWebhooks().isEmpty()) {
                             //if destination contain webhooks
 
                             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
-                                    .setDestination(albumDestinationId)
+                                    .setDestination(album.getId())
                                     .isUpload()
                                     .setIsManualTrigger(false)
-                                    .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                    .setStudy(study, kheopsInstance)
                                     .setSource(source)
                                     .setKheopsInstance(kheopsInstance);
 
-                            for (Map.Entry<String, Level4_InstancesLevel> entry2 : level3SeriesLevel.getSeries().entrySet()) {
-                                final String seriesUID = entry2.getKey();
+                            for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level3SeriesLevel.getSeries().entrySet()) {
+                                final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
 
-                                final Series series = getSeries(seriesUID, em);
                                 newSeriesWebhookBuilder.addSeries(series);
-                                for (String instanceUID : level4InstancesLevel.getInstancesUIDLst()) {
-                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                for (Instances instance : level4InstancesLevel.getInstancesUIDLst()) {
+                                    newSeriesWebhookBuilder.addInstances(instance);
                                 }
-                                for (String instanceUID : level2DestinationLevel.getSeriesNewInstances(seriesUID)) {
-                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                for (Instances instance : level2DestinationLevel.getSeriesNewInstances(series)) {
+                                    newSeriesWebhookBuilder.addInstances(instance);
                                 }
                             }
 
@@ -120,41 +117,39 @@ public class FooHashMap {
                         }
                     }
                 } else {
-                    for (Album album : findAlbumsWithEnabledNewSeriesWebhooks(studyUID, em)) {
+                    for (Album album : findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em)) {
 
                         final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                 .setDestination(album.getId())
                                 .isUpload()
                                 .setIsManualTrigger(false)
-                                .setStudy(getStudy(studyUID, em), kheopsInstance)
+                                .setStudy(study, kheopsInstance)
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
 
                         if (level2DestinationLevel.getDestinations().containsKey(album.getId())) {
-                            for (Map.Entry<String, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album.getId()).getSeries().entrySet()) {
-                                final String seriesUID = entry2.getKey();
+                            for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album.getId()).getSeries().entrySet()) {
+                                final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
-                                final Series series = getSeries(seriesUID, em);
                                 seriesLstForWebhookTrigger.add(series);
                                 newSeriesWebhookBuilder.addSeries(series);
-                                for (String instanceUID : level4InstancesLevel.getInstances().keySet()) {
-                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                for (Instances instance : level4InstancesLevel.getInstances().keySet()) {
+                                    newSeriesWebhookBuilder.addInstances(instance);
                                 }
-                                for (String instanceUID : level2DestinationLevel.getSeriesNewInstances(seriesUID)) {
-                                    newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
+                                for (Instances instance : level2DestinationLevel.getSeriesNewInstances(series)) {
+                                    newSeriesWebhookBuilder.addInstances(instance);
                                 }
                             }
                         } else {
-                            for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level2DestinationLevel.getSeriesNewInstances().entrySet()) {
-                                final String seriesUID = seriesUIDSetInstancesUID.getKey();
-                                final Set<String> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
-                                final Series series = getSeries(seriesUID, em);
+                            for (Map.Entry<Series, Set<Instances>> seriesUIDSetInstancesUID : level2DestinationLevel.getSeriesNewInstances().entrySet()) {
+                                final Series series = em.merge(seriesUIDSetInstancesUID.getKey());
+                                final Set<Instances> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
                                 if (album.containsSeries(series, em)) {
                                     seriesLstForWebhookTrigger.add(series);
                                     newSeriesWebhookBuilder.addSeries(series);
-                                    for (String i : instancesUIDSet) {
-                                        newSeriesWebhookBuilder.addInstances(getInstances(i, em));
+                                    for (Instances i : instancesUIDSet) {
+                                        newSeriesWebhookBuilder.addInstances(i);
                                     }
                                 }
                             }
@@ -185,7 +180,7 @@ public class FooHashMap {
             em.close();
         }
 
-        level0StudyLevel.remove(studyUID);
+        level0StudyLevel.remove(study);
     }
 
 }

@@ -6,6 +6,7 @@ import online.kheops.auth_server.album.AlbumNotFoundException;
 import online.kheops.auth_server.annotation.Secured;
 import online.kheops.auth_server.annotation.UIDValidator;
 import online.kheops.auth_server.entity.*;
+import online.kheops.auth_server.instances.InstancesNotFoundException;
 import online.kheops.auth_server.principal.KheopsPrincipal;
 import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.study.StudyNotFoundException;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
+import static online.kheops.auth_server.instances.Instances.getInstances;
 import static online.kheops.auth_server.instances.Instances.instancesExist;
 import static online.kheops.auth_server.report_provider.ReportProviderQueries.getReportProviderWithClientId;
 import static online.kheops.auth_server.series.Series.getSeries;
@@ -139,7 +141,12 @@ public class STOWResource {
                 study = getStudy(studyInstanceUID, em);
                 if (compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID) &&
                         compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-
+                    try {
+                        instances = getInstances(instancesUID, em);
+                    } catch (InstancesNotFoundException e) {
+                        //error
+                        return Response.status(BAD_REQUEST).build();
+                    }
                 } else {
                     //error
                     return Response.status(BAD_REQUEST).build();
@@ -209,11 +216,13 @@ public class STOWResource {
 
             //add series in destination if not present
             final Album destination;
+            Album destinationHashMap = null;
             if (albumId == null) {
                 destination = kheopsPrincipal.getUser().getInbox();
             } else {
                 destination = getAlbum(albumId, em);
                 destinationId = destination.getId();
+                destinationHashMap = destination;
             }
             try {
                 getAlbumSeries(destination, series, em);
@@ -229,7 +238,7 @@ public class STOWResource {
             source.setUser(kheopsPrincipal.getUser());
             kheopsPrincipal.getCapability().ifPresent(capability -> source.setCapabilityToken(capability));
             kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-            FooHashMap.getInstance().addHashMapData(studyInstanceUID, seriesInstanceUID, instancesUID, destinationId, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
+            FooHashMap.getInstance().addHashMapData(study, series, instances, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
             FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
         } finally {
             if (tx.isActive()) {

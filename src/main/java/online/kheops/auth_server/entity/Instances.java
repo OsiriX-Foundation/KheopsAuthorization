@@ -3,6 +3,7 @@ package online.kheops.auth_server.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
 
 @NamedQueries({
         @NamedQuery(name = "Instances.findByInstancesUID",
@@ -47,4 +48,18 @@ public class Instances {
     public LocalDateTime getCreatedTime() { return createdTime; }
     public String getInstanceUID() { return instanceUID; }
     public Series getSeries() { return series; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Instances instances = (Instances) o;
+        return pk == instances.pk &&
+                instanceUID.equals(instances.instanceUID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, instanceUID);
+    }
 }

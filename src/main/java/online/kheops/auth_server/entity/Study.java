@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static online.kheops.auth_server.study.Studies.safeAttributeSetString;
@@ -250,6 +251,22 @@ public class Study {
     public void setEvents(Set<Event> events) { this.events = events; }
 
     public void addEvents(Event event) { this.events.add(event); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Study study = (Study) o;
+        return pk == study.pk &&
+                studyInstanceUID.equals(study.studyInstanceUID) &&
+                Objects.equals(accessionNumber, study.accessionNumber) &&
+                Objects.equals(patientID, study.patientID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, studyInstanceUID, accessionNumber, patientID);
+    }
 }
 
 
