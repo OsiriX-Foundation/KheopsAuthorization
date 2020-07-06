@@ -45,7 +45,7 @@ public class Level2_DestinationLevel {
     public HashMap<Series, Set<Instances>> getSeriesNewInstances() { return seriesNewInstances; }
 
     public HashMap<Album, Level3_SeriesLevel> getDestinations() { return level3; }
-    public Level3_SeriesLevel getDestination(String destination) { return level3.get(destination); }
+    public Level3_SeriesLevel getDestination(Album destination) { return level3.get(destination); }
 
     @Override
     public String toString() {

@@ -117,7 +117,8 @@ public class FooHashMap {
                         }
                     }
                 } else {
-                    for (Album album : findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em)) {
+                    List<Album> albumLst = findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em);
+                    for (Album album : albumLst) {
 
                         final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
@@ -128,8 +129,8 @@ public class FooHashMap {
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
 
-                        if (level2DestinationLevel.getDestinations().containsKey(album.getId())) {
-                            for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album.getId()).getSeries().entrySet()) {
+                        if (level2DestinationLevel.getDestinations().containsKey(album)) {
+                            for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album).getSeries().entrySet()) {
                                 final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
                                 seriesLstForWebhookTrigger.add(series);
