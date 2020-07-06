@@ -131,7 +131,9 @@ public class FooHashMap {
 
             } else {
                 //pas une nouvelle study mais des series (nouvelle + ancienne)
-                for (Source source : level1SourceLevel.getSources().keySet()) {
+                for (Map.Entry<Source, Level2_DestinationLevel> entry : level1SourceLevel.getSources().entrySet()) {
+                    final Source source = entry.getKey();
+                    final Level2_DestinationLevel level2DestinationLevel = entry.getValue();
 
                     for (Album album : findAlbumLstForWebhook(studyUID, em)) {
 
@@ -144,20 +146,22 @@ public class FooHashMap {
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
 
-                        if (level1SourceLevel.getSource(source).getDestinations().containsKey(album.getId())) {
-                            for (String seriesUID : level1SourceLevel.getSource(source).getDestination(album.getId()).getSeries().keySet()) {
+                        if (level2DestinationLevel.getDestinations().containsKey(album.getId())) {
+                            for (Map.Entry<String, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album.getId()).getSeries().entrySet()) {
+                                final String seriesUID = entry2.getKey();
+                                final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
                                 final Series series = getSeries(seriesUID, em);
                                 seriesLstForWebhookTrigger.add(series);
                                 newSeriesWebhookBuilder.addSeries(series);
-                                for (String instanceUID : level1SourceLevel.getSource(source).getDestination(album.getId()).getSeries(seriesUID).getInstances().keySet()) {
+                                for (String instanceUID : level4InstancesLevel.getInstances().keySet()) {
                                     newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
                                 }
-                                for (String instanceUID : level1SourceLevel.getSource(source).getSeriesNewInstances(seriesUID)) {
+                                for (String instanceUID : level2DestinationLevel.getSeriesNewInstances(seriesUID)) {
                                     newSeriesWebhookBuilder.addInstances(getInstances(instanceUID, em));
                                 }
                             }
                         } else {
-                            for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level1SourceLevel.getSource(source).getSeriesNewInstances().entrySet()) {
+                            for (Map.Entry<String, Set<String>> seriesUIDSetInstancesUID : level2DestinationLevel.getSeriesNewInstances().entrySet()) {
                                 final String seriesUID = seriesUIDSetInstancesUID.getKey();
                                 final Set<String> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
                                 final Series series = getSeries(seriesUID, em);
