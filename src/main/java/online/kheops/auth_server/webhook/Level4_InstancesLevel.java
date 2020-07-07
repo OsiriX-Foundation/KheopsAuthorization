@@ -31,7 +31,7 @@ public class Level4_InstancesLevel {
         }
     }
 
-    public HashMap<Instances, Boolean> getInstances() { return instances; }
+    public Map<Instances, Boolean> getInstances() { return instances; }
     public Set<Instances> getInstancesUIDLst() { return instances.keySet(); }
 
 

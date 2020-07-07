@@ -32,7 +32,7 @@ public class Level1_SourceLevel {
     }
 
     public boolean isNewStudy() { return isNewStudy; }
-    public HashMap<Source, Level2_DestinationLevel> getSources() { return level2; }
+    public Map<Source, Level2_DestinationLevel> getSources() { return level2; }
     public Level2_DestinationLevel getSource(Source source) { return level2.get(source); }
     public boolean cancelScheduledFuture() {
         return scheduledFuture.cancel(true);

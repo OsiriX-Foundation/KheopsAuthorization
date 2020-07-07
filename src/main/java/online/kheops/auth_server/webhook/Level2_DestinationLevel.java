@@ -42,9 +42,9 @@ public class Level2_DestinationLevel {
     public Set<Instances> getSeriesNewInstances(Series series) {
         return seriesNewInstances.containsKey(series) ? seriesNewInstances.get(series) : new HashSet<>();
     }
-    public HashMap<Series, Set<Instances>> getSeriesNewInstances() { return seriesNewInstances; }
+    public Map<Series, Set<Instances>> getSeriesNewInstances() { return seriesNewInstances; }
 
-    public HashMap<Album, Level3_SeriesLevel> getDestinations() { return level3; }
+    public Map<Album, Level3_SeriesLevel> getDestinations() { return level3; }
     public Level3_SeriesLevel getDestination(Album destination) { return level3.get(destination); }
 
     @Override
