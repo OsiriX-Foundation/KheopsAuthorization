@@ -183,9 +183,7 @@ public class NewSeriesWebhook implements WebhookResult{
         public Map<Series, Set<Instances>> getSeriesInstancesHashMap() { return seriesInstancesHashMap; }
 
         public NewSeriesWebhook build() {
-            for(Series s:seriesInstancesHashMap.keySet()) {
-                updatedStudy.addSeriesWithInstances(s, seriesInstancesHashMap.get(s));
-            }
+            seriesInstancesHashMap.forEach(updatedStudy::addSeriesWithInstances);
             return new NewSeriesWebhook(this);
         }
 
