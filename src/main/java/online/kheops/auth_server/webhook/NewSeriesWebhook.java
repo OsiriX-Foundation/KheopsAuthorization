@@ -2,7 +2,6 @@ package online.kheops.auth_server.webhook;
 
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.report_provider.ReportProviderResponse;
-import online.kheops.auth_server.series.SeriesResponse;
 import online.kheops.auth_server.study.StudyResponse;
 import online.kheops.auth_server.user.UserResponse;
 

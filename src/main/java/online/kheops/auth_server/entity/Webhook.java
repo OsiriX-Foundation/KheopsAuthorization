@@ -124,7 +124,7 @@ public class Webhook {
 
     public boolean isNewUser() { return newUser; }
 
-    public Boolean isEnabled() { return enabled; }
+    public boolean isEnabled() { return enabled; }
 
     public Album getAlbum() {
         return album;

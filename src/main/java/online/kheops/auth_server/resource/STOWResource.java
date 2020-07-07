@@ -119,7 +119,6 @@ public class STOWResource {
                //oui => gestion de mutation / webhook ==> return already exist
 
 
-        String destinationId = null;
         boolean isNewStudy = false;
         boolean isNewSeries = false;
         boolean isNewInstance = false;
@@ -221,7 +220,6 @@ public class STOWResource {
                 destination = kheopsPrincipal.getUser().getInbox();
             } else {
                 destination = getAlbum(albumId, em);
-                destinationId = destination.getId();
                 destinationHashMap = destination;
             }
             try {
@@ -236,7 +234,7 @@ public class STOWResource {
 
             //Webhook
             source.setUser(kheopsPrincipal.getUser());
-            kheopsPrincipal.getCapability().ifPresent(capability -> source.setCapabilityToken(capability));
+            kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
             kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
             FooHashMap.getInstance().addHashMapData(study, series, instances, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
             FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));

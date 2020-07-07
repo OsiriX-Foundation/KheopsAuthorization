@@ -9,25 +9,22 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 public class Level1_SourceLevel {
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture<?> scheduledFuture;
     private boolean isNewStudy;
     private HashMap<Source, Level2_DestinationLevel> level2;
 
-    public Level1_SourceLevel(ScheduledFuture scheduledFuture, boolean isNewStudy) {
+    public Level1_SourceLevel(ScheduledFuture<?> scheduledFuture, boolean isNewStudy) {
         level2 = new HashMap<>();
         this.scheduledFuture = scheduledFuture;
         this.isNewStudy = isNewStudy;
     }
 
-    public void addSeries(ScheduledFuture scheduledFuture, Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Source source, Album destination, boolean isNewInDestination) {
+    public void addSeries(ScheduledFuture<?> scheduledFuture, Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Source source, Album destination, boolean isNewInDestination) {
         this.scheduledFuture = scheduledFuture;
         if (level2.containsKey(source)) {
             level2.get(source).addDestination(series, instances, isNewSeries, isNewInstances, destination, isNewInDestination);
         } else {
             level2.put(source, new Level2_DestinationLevel(series, instances, isNewSeries, isNewInstances, destination, isNewInDestination));
-        }
-        if (isNewStudy) {
-            this.isNewStudy = isNewStudy;
         }
     }
 
