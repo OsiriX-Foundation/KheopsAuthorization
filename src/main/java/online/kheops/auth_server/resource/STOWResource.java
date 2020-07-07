@@ -12,6 +12,7 @@ import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.AlbumUserPermissions;
 import online.kheops.auth_server.util.ErrorResponse;
+import online.kheops.auth_server.util.KheopsLogBuilder;
 import online.kheops.auth_server.webhook.FooHashMap;
 import online.kheops.auth_server.webhook.Source;
 
@@ -54,6 +55,7 @@ public class STOWResource {
     @Secured
     @Path("stow")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getStudies(
             @FormParam(ALBUM) String albumId,
 
@@ -70,14 +72,14 @@ public class STOWResource {
             @FormParam("patientSex") String patientSex,
             @FormParam("studyId") String studyId,
 
-            @FormParam(SeriesInstanceUID) @UIDValidator String seriesInstanceUID,
+            @FormParam("seriesInstanceUID") @UIDValidator String seriesInstanceUID,
             @FormParam("modality") String modality,
             @FormParam("seriesDescription") String seriesDescription,
             @FormParam("seriesNumber") int seriesNumber,
             @FormParam("bodyPartExamined") String bodyPartExamined,
 
             @FormParam("instancesUID") @UIDValidator String instancesUID)
-            throws SeriesNotFoundException, StudyNotFoundException, AlbumNotFoundException {
+            throws StudyNotFoundException, SeriesNotFoundException, InstancesNotFoundException, AlbumNotFoundException {
 
         KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
 
@@ -122,7 +124,6 @@ public class STOWResource {
         boolean isNewStudy = false;
         boolean isNewSeries = false;
         boolean isNewInstance = false;
-        Source source = new Source();
         boolean isNewInDestination = false;
 
         final EntityManager em = EntityManagerListener.createEntityManager();
@@ -140,15 +141,13 @@ public class STOWResource {
                 study = getStudy(studyInstanceUID, em);
                 if (compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID) &&
                         compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    try {
-                        instances = getInstances(instancesUID, em);
-                    } catch (InstancesNotFoundException e) {
-                        //error
-                        return Response.status(BAD_REQUEST).build();
-                    }
+                    instances = getInstances(instancesUID, em);
                 } else {
-                    //error
-                    return Response.status(BAD_REQUEST).build();
+                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
+                            .message("Bad Request")
+                            .detail("The study metadata or the series metadata is differente from Kheops")
+                            .build();
+                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
                 }
             } else if (seriesExist(studyInstanceUID, seriesInstanceUID, em)) {
                 //obtenir et comparer (study series)
@@ -161,8 +160,11 @@ public class STOWResource {
                     isNewInstance = true;
                     em.persist(instances);
                 } else {
-                    //error
-                    return Response.status(BAD_REQUEST).build();
+                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
+                            .message("Bad Request")
+                            .detail("The study metadata or the series metadata is differente from Kheops")
+                            .build();
+                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
                 }
             } else if (studyExist(studyInstanceUID, em)) {
                 //obtenir et comparer (study)
@@ -182,8 +184,11 @@ public class STOWResource {
                     em.persist(series);
                     em.persist(instances);
                 } else {
-                    //error
-                    return Response.status(BAD_REQUEST).build();
+                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
+                            .message("Bad Request")
+                            .detail("The study metadata or the series metadata is differente from Kheops")
+                            .build();
+                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
                 }
             } else {
                 study = new Study(studyInstanceUID);
@@ -233,7 +238,7 @@ public class STOWResource {
             tx.commit();
 
             //Webhook
-            source.setUser(kheopsPrincipal.getUser());
+            final Source source = new Source(kheopsPrincipal.getUser());
             kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
             kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
             FooHashMap.getInstance().addHashMapData(study, series, instances, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
@@ -245,36 +250,43 @@ public class STOWResource {
             em.close();
         }
 
-        //LOG
+       KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
+                .action(KheopsLogBuilder.ActionType.STOW)
+                .study(studyId)
+                .series(seriesInstanceUID)
+                .instances(instancesUID);
+       if(albumId != null) {
+           kheopsLogBuilder.album(albumId);
+       }
+       kheopsLogBuilder.log();
 
-
-        return Response.ok().build();
+       return Response.ok().build();
     }
 
     private static boolean compareSeries(Series series, String modality, String seriesDescription, int seriesNumber,
                                          String bodyPartExamined, String timzoneOffsetFromUtc, String studyInstanceUID) {
-        return series.getModality().compareTo(modality) == 0 &&
-                series.getSeriesDescription().compareTo(seriesDescription) == 0 &&
+        return (series.getModality() == null ? modality == null : series.getModality().equals(modality)) &&
+                (series.getSeriesDescription() == null ? seriesDescription == null : series.getSeriesDescription().equals(seriesDescription)) &&
                 series.getSeriesNumber() == seriesNumber &&
-                series.getBodyPartExamined().compareTo(bodyPartExamined) == 0 &&
-                series.getTimezoneOffsetFromUTC().compareTo(timzoneOffsetFromUtc) == 0 &&
-                series.getStudy().getStudyInstanceUID().compareTo(studyInstanceUID) == 0;
+                (series.getBodyPartExamined() == null ? bodyPartExamined == null : series.getBodyPartExamined().equals(bodyPartExamined)) &&
+                (series.getTimezoneOffsetFromUTC() == null ? timzoneOffsetFromUtc == null : series.getTimezoneOffsetFromUTC().equals(timzoneOffsetFromUtc)) &&
+                (series.getStudy().getStudyInstanceUID() == null ? studyInstanceUID == null : series.getStudy().getStudyInstanceUID().equals(studyInstanceUID));
     }
 
     private static boolean compareStudy(Study study, String studyDate, String studyTime, String studyDescription,
                                         String timzoneOffsetFromUtc, String accessionNumber,
                                         String referringPhysicianName, String patientName, String patientId,
                                         String patientBirthDate, String patientSex, String studyId) {
-        return study.getStudyDate().compareTo(studyDate) == 0 &&
-                study.getStudyTime().compareTo(studyTime) == 0 &&
-                study.getStudyDescription().compareTo(studyDescription) == 0 &&
-                study.getTimezoneOffsetFromUTC().compareTo(timzoneOffsetFromUtc) == 0 &&
-                study.getAccessionNumber().compareTo(accessionNumber) == 0 &&
-                study.getReferringPhysicianName().compareTo(referringPhysicianName) == 0 &&
-                study.getPatientName().compareTo(patientName) == 0 &&
-                study.getPatientID().compareTo(patientId) == 0 &&
-                study.getPatientBirthDate().compareTo(patientBirthDate) == 0 &&
-                study.getPatientSex().compareTo(patientSex) == 0 &&
-                study.getStudyID().compareTo(studyId) == 0;
+        return (study.getStudyDate() == null ? studyDate == null : study.getStudyDate().equals(studyDate)) &&
+                (study.getStudyTime() == null ? studyTime == null : study.getStudyTime().equals(studyTime)) &&
+                (study.getStudyDescription() == null ? studyDescription == null : study.getStudyDescription().equals(studyDescription)) &&
+                (study.getTimezoneOffsetFromUTC() == null ? timzoneOffsetFromUtc == null : study.getTimezoneOffsetFromUTC().equals(timzoneOffsetFromUtc)) &&
+                (study.getAccessionNumber() == null ? accessionNumber == null : study.getAccessionNumber().equals(accessionNumber)) &&
+                (study.getReferringPhysicianName() == null ? referringPhysicianName == null : study.getReferringPhysicianName().equals(referringPhysicianName)) &&
+                (study.getPatientName() == null ? patientName == null : study.getPatientName().equals(patientName)) &&
+                (study.getPatientID() == null ? patientId == null : study.getPatientID().equals(patientId)) &&
+                (study.getPatientBirthDate() == null ? patientBirthDate == null : study.getPatientBirthDate().equals(patientBirthDate)) &&
+                (study.getPatientSex() == null ? patientSex == null : study.getPatientSex().equals(patientSex)) &&
+                (study.getStudyID() == null ? studyId == null : study.getStudyID().equals(studyId));
     }
 }

@@ -16,7 +16,7 @@ public class KheopsLogBuilder {
         ADD_FAVORITE_SERIES, ADD_FAVORITE_STUDY, REMOVE_FAVORITE_SERIES, REMOVE_FAVORITE_STUDY,
         QIDO_STUDIES, QIDO_SERIES, QIDO_STUDY_METADATA,
         POST_COMMENT, LIST_EVENTS,
-        FETCH, TEST_USER, USER_INFO, USERS_LIST,
+        FETCH, STOW, TEST_USER, USER_INFO, USERS_LIST,
         NEW_REPORT_PROVIDER, NEW_REPORT, REPORT_PROVIDER_CONFIGURATION, LIST_REPORT_PROVIDERS, GET_REPORT_PROVIDER, DELETE_REPORT_PROVIDER, EDIT_REPORT_PROVIDER, REPORT_PROVIDER_METADATA,
         NEW_TOKEN, INTROSPECT_TOKEN,
         REFRESH_TOKEN_GRANT, AUTHORIZATION_CODE_GRANT, PASSWORD_GRANT, CLIENT_CREDENTIALS_GRANT, JWT_ASSERTION_GRANT, SAML_ASSERTION_GRANT, TOKEN_EXCHANGE_GRANT,
@@ -118,6 +118,10 @@ public class KheopsLogBuilder {
     }
     public KheopsLogBuilder series(String seriesUID) {
         logEntry.add(new LogEntry("seriesUID", seriesUID));
+        return this;
+    }
+    public KheopsLogBuilder instances(String instancesUID) {
+        logEntry.add(new LogEntry("instancesUID", instancesUID));
         return this;
     }
 

@@ -10,9 +10,11 @@ import java.util.Optional;
 public class Source {
     private Optional<ReportProvider> reportProvider = Optional.empty();
     private Optional<Capability> capabilityToken = Optional.empty();
-    private Optional<User> user = Optional.empty();
+    private User user;
 
-    public Source() { /*empty*/ }
+    public Source(User user) {
+        this.user = user;
+    }
 
     public void setReportProviderClientId(ReportProvider reportProvider) {
         this.reportProvider = Optional.of(reportProvider);
@@ -20,10 +22,6 @@ public class Source {
 
     public void setCapabilityToken(Capability capabilityToken) {
         this.capabilityToken = Optional.of(capabilityToken);
-    }
-
-    public void setUser(User user) {
-        this.user = Optional.of(user);
     }
 
     public Optional<ReportProvider> getReportProvider() {
@@ -34,7 +32,7 @@ public class Source {
         return capabilityToken;
     }
 
-    public Optional<User> getUser() {
+    public User getUser() {
         return user;
     }
 
@@ -62,9 +60,7 @@ public class Source {
         if (capabilityToken.isPresent()) {
             s += capabilityToken.get().toString();
         }
-        if (user.isPresent()) {
-            s += user.get().toString();
-        }
+        s += user.toString();
 
         return s;
     }

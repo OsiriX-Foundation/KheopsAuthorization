@@ -82,7 +82,7 @@ public class NewSeriesWebhook implements WebhookResult{
             if (source == null) {
                 throw new IllegalStateException("source is null");
             }
-            sourceUser = new UserResponse(source.getUser().get());
+            sourceUser = new UserResponse(source.getUser());
             source.getCapabilityTokenId().ifPresent(capability -> sourceUser.setCapabilityToken(capability));
             source.getReportProvider().ifPresent(reportProvider -> sourceUser.setReportProvider(reportProvider, WEBHOOK));
             return this;
