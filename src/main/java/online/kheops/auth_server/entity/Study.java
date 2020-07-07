@@ -267,6 +267,9 @@ public class Study {
     public int hashCode() {
         return Objects.hash(pk, studyInstanceUID, accessionNumber, patientID);
     }
+
+    @Override
+    public String toString() { return studyInstanceUID; }
 }
 
 

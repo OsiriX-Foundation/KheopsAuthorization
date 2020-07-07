@@ -225,4 +225,7 @@ public class Series {
     public int hashCode() {
         return Objects.hash(pk, seriesInstanceUID, modality, seriesNumber);
     }
+
+    @Override
+    public String toString() { return seriesInstanceUID; }
 }

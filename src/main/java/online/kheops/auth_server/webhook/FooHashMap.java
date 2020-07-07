@@ -12,10 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static online.kheops.auth_server.album.AlbumQueries.findAlbumsWithEnabledNewSeriesWebhooks;
-import static online.kheops.auth_server.album.Albums.getAlbum;
-import static online.kheops.auth_server.instances.Instances.getInstances;
-import static online.kheops.auth_server.series.Series.getSeries;
-import static online.kheops.auth_server.study.Studies.getStudy;
 
 public class FooHashMap {
 
@@ -96,14 +92,9 @@ public class FooHashMap {
                             for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level3SeriesLevel.getSeries().entrySet()) {
                                 final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
-
                                 newSeriesWebhookBuilder.addSeries(series);
-                                for (Instances instance : level4InstancesLevel.getInstancesUIDLst()) {
-                                    newSeriesWebhookBuilder.addInstances(instance);
-                                }
-                                for (Instances instance : level2DestinationLevel.getSeriesNewInstances(series)) {
-                                    newSeriesWebhookBuilder.addInstances(instance);
-                                }
+                                level4InstancesLevel.getInstancesUIDLst().forEach(newSeriesWebhookBuilder::addInstances);
+                                level2DestinationLevel.getSeriesNewInstances(series).forEach(newSeriesWebhookBuilder::addInstances);
                             }
 
                             for (Webhook webhook : album.getWebhooks()) {
@@ -135,23 +126,16 @@ public class FooHashMap {
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
                                 seriesLstForWebhookTrigger.add(series);
                                 newSeriesWebhookBuilder.addSeries(series);
-                                for (Instances instance : level4InstancesLevel.getInstances().keySet()) {
-                                    newSeriesWebhookBuilder.addInstances(instance);
-                                }
-                                for (Instances instance : level2DestinationLevel.getSeriesNewInstances(series)) {
-                                    newSeriesWebhookBuilder.addInstances(instance);
-                                }
+                                level4InstancesLevel.getInstancesUIDLst().forEach(newSeriesWebhookBuilder::addInstances);
+                                level2DestinationLevel.getSeriesNewInstances(series).forEach(newSeriesWebhookBuilder::addInstances);
                             }
                         } else {
                             for (Map.Entry<Series, Set<Instances>> seriesUIDSetInstancesUID : level2DestinationLevel.getSeriesNewInstances().entrySet()) {
                                 final Series series = em.merge(seriesUIDSetInstancesUID.getKey());
-                                final Set<Instances> instancesUIDSet = seriesUIDSetInstancesUID.getValue();
                                 if (album.containsSeries(series, em)) {
                                     seriesLstForWebhookTrigger.add(series);
                                     newSeriesWebhookBuilder.addSeries(series);
-                                    for (Instances i : instancesUIDSet) {
-                                        newSeriesWebhookBuilder.addInstances(i);
-                                    }
+                                    seriesUIDSetInstancesUID.getValue().forEach(newSeriesWebhookBuilder::addInstances);
                                 }
                             }
                         }

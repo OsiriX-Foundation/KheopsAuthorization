@@ -62,4 +62,7 @@ public class Instances {
     public int hashCode() {
         return Objects.hash(pk, instanceUID);
     }
+
+    @Override
+    public String toString() { return instanceUID; }
 }
