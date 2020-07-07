@@ -26,7 +26,7 @@ public class Level3_SeriesLevel {
     }
 
     public HashMap<Series, Level4_InstancesLevel> getSeries() { return series; }
-    public Level4_InstancesLevel getSeries(String series) { return this.series.get(series); }
+    public Level4_InstancesLevel getSeries(Series series) { return this.series.get(series); }
 
     @Override
     public String toString() {
