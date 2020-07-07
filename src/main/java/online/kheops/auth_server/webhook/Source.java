@@ -12,7 +12,7 @@ public class Source {
     private Optional<Capability> capabilityToken = Optional.empty();
     private Optional<User> user = Optional.empty();
 
-    public Source() { }
+    public Source() { /*empty*/ }
 
     public void setReportProviderClientId(ReportProvider reportProvider) {
         this.reportProvider = Optional.of(reportProvider);

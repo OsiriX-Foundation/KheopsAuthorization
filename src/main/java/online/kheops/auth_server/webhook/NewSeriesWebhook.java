@@ -60,8 +60,7 @@ public class NewSeriesWebhook implements WebhookResult{
         private StudyResponse updatedStudy;
         private HashMap<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
 
-        public Builder() {
-        }
+        public Builder() { /*empty*/ }
 
         public Builder setDestination(String destination) {
             if (destination == null) {
