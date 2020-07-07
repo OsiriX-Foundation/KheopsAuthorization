@@ -16,6 +16,7 @@ import online.kheops.auth_server.principal.KheopsPrincipal;
 import online.kheops.auth_server.report_provider.ClientIdNotFoundException;
 import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.sharing.Sending;
+import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.UserNotFoundException;
 import online.kheops.auth_server.util.ErrorResponse;
 
@@ -254,7 +255,7 @@ public class SendingResource
     @Path("studies/{StudyInstanceUID:([0-9]+[.])*[0-9]+}")
     public Response appropriateStudy(@PathParam(StudyInstanceUID) @UIDValidator String studyInstanceUID,
                                      @QueryParam(ALBUM) String albumId)
-            throws AlbumNotFoundException, SeriesNotFoundException, UserNotMemberException {
+            throws AlbumNotFoundException, SeriesNotFoundException, UserNotMemberException, StudyNotFoundException {
 
         final KheopsPrincipal kheopsPrincipal = ((KheopsPrincipal)securityContext.getUserPrincipal());
 
@@ -503,7 +504,7 @@ public class SendingResource
                                     @PathParam(StudyInstanceUID) @UIDValidator String studyInstanceUID,
                                     @QueryParam(ALBUM) String fromAlbumId,
                                     @QueryParam(INBOX) Boolean fromInbox)
-            throws AlbumNotFoundException, UserNotMemberException {
+            throws AlbumNotFoundException, StudyNotFoundException, UserNotMemberException {
 
 
         if (((fromAlbumId == null && fromInbox == null) ||

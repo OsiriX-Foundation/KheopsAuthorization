@@ -7,6 +7,7 @@ import online.kheops.auth_server.album.UserNotMemberException;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.event.Events;
 import online.kheops.auth_server.series.SeriesNotFoundException;
+import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.UserNotFoundException;
 import online.kheops.auth_server.util.Consts;
 import online.kheops.auth_server.util.ErrorResponse;
@@ -27,6 +28,7 @@ import static online.kheops.auth_server.event.Events.MutationType.*;
 import static online.kheops.auth_server.event.Events.MutationType.EDIT_WEBHOOK;
 import static online.kheops.auth_server.event.Events.MutationType.TRIGGER_WEBHOOK;
 import static online.kheops.auth_server.series.Series.getSeries;
+import static online.kheops.auth_server.study.Studies.getStudy;
 import static online.kheops.auth_server.user.Users.getUser;
 import static online.kheops.auth_server.util.Consts.HOST_ROOT_PARAMETER;
 import static online.kheops.auth_server.util.Consts.VALID_SCHEMES_WEBHOOK_URL;
@@ -264,7 +266,7 @@ public class Webhooks {
     }
 
     public static void triggerNewSeriesWebhook(ServletContext context, String webhookID, String albumId, String studyInstanceUID, List<String> seriesInstanceUID, User callingUser)
-            throws WebhookNotFoundException, AlbumNotFoundException, UserNotMemberException, SeriesNotFoundException {
+            throws WebhookNotFoundException, AlbumNotFoundException, UserNotMemberException, SeriesNotFoundException, StudyNotFoundException {
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
 
@@ -276,7 +278,15 @@ public class Webhooks {
             final Album album = getAlbum(albumId, em);
             final Webhook webhook = WebhookQueries.getWebhook(webhookID, album, em);
             final AlbumUser albumCallingUser = getAlbumUser(album, callingUser, em);
-            final NewSeriesWebhook newSeriesWebhook = new NewSeriesWebhook(albumId, albumCallingUser, context.getInitParameter(HOST_ROOT_PARAMETER), true);
+            final Study study = getStudy(studyInstanceUID, em);
+
+            final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
+                    .isSent()
+                    .setIsManualTrigger(true)
+                    .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
+                    .setDestination(albumId)
+                    .setSource(albumCallingUser)
+                    .setStudy(study, context.getInitParameter(HOST_ROOT_PARAMETER));
             final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), true, WebhookType.NEW_SERIES, webhook);
             em.persist(webhookTrigger);
 
@@ -284,7 +294,7 @@ public class Webhooks {
                 final Series series = getSeries(studyInstanceUID, seriesUID, em);
                 if (album.containsSeries(series, em)) {
                     webhookTrigger.addSeries(series);
-                    newSeriesWebhook.addSeries(series);
+                    newSeriesWebhookBuilder.addSeries(series);
                 } else {
                     final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                             .message(SERIES_NOT_FOUND)
@@ -296,7 +306,7 @@ public class Webhooks {
             final Mutation mutation = Events.albumPostMutation(callingUser, album, TRIGGER_WEBHOOK);
             em.persist(mutation);
             tx.commit();
-            new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger).firstRequest();
+            new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
         } finally {
             if (tx.isActive()) {
                 tx.rollback();

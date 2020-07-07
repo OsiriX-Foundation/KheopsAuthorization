@@ -1,7 +1,6 @@
 package online.kheops.auth_server.webhook;
 
 import online.kheops.auth_server.entity.*;
-import online.kheops.auth_server.report_provider.ReportProviderResponse;
 import online.kheops.auth_server.study.StudyResponse;
 import online.kheops.auth_server.user.UserResponse;
 
@@ -11,6 +10,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static online.kheops.auth_server.report_provider.ReportProviderResponse.Type.WEBHOOK;
 
 public class NewSeriesWebhook implements WebhookResult{
 
@@ -45,61 +46,10 @@ public class NewSeriesWebhook implements WebhookResult{
 
     public static Builder builder() { return new Builder(); }
 
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Study study, String kheopsInstance, boolean isManualTrigger) {
-        this(albumId, sourceUser, kheopsInstance, isManualTrigger);
-        updatedStudy = new StudyResponse(study, kheopsInstance);
-    }
-
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, Series series, String kheopsInstance, boolean isManualTrigger) {
-        this(albumId, sourceUser, kheopsInstance, isManualTrigger);
-        updatedStudy = new StudyResponse(series.getStudy(), kheopsInstance);
-        updatedStudy.addSeries(series);
-    }
-
-    public NewSeriesWebhook(String albumId, AlbumUser sourceUser, String kheopsInstance, boolean isManualTrigger) {
-        this.kheopsInstance = kheopsInstance;
-        this.albumId = albumId;
-        this.eventTime = LocalDateTime.now();
-        this.sourceUser = new UserResponse(sourceUser);
-        this.isManualTrigger = isManualTrigger;
-        importSource = "send";
-    }
-
-    public NewSeriesWebhook(String albumId, User user, String kheopsInstance, boolean isManualTrigger) {
-        this.kheopsInstance = kheopsInstance;
-        this.albumId = albumId;
-        this.eventTime = LocalDateTime.now();
-        this.sourceUser = new UserResponse(user);
-        this.isManualTrigger = isManualTrigger;
-        importSource = "send";
-    }
-
-    public void addSeries(Series series) {
-        if(updatedStudy == null) {
-            updatedStudy = new StudyResponse(series.getStudy(), kheopsInstance);
-        }
-        updatedStudy.addSeries(series);
-    }
-
-    public void setReportProvider(ReportProvider reportProvider) { sourceUser.setReportProvider(reportProvider, ReportProviderResponse.Type.WEBHOOK); }
-
-    public void setCapabilityToken(Capability capability) { sourceUser.setCapabilityToken(capability); }
-
-    public boolean containSeries() {
-        return updatedStudy.containSeries();
-    }
-
-    public void setFetch() {
-        importSource = "upload";
-    }
-
-
-
     @Override
     public WebhookType getType() {
         return WebhookType.NEW_SERIES;
     }
-
 
     public static class Builder {
         private String kheopsInstance;
@@ -135,7 +85,30 @@ public class NewSeriesWebhook implements WebhookResult{
             }
             sourceUser = new UserResponse(source.getUser().get());
             source.getCapabilityTokenId().ifPresent(capability -> sourceUser.setCapabilityToken(capability));
-            source.getReportProvider().ifPresent(reportProvider -> sourceUser.setReportProvider(reportProvider, ReportProviderResponse.Type.WEBHOOK));
+            source.getReportProvider().ifPresent(reportProvider -> sourceUser.setReportProvider(reportProvider, WEBHOOK));
+            return this;
+        }
+
+        public Builder setSource(AlbumUser sourceUser) {
+            this.sourceUser = new UserResponse(sourceUser);
+            return this;
+        }
+
+        public Builder setCapabilityToken(Capability capability) {
+            if (sourceUser != null) {
+                sourceUser.setCapabilityToken(capability);
+            } else {
+                throw new IllegalStateException();
+            }
+            return this;
+        }
+
+        public Builder setReportProvider(ReportProvider reportProvider) {
+            if (sourceUser != null) {
+                sourceUser.setReportProvider(reportProvider, WEBHOOK);
+            } else {
+                throw new IllegalStateException();
+            }
             return this;
         }
 
@@ -166,7 +139,6 @@ public class NewSeriesWebhook implements WebhookResult{
             if (!seriesInstancesHashMap.containsKey(series)) {
                 seriesInstancesHashMap.put(series, new HashSet<>());
             }
-            //updatedStudy.addSeries(series);
             return this;
         }
 
@@ -175,12 +147,12 @@ public class NewSeriesWebhook implements WebhookResult{
                 seriesInstancesHashMap.put(instances.getSeries(), new HashSet<>());
             }
             seriesInstancesHashMap.get(instances.getSeries()).add(instances);
-
-            //updatedStudy.addInstances(instances);
             return this;
         }
 
         public Map<Series, Set<Instances>> getSeriesInstancesHashMap() { return seriesInstancesHashMap; }
+
+        public boolean containSeries() { return !seriesInstancesHashMap.isEmpty(); }
 
         public NewSeriesWebhook build() {
             seriesInstancesHashMap.forEach(updatedStudy::addSeriesWithInstances);
