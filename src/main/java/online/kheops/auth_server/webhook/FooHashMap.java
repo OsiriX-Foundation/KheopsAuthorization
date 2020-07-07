@@ -84,7 +84,7 @@ public class FooHashMap {
                             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                     .setDestination(album.getId())
                                     .isUpload()
-                                    .setIsManualTrigger(false)
+                                    .isAutomatedTrigger()
                                     .setStudy(study, kheopsInstance)
                                     .setSource(source)
                                     .setKheopsInstance(kheopsInstance);
@@ -115,7 +115,7 @@ public class FooHashMap {
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                 .setDestination(album.getId())
                                 .isUpload()
-                                .setIsManualTrigger(false)
+                                .isAutomatedTrigger()
                                 .setStudy(study, kheopsInstance)
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);

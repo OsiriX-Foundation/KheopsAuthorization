@@ -111,8 +111,13 @@ public class NewSeriesWebhook implements WebhookResult{
             return this;
         }
 
-        public Builder setIsManualTrigger(boolean isManualTrigger) {
-            this.isManualTrigger = isManualTrigger;
+        public Builder isManualTrigger() {
+            this.isManualTrigger = true;
+            return this;
+        }
+
+        public Builder isAutomatedTrigger() {
+            this.isManualTrigger = false;
             return this;
         }
 

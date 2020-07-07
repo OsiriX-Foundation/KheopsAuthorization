@@ -234,7 +234,7 @@ public class Sending {
                     .addSeries(availableSeries)
                     .isSent()
                     .setDestination(albumId)
-                    .setIsManualTrigger(false)
+                    .isAutomatedTrigger()
                     .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .setSource(targetAlbumUser);
 
@@ -299,7 +299,7 @@ public class Sending {
                     .setSource(targetAlbumUser)
                     .setDestination(albumId)
                     .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
-                    .setIsManualTrigger(false)
+                    .isAutomatedTrigger()
                     .isSent()
                     .setStudy(study, context.getInitParameter(HOST_ROOT_PARAMETER));
 

@@ -282,7 +282,7 @@ public class Webhooks {
 
             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                     .isSent()
-                    .setIsManualTrigger(true)
+                    .isManualTrigger()
                     .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .setDestination(albumId)
                     .setSource(albumCallingUser)
