@@ -78,7 +78,7 @@ public class FooHashMap {
                         final Album album = em.merge(entry1.getKey());
                         final Level3_SeriesLevel level3SeriesLevel = entry1.getValue();
 
-                        if (!album.getWebhooks().isEmpty()) {
+                        if (!album.getWebhooksNewSeriesEnabled().isEmpty()) {
                             //if destination contain webhooks
 
                             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
@@ -97,18 +97,16 @@ public class FooHashMap {
                                 level2DestinationLevel.getSeriesNewInstances(series).forEach(newSeriesWebhookBuilder::addInstances);
                             }
 
-                            for (Webhook webhook : album.getWebhooks()) {
-                                if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                    newSeriesWebhookBuilder.getSeriesInstancesHashMap().forEach((series, instances) -> webhookTrigger.addSeries(series));
-                                    em.persist(webhookTrigger);
-                                    new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
-                                }
+                            for (Webhook webhook : album.getWebhooksNewSeriesEnabled()) {
+                                final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                newSeriesWebhookBuilder.getSeriesInstancesHashMap().forEach((series, instances) -> webhookTrigger.addSeries(series));
+                                em.persist(webhookTrigger);
+                                new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
                             }
                         }
                     }
                 } else {
-                    List<Album> albumLst = findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em);
+                    final List<Album> albumLst = findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em);
                     for (Album album : albumLst) {
 
                         final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
@@ -141,31 +139,24 @@ public class FooHashMap {
                         }
 
                         if (!seriesLstForWebhookTrigger.isEmpty()) {
-                            for (Webhook webhook : album.getWebhooks()) {
-                                if (webhook.isEnabled() && webhook.isNewSeries()) {
-                                    final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
-                                    seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
-                                    em.persist(webhookTrigger);
-                                    new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
-                                }
+                            for (Webhook webhook : album.getWebhooksNewSeriesEnabled()) {
+                                final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
+                                seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
+                                em.persist(webhookTrigger);
+                                new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
                             }
                         }
                     }
                 }
             }
-
             tx.commit();
-
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
             }
             em.close();
+            level0StudyLevel.remove(study);
         }
-
-        level0StudyLevel.remove(study);
     }
 
 }

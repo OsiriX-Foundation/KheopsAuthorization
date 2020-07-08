@@ -1,6 +1,7 @@
 package online.kheops.auth_server.entity;
 
 import online.kheops.auth_server.user.UsersPermission;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -56,6 +57,14 @@ public class Album {
 
     @OneToMany(mappedBy = "album")
     private Set<Webhook> webhooks = new HashSet<>();
+
+    @OneToMany(mappedBy = "album")
+    @Where(clause = "enabled=true and new_series = true")
+    private Set<Webhook> webhooksNewSeriesEnabled = new HashSet<>();
+
+    @OneToMany(mappedBy = "album")
+    @Where(clause = "enabled=true and new_user = true")
+    private Set<Webhook> webhooksNewUserEnabled = new HashSet<>();
 
     @OneToMany(mappedBy = "album")
     private Set<Event> events = new HashSet<>();
@@ -160,6 +169,10 @@ public class Album {
     public void addWebhook(Webhook webhook) { this.webhooks.add(webhook); }
 
     public Set<Webhook> getWebhooks() { return webhooks; }
+
+    public Set<Webhook> getWebhooksNewSeriesEnabled() { return webhooksNewSeriesEnabled; }
+
+    public Set<Webhook> getWebhooksNewUserEnabled() { return webhooksNewUserEnabled; }
 
     @Override
     public String toString() {

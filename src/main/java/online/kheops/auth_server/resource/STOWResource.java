@@ -255,7 +255,7 @@ public class STOWResource {
 
        KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
                 .action(KheopsLogBuilder.ActionType.STOW)
-                .study(studyId)
+                .study(studyInstanceUID)
                 .series(seriesInstanceUID)
                 .instances(instancesUID);
        if(albumId != null) {
@@ -263,7 +263,7 @@ public class STOWResource {
        }
        kheopsLogBuilder.log();
 
-       return Response.ok().build();
+       return Response.status(NO_CONTENT).build();
     }
 
     private static boolean compareSeries(Series series, String modality, String seriesDescription, int seriesNumber,
