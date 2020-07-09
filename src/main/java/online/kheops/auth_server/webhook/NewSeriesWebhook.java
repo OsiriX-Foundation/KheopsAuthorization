@@ -75,6 +75,9 @@ public class NewSeriesWebhook implements WebhookResult{
                 throw new IllegalStateException("instance is null");
             }
             this.kheopsInstance = kheopsInstance;
+            if (updatedStudy != null) {
+                updatedStudy.setKheopsInstance(kheopsInstance);
+            }
             return this;
         }
 
@@ -83,7 +86,7 @@ public class NewSeriesWebhook implements WebhookResult{
                 throw new IllegalStateException("source is null");
             }
             sourceUser = new UserResponse(source.getUser());
-            source.getCapabilityTokenId().ifPresent(capability -> sourceUser.setCapabilityToken(capability));
+            source.getCapabilityToken().ifPresent(capability -> sourceUser.setCapabilityToken(capability));
             source.getReportProvider().ifPresent(reportProvider -> sourceUser.setReportProvider(reportProvider, WEBHOOK));
             return this;
         }
@@ -131,11 +134,14 @@ public class NewSeriesWebhook implements WebhookResult{
             return this;
         }
 
-        public Builder setStudy(Study study, String kheopsInstance) {
+        public Builder setStudy(Study study) {
             if (updatedStudy != null) {
                 throw new IllegalStateException("updatedStudy is already set");
             }
-            this.updatedStudy = new StudyResponse(study, kheopsInstance);
+            this.updatedStudy = new StudyResponse(study, false);
+            if(kheopsInstance != null) {
+                this.updatedStudy.setKheopsInstance(kheopsInstance);
+            }
             return this;
         }
 

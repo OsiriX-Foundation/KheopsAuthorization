@@ -286,7 +286,7 @@ public class Webhooks {
                     .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .setDestination(albumId)
                     .setSource(albumCallingUser)
-                    .setStudy(study, context.getInitParameter(HOST_ROOT_PARAMETER));
+                    .setStudy(study);
             final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), true, WebhookType.NEW_SERIES, webhook);
             em.persist(webhookTrigger);
 

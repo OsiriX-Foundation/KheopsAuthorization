@@ -244,8 +244,6 @@ public class STOWResource {
             FooHashMap.getInstance().addHashMapData(study, series, instances, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
             FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
 
-            //TODO mutation
-
         } finally {
             if (tx.isActive()) {
                 tx.rollback();

@@ -28,7 +28,7 @@ public class Source {
         return reportProvider;
     }
 
-    public Optional<Capability> getCapabilityTokenId() {
+    public Optional<Capability> getCapabilityToken() {
         return capabilityToken;
     }
 

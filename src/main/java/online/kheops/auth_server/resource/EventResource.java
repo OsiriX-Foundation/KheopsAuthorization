@@ -13,6 +13,7 @@ import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.UserNotFoundException;
 import online.kheops.auth_server.util.ErrorResponse;
 import online.kheops.auth_server.util.KheopsLogBuilder;
+import online.kheops.auth_server.util.KheopsLogBuilder.*;
 import online.kheops.auth_server.util.PairListXTotalCount;
 
 import javax.servlet.ServletContext;
@@ -84,7 +85,7 @@ public class EventResource {
 
         final GenericEntity<List<EventResponse>> genericEventsResponsesList = new GenericEntity<List<EventResponse>>(pair.getAttributesList()) {};
         kheopsLogBuilder.album(albumId)
-                .action(KheopsLogBuilder.ActionType.LIST_EVENTS)
+                .action(ActionType.LIST_EVENTS)
                 .log();
         return Response.ok(genericEventsResponsesList)
                 .header(X_TOTAL_COUNT, pair.getXTotalCount())
@@ -117,7 +118,7 @@ public class EventResource {
         Events.albumPostComment(kheopsPrincipal.getUser(), albumId, comment, user);
 
         kheopsPrincipal.getKheopsLogBuilder().album(albumId)
-                .action(KheopsLogBuilder.ActionType.POST_COMMENT)
+                .action(ActionType.POST_COMMENT)
                 .log();
         return Response.status(NO_CONTENT).build();
     }
@@ -146,7 +147,7 @@ public class EventResource {
 
         final GenericEntity<List<EventResponse>> genericEventsResponsesList = new GenericEntity<List<EventResponse>>(pair.getAttributesList()) {};
         kheopsPrincipal.getKheopsLogBuilder().study(studyInstanceUID)
-                .action(KheopsLogBuilder.ActionType.LIST_EVENTS)
+                .action(ActionType.LIST_EVENTS)
                 .log();
         return Response.ok(genericEventsResponsesList)
                 .header(X_TOTAL_COUNT, pair.getXTotalCount())
@@ -188,7 +189,7 @@ public class EventResource {
         }
 
         kheopsPrincipal.getKheopsLogBuilder().study(studyInstanceUID)
-                .action(KheopsLogBuilder.ActionType.POST_COMMENT)
+                .action(ActionType.POST_COMMENT)
                 .log();
         return Response.status(NO_CONTENT).build();
     }

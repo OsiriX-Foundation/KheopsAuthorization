@@ -230,7 +230,7 @@ public class Sending {
             em.persist(albumSeries);
 
             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
-                    .setStudy(availableSeries.getStudy(), context.getInitParameter(HOST_ROOT_PARAMETER))
+                    .setStudy(availableSeries.getStudy())
                     .addSeries(availableSeries)
                     .isSent()
                     .setDestination(albumId)
@@ -299,7 +299,7 @@ public class Sending {
                     .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .isAutomatedTrigger()
                     .isSent()
-                    .setStudy(study, context.getInitParameter(HOST_ROOT_PARAMETER));
+                    .setStudy(study);
 
             final List<Series> availableSeries = getSeriesList(callingUser, studyInstanceUID, fromAlbumId, fromInbox, em);
             final List<Series> seriesListEvent = new ArrayList<>();

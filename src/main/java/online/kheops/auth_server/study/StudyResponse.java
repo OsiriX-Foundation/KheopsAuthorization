@@ -46,9 +46,10 @@ public class StudyResponse {
 
     private StudyResponse() { /*empty*/ }
 
-    public StudyResponse(Study study, String kheopsInstance) {
-        patientName = study.getPatientName();
+    public StudyResponse(Study study, boolean uidOnly) {
         studyInstanceUID = study.getStudyInstanceUID();
+        if (uidOnly) { return; }
+        patientName = study.getPatientName();
         studyDate = study.getStudyDate();
         studyDescription = study.getStudyDescription();
         patientID = study.getPatientID();
@@ -59,7 +60,10 @@ public class StudyResponse {
         studyId = study.getStudyID();
         timezoneOffsetFromUtc = study.getTimezoneOffsetFromUTC();
         studyTime = study.getStudyTime();
-        retrieveUrl = kheopsInstance + "/api/studies/" + study.getStudyInstanceUID();
+    }
+
+    public void setKheopsInstance(String kheopsInstance) {
+        retrieveUrl = kheopsInstance + "/api/studies/" + studyInstanceUID;
         this.kheopsInstance = kheopsInstance;
     }
 

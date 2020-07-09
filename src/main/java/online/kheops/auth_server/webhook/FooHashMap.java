@@ -2,6 +2,7 @@ package online.kheops.auth_server.webhook;
 
 import online.kheops.auth_server.EntityManagerListener;
 import online.kheops.auth_server.entity.*;
+import online.kheops.auth_server.event.Events;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static online.kheops.auth_server.album.AlbumQueries.findAlbumsWithEnabledNewSeriesWebhooks;
+import static online.kheops.auth_server.event.Events.albumPostStudyMutation;
 
 public class FooHashMap {
 
@@ -85,7 +87,7 @@ public class FooHashMap {
                                     .setDestination(album.getId())
                                     .isUpload()
                                     .isAutomatedTrigger()
-                                    .setStudy(study, kheopsInstance)
+                                    .setStudy(study)
                                     .setSource(source)
                                     .setKheopsInstance(kheopsInstance);
 
@@ -104,6 +106,14 @@ public class FooHashMap {
                                 new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
                             }
                         }
+
+                        final Mutation mutation;
+                        if (source.getCapabilityToken().isPresent()) {
+                            mutation = albumPostStudyMutation(em.merge(source.getCapabilityToken().get()), album, Events.MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet()));
+                        } else {
+                            mutation = albumPostStudyMutation(em.merge(source.getUser()), album, Events.MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet()));
+                        }
+                        em.persist(mutation);
                     }
                 } else {
                     final List<Album> albumLst = findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em);
@@ -114,11 +124,12 @@ public class FooHashMap {
                                 .setDestination(album.getId())
                                 .isUpload()
                                 .isAutomatedTrigger()
-                                .setStudy(study, kheopsInstance)
+                                .setStudy(study)
                                 .setSource(source)
                                 .setKheopsInstance(kheopsInstance);
 
                         if (level2DestinationLevel.getDestinations().containsKey(album)) {
+                            ArrayList<Series> newSeriesInDestinationLst = new ArrayList<>();
                             for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album).getSeries().entrySet()) {
                                 final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();
@@ -126,6 +137,19 @@ public class FooHashMap {
                                 newSeriesWebhookBuilder.addSeries(series);
                                 level4InstancesLevel.getInstancesUIDLst().forEach(newSeriesWebhookBuilder::addInstances);
                                 level2DestinationLevel.getSeriesNewInstances(series).forEach(newSeriesWebhookBuilder::addInstances);
+                                if (level4InstancesLevel.isNewInDestination()) {
+                                    newSeriesInDestinationLst.add(series);
+                                }
+                            }
+
+                            if (!newSeriesInDestinationLst.isEmpty()) {
+                                final Mutation mutation;
+                                if (source.getCapabilityToken().isPresent()) {
+                                    mutation = albumPostStudyMutation(em.merge(source.getCapabilityToken().get()), album, Events.MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst);
+                                } else {
+                                    mutation = albumPostStudyMutation(em.merge(source.getUser()), album, Events.MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst);
+                                }
+                                em.persist(mutation);
                             }
                         } else {
                             for (Map.Entry<Series, Set<Instances>> seriesUIDSetInstancesUID : level2DestinationLevel.getSeriesNewInstances().entrySet()) {
@@ -149,7 +173,17 @@ public class FooHashMap {
                     }
                 }
             }
+
+            /*
+            new study in destination (with list of series)=>si fooHashMap NE contient PAS la study
+            new series in destination =>si fooHashMap NE contient PAS la séries
+            ?? new instances ?? (update series) or (add instances in series)
+             */
+
             tx.commit();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
