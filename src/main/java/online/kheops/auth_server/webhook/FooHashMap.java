@@ -22,7 +22,7 @@ public class FooHashMap {
     private static FooHashMap instance = null;
     private static String kheopsInstance;
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
-    private static final int TIME_TO_LIVE = 10;//seconds
+    private static final int TIME_TO_LIVE = 30;//seconds
 
     private Level0_StudyLevel level0StudyLevel;
 
@@ -71,6 +71,8 @@ public class FooHashMap {
 
             study = em.merge(study);
 
+            final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
+
             for (Map.Entry<Source, Level2_DestinationLevel> entry : level1SourceLevel.getSources().entrySet()) {
                 final Source source = entry.getKey();
                 final Level2_DestinationLevel level2DestinationLevel = entry.getValue();
@@ -103,7 +105,7 @@ public class FooHashMap {
                                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                                 newSeriesWebhookBuilder.getSeriesInstancesHashMap().forEach((series, instances) -> webhookTrigger.addSeries(series));
                                 em.persist(webhookTrigger);
-                                new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
+                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
                             }
                         }
 
@@ -167,7 +169,7 @@ public class FooHashMap {
                                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                                 seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
                                 em.persist(webhookTrigger);
-                                new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger).firstRequest();
+                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
                             }
                         }
                     }
@@ -180,8 +182,11 @@ public class FooHashMap {
             ?? new instances ?? (update series) or (add instances in series)
              */
 
-            tx.commit();
 
+            tx.commit();
+            for (WebhookAsyncRequest webhookAsyncRequest : webhookAsyncRequests) {
+                webhookAsyncRequest.firstRequest();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
