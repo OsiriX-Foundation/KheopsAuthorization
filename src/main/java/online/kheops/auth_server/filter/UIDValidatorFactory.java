@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.List;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static online.kheops.auth_server.util.Consts.UID_VALIDATOR_PRIORITY;
@@ -28,7 +29,7 @@ public class UIDValidatorFactory implements DynamicFeature {
     public void configure(ResourceInfo resourceInfo, FeatureContext featureContext) {
 
         Annotation[][] parameterAnnotations = resourceInfo.getResourceMethod().getParameterAnnotations();
-        ArrayList<String> uids = new ArrayList<>();
+        List<String> uids = new ArrayList<>();
 
         for(Annotation[] annotations : parameterAnnotations) {
             for (Annotation annotation1 : annotations) {
@@ -50,9 +51,9 @@ public class UIDValidatorFactory implements DynamicFeature {
 
     @Priority(UID_VALIDATOR_PRIORITY)
     private static class CheckUID implements ContainerRequestFilter {
-        private final ArrayList<String> types;
+        private final List<String> types;
 
-        CheckUID(ArrayList<String> types) {
+        CheckUID(List<String> types) {
             this.types = types;
         }
 

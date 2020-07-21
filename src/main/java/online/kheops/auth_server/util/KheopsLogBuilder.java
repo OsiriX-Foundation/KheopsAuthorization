@@ -5,6 +5,7 @@ import online.kheops.auth_server.token.TokenProvenance;
 import online.kheops.auth_server.user.UsersPermission;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -24,7 +25,7 @@ public class KheopsLogBuilder {
         INBOX_INFO,
         NEW_WEBHOOK, REMOVE_WEBHOOK, GET_WEBHOOK, EDIT_WEBHOOK, LIST_WEBHOOK, TRIGGER_WEBHOOK}
 
-    private ArrayList<LogEntry> logEntry;
+    private List<LogEntry> logEntry;
     private static final Logger LOG = Logger.getLogger(KheopsLogBuilder.class.getName());
 
 

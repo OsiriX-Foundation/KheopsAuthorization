@@ -68,7 +68,7 @@ public class Studies {
     public static PairListXTotalCount<Attributes> findAttributesByUserPKJOOQ(long callingUserPK, StudyQIDOParams qidoParams, Connection connection)
             throws BadQueryParametersException {
 
-        ArrayList<Condition> conditionArrayList = new ArrayList<>();
+        List<Condition> conditionArrayList = new ArrayList<>();
 
         if (qidoParams.isFromInbox()) {
             conditionArrayList.add(ALBUMS.PK.eq(USERS.INBOX_FK));

@@ -24,7 +24,7 @@ public class ReportProviderClientMetadata {
     @XmlElement(name = "introspection_endpoint_auth_method")
     private String introspectionEndpointAuthMethod;
     @XmlElement(name = "grant_types")
-    private ArrayList<String> grantTypes;
+    private List<String> grantTypes;
     @XmlElement(name = "response_type")
     private String responseType;
     @XmlElement(name = "client_name")
@@ -36,7 +36,7 @@ public class ReportProviderClientMetadata {
     @XmlElement(name = "scope")
     private String scope;
     @XmlElement(name = "contacts")
-    private ArrayList<String> contacts;
+    private List<String> contacts;
     @XmlElement(name = "tos_uri")
     private String tosUri;
     @XmlElement(name = "policy_uri")
@@ -48,7 +48,7 @@ public class ReportProviderClientMetadata {
     @XmlElement(name = "software_version")
     private String softwareVersion;
     @XmlElement(name = "supported_modalities")
-    private ArrayList<String> supportedModalities;
+    private List<String> supportedModalities;
 
     @XmlElement(name = "token_endpoint_auth_signing_alg")
     private String tokenEndpointAuthSigningAlg;

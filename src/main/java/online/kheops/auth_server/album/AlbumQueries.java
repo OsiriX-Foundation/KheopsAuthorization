@@ -87,7 +87,7 @@ public class AlbumQueries {
             DSLContext create = DSL.using(connection, SQLDialect.POSTGRES);
             SelectQuery<Record> query = create.selectQuery();
 
-            ArrayList<Condition> conditionArrayList = new ArrayList<>();
+            List<Condition> conditionArrayList = new ArrayList<>();
 
             Field<Object> nbUsers = create.select(countDistinct(ALBUM_USER.PK))
                     .from(ALBUM_USER)
@@ -296,7 +296,7 @@ public class AlbumQueries {
     }
 
 
-    private static int getAlbumTotalCount(long userPk, ArrayList<Condition> conditionArrayList, Connection connection) {
+    private static int getAlbumTotalCount(long userPk, List<Condition> conditionArrayList, Connection connection) {
         final DSLContext create = DSL.using(connection, SQLDialect.POSTGRES);
         final SelectQuery<Record> query = create.selectQuery();
         query.addSelect(countDistinct(ALBUMS.PK));

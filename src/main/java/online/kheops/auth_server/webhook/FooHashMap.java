@@ -121,7 +121,7 @@ public class FooHashMap {
                     final List<Album> albumLst = findAlbumsWithEnabledNewSeriesWebhooks(study.getStudyInstanceUID(), em);
                     for (Album album : albumLst) {
 
-                        final ArrayList<Series> seriesLstForWebhookTrigger = new ArrayList<>();
+                        final List<Series> seriesLstForWebhookTrigger = new ArrayList<>();
                         final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                                 .setDestination(album.getId())
                                 .isUpload()
@@ -131,7 +131,7 @@ public class FooHashMap {
                                 .setKheopsInstance(kheopsInstance);
 
                         if (level2DestinationLevel.getDestinations().containsKey(album)) {
-                            ArrayList<Series> newSeriesInDestinationLst = new ArrayList<>();
+                            List<Series> newSeriesInDestinationLst = new ArrayList<>();
                             for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level2DestinationLevel.getDestination(album).getSeries().entrySet()) {
                                 final Series series = em.merge(entry2.getKey());
                                 final Level4_InstancesLevel level4InstancesLevel = entry2.getValue();

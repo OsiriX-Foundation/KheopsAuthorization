@@ -7,6 +7,7 @@ import online.kheops.auth_server.series.SeriesResponse;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class StudyResponse {
@@ -40,7 +41,7 @@ public class StudyResponse {
     private String retrieveUrl;
 
     @XmlElement(name = "series")
-    private ArrayList<SeriesResponse> series;
+    private List<SeriesResponse> series;
 
     private String kheopsInstance;
 
