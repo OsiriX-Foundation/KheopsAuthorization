@@ -1,6 +1,5 @@
 package online.kheops.auth_server.mapper;
 
-import online.kheops.auth_server.album.AlbumNotFoundException;
 import online.kheops.auth_server.instances.InstancesNotFoundException;
 
 import javax.ws.rs.core.Response;
