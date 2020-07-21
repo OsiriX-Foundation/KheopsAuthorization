@@ -4,7 +4,6 @@ package online.kheops.auth_server.report_provider;
 import javax.xml.bind.annotation.XmlElement;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReportProviderClientMetadata {

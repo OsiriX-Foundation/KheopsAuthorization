@@ -3,7 +3,6 @@ package online.kheops.auth_server.util;
 import com.google.common.collect.ImmutableList;
 
 import javax.ws.rs.Priorities;
-import java.time.Duration;
 
 public class Consts {
 
