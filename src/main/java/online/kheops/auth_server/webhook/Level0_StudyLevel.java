@@ -6,11 +6,12 @@ import online.kheops.auth_server.entity.Series;
 import online.kheops.auth_server.entity.Study;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 public class Level0_StudyLevel {
     //              StudyUID
-    private HashMap<Study, Level1_SourceLevel> studyHashMap;
+    private Map<Study, Level1_SourceLevel> studyHashMap;
 
     public Level0_StudyLevel() {
         studyHashMap = new HashMap<>();

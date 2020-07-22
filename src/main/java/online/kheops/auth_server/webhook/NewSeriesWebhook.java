@@ -58,7 +58,7 @@ public class NewSeriesWebhook implements WebhookResult{
         private boolean isManualTrigger;
         private String importSource;
         private StudyResponse updatedStudy;
-        private HashMap<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
+        private Map<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
 
         public Builder() { /*empty*/ }
 

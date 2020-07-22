@@ -8,8 +8,8 @@ import java.util.*;
 
 public class Level2_DestinationLevel {
     //             Destination
-    private HashMap<Album, Level3_SeriesLevel> level3;
-    private HashMap<Series, Set<Instances>> seriesNewInstances;
+    private Map<Album, Level3_SeriesLevel> level3;
+    private Map<Series, Set<Instances>> seriesNewInstances;
 
     public Level2_DestinationLevel(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Album destination, boolean isNewInDestination) {
         level3 = new HashMap<>();

@@ -17,6 +17,7 @@ import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.Albums.isMemberOfAlbum;
@@ -134,7 +135,7 @@ public class Events {
             callingUser = em.merge(callingUser);
             final Album album = getAlbum(albumId, em);
 
-            final HashMap<String, Boolean> userMember = new HashMap<>();
+            final Map<String, Boolean> userMember = new HashMap<>();
             for(AlbumUser albumUser : album.getAlbumUser()) {
                 userMember.put(albumUser.getUser().getSub(), albumUser.isAdmin());
             }
@@ -161,7 +162,7 @@ public class Events {
 
         try {
             final Album album = getAlbum(albumId, em);
-            final HashMap<String, Boolean> userMember = new HashMap<>();
+            final Map<String, Boolean> userMember = new HashMap<>();
             for(AlbumUser albumUser : album.getAlbumUser()) {
                 userMember.put(albumUser.getUser().getSub(), albumUser.isAdmin());
             }
@@ -189,7 +190,7 @@ public class Events {
             callingUser = em.merge(callingUser);
             final Album album = getAlbum(albumId, em);
 
-            final HashMap<String, Boolean> userMember = new HashMap<>();
+            final Map<String, Boolean> userMember = new HashMap<>();
             for(AlbumUser albumUser : album.getAlbumUser()) {
                 userMember.put(albumUser.getUser().getSub(), albumUser.isAdmin());
             }
@@ -210,7 +211,7 @@ public class Events {
         final long XTotalCount;
 
         final EntityManager em = EntityManagerListener.createEntityManager();
-        final HashMap<String, Boolean> userMember = new HashMap<>();
+        final Map<String, Boolean> userMember = new HashMap<>();
 
         try {
             User callingUser = em.merge(principal.getUser());

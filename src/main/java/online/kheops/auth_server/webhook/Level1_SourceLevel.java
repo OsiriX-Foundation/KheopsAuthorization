@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledFuture;
 public class Level1_SourceLevel {
     private ScheduledFuture<?> scheduledFuture;
     private boolean isNewStudy;
-    private HashMap<Source, Level2_DestinationLevel> level2;
+    private Map<Source, Level2_DestinationLevel> level2;
 
     public Level1_SourceLevel(ScheduledFuture<?> scheduledFuture, boolean isNewStudy) {
         level2 = new HashMap<>();

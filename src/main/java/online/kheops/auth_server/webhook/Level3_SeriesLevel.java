@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Level3_SeriesLevel {
     //              SeriesUID
-    private HashMap<Series, Level4_InstancesLevel> series;
+    private Map<Series, Level4_InstancesLevel> series;
 
     public Level3_SeriesLevel(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, boolean isNewInDestination) {
         this.series = new HashMap<>();
