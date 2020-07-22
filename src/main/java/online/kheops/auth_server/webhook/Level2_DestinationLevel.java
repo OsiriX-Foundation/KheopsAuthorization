@@ -29,13 +29,7 @@ public class Level2_DestinationLevel {
             level3.put(destination, new Level3_SeriesLevel(series, instances, isNewSeries, isNewInstances, isNewInDestination));
         }
         if (isNewInstances) {
-            if (seriesNewInstances.containsKey(series)) {
-                seriesNewInstances.get(series).add(instances);
-            } else {
-                final Set<Instances> instanceSet = new HashSet<>();
-                instanceSet.add(instances);
-                seriesNewInstances.put(series, instanceSet);
-            }
+            seriesNewInstances.computeIfAbsent(series, value -> new HashSet<>()).add(instances);
         }
     }
 

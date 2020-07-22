@@ -22,7 +22,7 @@ public class FooHashMap {
     private static FooHashMap instance = null;
     private static String kheopsInstance;
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
-    private static final int TIME_TO_LIVE = 30;//seconds
+    private static final int TIME_TO_LIVE = 10;//seconds
 
     private Level0_StudyLevel level0StudyLevel;
 
@@ -101,11 +101,12 @@ public class FooHashMap {
                                 level2DestinationLevel.getSeriesNewInstances(series).forEach(newSeriesWebhookBuilder::addInstances);
                             }
 
+                            final NewSeriesWebhook newSeriesWebhook = newSeriesWebhookBuilder.build();
                             for (Webhook webhook : album.getWebhooksNewSeriesEnabled()) {
                                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                                 newSeriesWebhookBuilder.getSeriesInstancesHashMap().forEach((series, instances) -> webhookTrigger.addSeries(series));
                                 em.persist(webhookTrigger);
-                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
+                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
                             }
                         }
 
@@ -165,11 +166,12 @@ public class FooHashMap {
                         }
 
                         if (!seriesLstForWebhookTrigger.isEmpty()) {
+                            final NewSeriesWebhook newSeriesWebhook = newSeriesWebhookBuilder.build();
                             for (Webhook webhook : album.getWebhooksNewSeriesEnabled()) {
                                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                                 seriesLstForWebhookTrigger.forEach(webhookTrigger::addSeries);
                                 em.persist(webhookTrigger);
-                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
+                                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
                             }
                         }
                     }

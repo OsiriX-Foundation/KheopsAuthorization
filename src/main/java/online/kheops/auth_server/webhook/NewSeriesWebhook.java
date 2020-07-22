@@ -146,17 +146,12 @@ public class NewSeriesWebhook implements WebhookResult{
         }
 
         public Builder addSeries(Series series) {
-            if (!seriesInstancesHashMap.containsKey(series)) {
-                seriesInstancesHashMap.put(series, new HashSet<>());
-            }
+            seriesInstancesHashMap.computeIfAbsent(series, series1 -> new HashSet<>());
             return this;
         }
 
         public Builder addInstances(Instances instances) {
-            if (!seriesInstancesHashMap.containsKey(instances.getSeries())) {
-                seriesInstancesHashMap.put(instances.getSeries(), new HashSet<>());
-            }
-            seriesInstancesHashMap.get(instances.getSeries()).add(instances);
+            seriesInstancesHashMap.computeIfAbsent(instances.getSeries(), series1 -> new HashSet<>()).add(instances);
             return this;
         }
 

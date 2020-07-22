@@ -262,11 +262,12 @@ public class Sending {
 
             final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
 
+            final NewSeriesWebhook newSeriesWebhook = newSeriesWebhookBuilder.build();
             for (Webhook webhook : targetAlbum.getWebhooksNewSeriesEnabled()) {
                 final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                 em.persist(webhookTrigger);
                 webhookTrigger.addSeries(availableSeries);
-                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
+                webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
             }
 
             tx.commit();
@@ -354,11 +355,12 @@ public class Sending {
             final List<WebhookAsyncRequest> webhookAsyncRequests = new ArrayList<>();
 
             if (newSeriesWebhookBuilder.containSeries()) {
+                final NewSeriesWebhook newSeriesWebhook = newSeriesWebhookBuilder.build();
                 for (Webhook webhook : targetAlbum.getWebhooksNewSeriesEnabled()) {
                     final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                     em.persist(webhookTrigger);
                     newSeriesWebhookBuilder.getSeriesInstancesHashMap().keySet().forEach(webhookTrigger::addSeries);
-                    webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhookBuilder.build(), webhookTrigger));
+                    webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
                 }
             }
             tx.commit();
