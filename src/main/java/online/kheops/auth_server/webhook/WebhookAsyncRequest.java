@@ -47,6 +47,7 @@ public class WebhookAsyncRequest {
 
         CompletionStageRxInvoker asyncInvoker = CLIENT.target(webhook.getUrl()).request()
                 .header(X_KHEOPS_DELIVERY, webhookTrigger.getId())
+                .header(X_KHEOPS_WEBHOOK_ID, webhook.getId())
                 .header(X_KHEOPS_ATTEMPT, NUMBER_OF_RETRY_WEBHOOK - cnt + 1 + "/" + NUMBER_OF_RETRY_WEBHOOK)
                 .header(X_KHEOPS_EVENT, data.getType().name().toLowerCase())
                 .rx();
@@ -74,14 +75,6 @@ public class WebhookAsyncRequest {
                 return null;
             });
         }
-    }
-
-    public WebhookType getType() {
-        return data.getType();
-    }
-
-    public String getRequestId() {
-        return webhookTrigger.getId();
     }
 
     public Webhook getWebhook() { return webhook; }

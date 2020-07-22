@@ -10,6 +10,7 @@ public abstract class HttpHeaders {
     public static final String X_LINK_AUTHORIZATION = "X-Link-Authorization";
     public static final String X_KHEOPS_SIGNATURE = "X-Kheops-Signature";
     public static final String X_KHEOPS_DELIVERY = "X-Kheops-Delivery";
+    public static final String X_KHEOPS_WEBHOOK_ID = "X-Kheops-Webhook-Id";
     public static final String X_KHEOPS_ATTEMPT = "X-Kheops-Attempt";
     public static final String X_KHEOPS_EVENT = "X-Kheops-Event";
 
