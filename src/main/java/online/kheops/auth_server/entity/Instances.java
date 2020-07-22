@@ -23,7 +23,7 @@ public class Instances {
     private LocalDateTime createdTime;
 
     @Basic(optional = false)
-    @Column(name = "instance_uid", updatable = false)
+    @Column(name = "instance_uid", updatable = false, unique = true)
     private String instanceUID;
 
     @ManyToOne
