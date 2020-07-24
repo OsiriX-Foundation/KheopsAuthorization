@@ -17,6 +17,7 @@ import online.kheops.auth_server.webhook.FooHashMap;
 import online.kheops.auth_server.webhook.Source;
 import org.hibernate.exception.ConstraintViolationException;
 
+import javax.management.InstanceNotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
@@ -139,13 +140,6 @@ public class STOWResource {
             tx.begin();
             try {
                 study = getStudy(studyInstanceUID, em);
-                if (!compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The study metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
                 tx.commit();
 
             } catch (StudyNotFoundException e) {
@@ -171,13 +165,6 @@ public class STOWResource {
                 tx.rollback();
                 tx.begin();
                 study = getStudy(studyInstanceUID, em);
-                if (!compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The study metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
                 tx.commit();
             } catch (StudyNotFoundException unused) {
                 throw new IllegalStateException();
@@ -193,13 +180,6 @@ public class STOWResource {
             tx.begin();
             try {
                 series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-                if (!compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID)) {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The series metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
                 tx.commit();
 
             } catch (SeriesNotFoundException e) {
@@ -213,19 +193,11 @@ public class STOWResource {
                 tx.commit();
                 isNewSeries = true;
             }
-
         } catch (PersistenceException e) {
             try {
                 tx.rollback();
                 tx.begin();
                 series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-                if (!compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID)) {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The series metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
                 tx.commit();
             } catch (SeriesNotFoundException unused) {
                 throw new IllegalStateException();
@@ -234,110 +206,92 @@ public class STOWResource {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            em.close();
+            //em.close();
         }
 
-
-        /*final EntityManager em = EntityManagerListener.createEntityManager();
-        final EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-
-            final Study study;
-            final Series series;
-            Instances instances;
-
-            if (instancesExist(instancesUID, em)) {
-                //obtenir et comparer (study series)
-                series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-                study = getStudy(studyInstanceUID, em);
-                if (compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID) &&
-                        compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    instances = getInstances(instancesUID, em);
-                } else {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The study metadata or the series metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
-            } else if (seriesExist(studyInstanceUID, seriesInstanceUID, em)) {
-                //obtenir et comparer (study series)
-                series = getSeries(studyInstanceUID, seriesInstanceUID, em);
-                study = getStudy(studyInstanceUID, em);
-                if (compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID) &&
-                        compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    //créer instances
-                    try {
-                        instances = new Instances(instancesUID, series);
-                        isNewInstance = true;
-                        em.persist(instances);
-                    } catch (PersistenceException e) {
-                        isNewInstance = false;
-                        instances = getInstances(instancesUID, em);
-                    }
-                } else {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The study metadata or the series metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
-            } else if (studyExist(studyInstanceUID, em)) {
-                //obtenir et comparer (study)
-                study = getStudy(studyInstanceUID, em);
-                if (compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
-                    //créer instances + series
-                    series = new Series(seriesInstanceUID, study);
-                    series.setModality(modality);
-                    series.setBodyPartExamined(bodyPartExamined);
-                    series.setSeriesDescription(seriesDescription);
-                    series.setSeriesNumber(seriesNumber);
-                    series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
-
-                    instances = new Instances(instancesUID, series);
-                    isNewSeries = true;
-                    isNewInstance = true;
-                    em.persist(series);
-                    em.persist(instances);
-                } else {
-                    final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                            .message("Bad Request")
-                            .detail("The study metadata or the series metadata is differente from Kheops")
-                            .build();
-                    return Response.status(BAD_REQUEST).entity(errorResponse).build();
-                }
-            } else {
-                study = new Study(studyInstanceUID);
-                study.setStudyDescription(studyDescription);
-                study.setAccessionNumber(accessionNumber);
-                study.setPatientBirthDate(patientBirthDate);
-                study.setPatientName(patientName);
-                study.setPatientID(patientId);
-                study.setPatientSex(patientSex);
-                study.setReferringPhysicianName(referringPhysicianName);
-                study.setStudyDate(studyDate);
-                study.setStudyTime(studyTime);
-                study.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
-                study.setStudyID(studyId);
-                series = new Series(seriesInstanceUID, study);
-                series.setModality(modality);
-                series.setBodyPartExamined(bodyPartExamined);
-                series.setSeriesDescription(seriesDescription);
-                series.setSeriesNumber(seriesNumber);
-                series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
-                instances = new Instances(instancesUID, series);
-                isNewStudy = true;
-                isNewSeries = true;
+            try {
+                instance = getInstances(instancesUID, em);
+                tx.commit();
+            } catch (InstancesNotFoundException e) {
+                instance = new Instances(instancesUID, series);
+                em.persist(instance);
+                tx.commit();
                 isNewInstance = true;
-                em.persist(study);
-                em.persist(series);
-                em.persist(instances);
             }
+        } catch (PersistenceException e) {
+            try {
+                tx.rollback();
+                tx.begin();
+                instance = getInstances(instancesUID, em);
+                tx.commit();
+            } catch (InstancesNotFoundException unused) {
+                throw new IllegalStateException();
+            }
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            //em.close();
+        }
 
+        if (!isNewSeries && !compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID)) {
+            try {
+                tx.begin();
+                if (isNewInstance) {
+                    em.remove(instance);
+                }
+                tx.commit();
+            } finally {
+                if (tx.isActive()) {
+                    tx.rollback();
+                }
+                em.close();
+                final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
+                        .message("Bad Request")
+                        .detail("The series metadata is differente from Kheops")
+                        .build();
+                return Response.status(BAD_REQUEST).entity(errorResponse).build();
+            }
+        }
+        if (!isNewStudy && !compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
+            try {
+                tx.begin();
+                if (isNewInstance) {
+                    em.remove(instance);
+                }
+                if (isNewSeries) {
+                    em.remove(series);
+                }
+                tx.commit();
+            } finally {
+                if (tx.isActive()) {
+                    tx.rollback();
+                }
+                em.close();
+                final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
+                        .message("Bad Request")
+                        .detail("The study metadata is differente from Kheops")
+                        .build();
+                return Response.status(BAD_REQUEST).entity(errorResponse).build();
+            }
+        }
+
+        //ajouter la series dans la destination
+            //si erreur supprimer si nouvelle series ou study ou instance
+        //webhook
+
+
+
+
+
+        Album destinationHashMap = null;
+
+        try {
+            tx.begin();
             //add series in destination if not present
             final Album destination;
-            Album destinationHashMap = null;
             if (albumId == null) {
                 destination = kheopsPrincipal.getUser().getInbox();
             } else {
@@ -353,20 +307,18 @@ public class STOWResource {
             }
 
             tx.commit();
-
-            //Webhook
-            final Source source = new Source(kheopsPrincipal.getUser());
-            kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
-            kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-            FooHashMap.getInstance().addHashMapData(study, series, instances, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
-            FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
-
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            em.close();
-        }*/
+        }
+
+        //Webhook
+        final Source source = new Source(kheopsPrincipal.getUser());
+        kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
+        kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
+        FooHashMap.getInstance().addHashMapData(study, series, instance, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
+        FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
 
        KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
                 .action(KheopsLogBuilder.ActionType.STOW)
