@@ -15,9 +15,7 @@ import online.kheops.auth_server.util.ErrorResponse;
 import online.kheops.auth_server.util.KheopsLogBuilder;
 import online.kheops.auth_server.webhook.FooHashMap;
 import online.kheops.auth_server.webhook.Source;
-import org.hibernate.exception.ConstraintViolationException;
 
-import javax.management.InstanceNotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
@@ -29,19 +27,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import java.time.Instant;
-
 import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
 import static online.kheops.auth_server.instances.Instances.getInstances;
-import static online.kheops.auth_server.instances.Instances.instancesExist;
 import static online.kheops.auth_server.report_provider.ReportProviderQueries.getReportProviderWithClientId;
 import static online.kheops.auth_server.series.Series.getSeries;
-import static online.kheops.auth_server.series.Series.seriesExist;
 import static online.kheops.auth_server.study.Studies.getStudy;
-import static online.kheops.auth_server.study.Studies.studyExist;
-import static online.kheops.auth_server.user.Users.getUser;
 import static online.kheops.auth_server.util.Consts.*;
 import static online.kheops.auth_server.util.ErrorResponse.Message.*;
 
@@ -173,7 +165,6 @@ public class STOWResource {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            //em.close();
         }
 
         try {
@@ -206,7 +197,6 @@ public class STOWResource {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            //em.close();
         }
 
         try {
@@ -233,7 +223,6 @@ public class STOWResource {
             if (tx.isActive()) {
                 tx.rollback();
             }
-            //em.close();
         }
 
         if (!isNewSeries && !compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID)) {
@@ -278,16 +267,7 @@ public class STOWResource {
             }
         }
 
-        //ajouter la series dans la destination
-            //si erreur supprimer si nouvelle series ou study ou instance
-        //webhook
-
-
-
-
-
         Album destinationHashMap = null;
-
         try {
             tx.begin();
             //add series in destination if not present
@@ -311,6 +291,7 @@ public class STOWResource {
             if (tx.isActive()) {
                 tx.rollback();
             }
+            em.close();
         }
 
         //Webhook
