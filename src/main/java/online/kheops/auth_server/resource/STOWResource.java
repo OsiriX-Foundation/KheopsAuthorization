@@ -46,6 +46,32 @@ public class STOWResource {
     @Context
     private ServletContext context;
 
+    private class StudyParam {
+        String studyInstanceUID;
+        String studyDate;
+        String studyTime;
+        String studyDescription;
+        String timzoneOffsetFromUtc;
+        String accessionNumber;
+        String referringPhysicianName;
+        String patientName;
+        String patientId;
+        String patientBirthDate;
+        String patientSex;
+        String studyId;
+    }
+
+    private class SeriesParam {
+        String seriesInstanceUID;
+        String studyInstanceUID;
+        String modality;
+        String seriesDescription;
+        int seriesNumber;
+        String bodyPartExamined;
+        String timzoneOffsetFromUtc;
+
+    }
+
     @POST
     @Secured
     @Path("stow")
@@ -115,6 +141,27 @@ public class STOWResource {
         //non => action non autorisée
         //oui => gestion de mutation / webhook ==> return already exist
 
+        StudyParam studyParam = new StudyParam();
+        studyParam.studyInstanceUID = studyInstanceUID;
+        studyParam.studyDate = studyDate;
+        studyParam.studyTime = studyTime;
+        studyParam.studyDescription = studyDescription;
+        studyParam.timzoneOffsetFromUtc = timzoneOffsetFromUtc;
+        studyParam.accessionNumber = accessionNumber;
+        studyParam.referringPhysicianName = referringPhysicianName;
+        studyParam.patientName = patientName;
+        studyParam.patientId = patientId;
+        studyParam.patientBirthDate = patientBirthDate;
+        studyParam.patientSex = patientSex;
+        studyParam.studyId = studyId;
+
+        SeriesParam seriesParam = new SeriesParam();
+        seriesParam.bodyPartExamined = bodyPartExamined;
+        seriesParam.modality = modality;
+        seriesParam.seriesDescription = seriesDescription;
+        seriesParam.seriesInstanceUID = seriesInstanceUID;
+        seriesParam.timzoneOffsetFromUtc = timzoneOffsetFromUtc;
+        seriesParam.studyInstanceUID = studyInstanceUID;
 
         boolean isNewStudy = false;
         boolean isNewSeries = false;
@@ -128,14 +175,11 @@ public class STOWResource {
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
 
-        final GetOrCreateStudyResult getOrCreateStudyResult = getOrCreateStudy(studyInstanceUID, studyDate, studyTime,
-                studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName,
-                patientId, patientBirthDate, patientSex, studyId, tx, em);
+        final GetOrCreateStudyResult getOrCreateStudyResult = getOrCreateStudy(studyParam, tx, em);
         study = getOrCreateStudyResult.getStudy();
         isNewStudy = getOrCreateStudyResult.isNewStudy();
 
-        final GetOrCreateSeriesResult getOrCreateSeriesResult = getOrCreateSeries(seriesInstanceUID, modality, seriesDescription,
-                seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID, study, tx, em);
+        final GetOrCreateSeriesResult getOrCreateSeriesResult = getOrCreateSeries(seriesParam, study, tx, em);
         series = getOrCreateSeriesResult.getSeries();
         isNewSeries = getOrCreateSeriesResult.isNewSeries();
 
@@ -144,7 +188,7 @@ public class STOWResource {
         isNewInstance = getOrCreateInstanceResult.isNewInstance();
 
 
-        if (!isNewSeries && !compareSeries(series, modality, seriesDescription, seriesNumber, bodyPartExamined, timzoneOffsetFromUtc, studyInstanceUID)) {
+        if (!isNewSeries && !compareSeries(series, seriesParam)) {
             try {
                 tx.begin();
                 if (isNewInstance) {
@@ -164,7 +208,7 @@ public class STOWResource {
             }
         }
 
-        if (!isNewStudy && !compareStudy(study, studyDate, studyTime, studyDescription, timzoneOffsetFromUtc, accessionNumber, referringPhysicianName, patientName, patientId, patientBirthDate, patientSex, studyId)) {
+        if (!isNewStudy && !compareStudy(study, studyParam)) {
             try {
                 tx.begin();
                 if (isNewInstance) {
@@ -234,31 +278,27 @@ public class STOWResource {
         return Response.status(NO_CONTENT).build();
     }
 
-    private static boolean compareSeries(Series series, String modality, String seriesDescription, int seriesNumber,
-                                         String bodyPartExamined, String timzoneOffsetFromUtc, String studyInstanceUID) {
-        return (series.getModality() == null ? modality == null : series.getModality().equals(modality)) &&
-                (series.getSeriesDescription() == null ? seriesDescription == null : series.getSeriesDescription().equals(seriesDescription)) &&
-                series.getSeriesNumber() == seriesNumber &&
-                (series.getBodyPartExamined() == null ? bodyPartExamined == null : series.getBodyPartExamined().equals(bodyPartExamined)) &&
-                (series.getTimezoneOffsetFromUTC() == null ? timzoneOffsetFromUtc == null : series.getTimezoneOffsetFromUTC().equals(timzoneOffsetFromUtc)) &&
-                (series.getStudy().getStudyInstanceUID() == null ? studyInstanceUID == null : series.getStudy().getStudyInstanceUID().equals(studyInstanceUID));
+    private static boolean compareSeries(Series series, SeriesParam seriesParam) {
+        return (series.getModality() == null ? seriesParam.modality == null : series.getModality().equals(seriesParam.modality)) &&
+                (series.getSeriesDescription() == null ? seriesParam.seriesDescription == null : series.getSeriesDescription().equals(seriesParam.seriesDescription)) &&
+                series.getSeriesNumber() == seriesParam.seriesNumber &&
+                (series.getBodyPartExamined() == null ? seriesParam.bodyPartExamined == null : series.getBodyPartExamined().equals(seriesParam.bodyPartExamined)) &&
+                (series.getTimezoneOffsetFromUTC() == null ? seriesParam.timzoneOffsetFromUtc == null : series.getTimezoneOffsetFromUTC().equals(seriesParam.timzoneOffsetFromUtc)) &&
+                (series.getStudy().getStudyInstanceUID() == null ? seriesParam.studyInstanceUID == null : series.getStudy().getStudyInstanceUID().equals(seriesParam.studyInstanceUID));
     }
 
-    private static boolean compareStudy(Study study, String studyDate, String studyTime, String studyDescription,
-                                        String timzoneOffsetFromUtc, String accessionNumber,
-                                        String referringPhysicianName, String patientName, String patientId,
-                                        String patientBirthDate, String patientSex, String studyId) {
-        return (study.getStudyDate() == null ? studyDate == null : study.getStudyDate().equals(studyDate)) &&
-                (study.getStudyTime() == null ? studyTime == null : study.getStudyTime().equals(studyTime)) &&
-                (study.getStudyDescription() == null ? studyDescription == null : study.getStudyDescription().equals(studyDescription)) &&
-                (study.getTimezoneOffsetFromUTC() == null ? timzoneOffsetFromUtc == null : study.getTimezoneOffsetFromUTC().equals(timzoneOffsetFromUtc)) &&
-                (study.getAccessionNumber() == null ? accessionNumber == null : study.getAccessionNumber().equals(accessionNumber)) &&
-                (study.getReferringPhysicianName() == null ? referringPhysicianName == null : study.getReferringPhysicianName().equals(referringPhysicianName)) &&
-                (study.getPatientName() == null ? patientName == null : study.getPatientName().equals(patientName)) &&
-                (study.getPatientID() == null ? patientId == null : study.getPatientID().equals(patientId)) &&
-                (study.getPatientBirthDate() == null ? patientBirthDate == null : study.getPatientBirthDate().equals(patientBirthDate)) &&
-                (study.getPatientSex() == null ? patientSex == null : study.getPatientSex().equals(patientSex)) &&
-                (study.getStudyID() == null ? studyId == null : study.getStudyID().equals(studyId));
+    private static boolean compareStudy(Study study, StudyParam studyParam) {
+        return (study.getStudyDate() == null ? studyParam.studyDate == null : study.getStudyDate().equals(studyParam.studyDate)) &&
+                (study.getStudyTime() == null ? studyParam.studyTime == null : study.getStudyTime().equals(studyParam.studyTime)) &&
+                (study.getStudyDescription() == null ? studyParam.studyDescription == null : study.getStudyDescription().equals(studyParam.studyDescription)) &&
+                (study.getTimezoneOffsetFromUTC() == null ? studyParam.timzoneOffsetFromUtc == null : study.getTimezoneOffsetFromUTC().equals(studyParam.timzoneOffsetFromUtc)) &&
+                (study.getAccessionNumber() == null ? studyParam.accessionNumber == null : study.getAccessionNumber().equals(studyParam.accessionNumber)) &&
+                (study.getReferringPhysicianName() == null ? studyParam.referringPhysicianName == null : study.getReferringPhysicianName().equals(studyParam.referringPhysicianName)) &&
+                (study.getPatientName() == null ? studyParam.patientName == null : study.getPatientName().equals(studyParam.patientName)) &&
+                (study.getPatientID() == null ? studyParam.patientId == null : study.getPatientID().equals(studyParam.patientId)) &&
+                (study.getPatientBirthDate() == null ? studyParam.patientBirthDate == null : study.getPatientBirthDate().equals(studyParam.patientBirthDate)) &&
+                (study.getPatientSex() == null ? studyParam.patientSex == null : study.getPatientSex().equals(studyParam.patientSex)) &&
+                (study.getStudyID() == null ? studyParam.studyId == null : study.getStudyID().equals(studyParam.studyId));
     }
 
     private class GetOrCreateSeriesResult {
@@ -279,23 +319,22 @@ public class STOWResource {
         }
     }
 
-    private GetOrCreateSeriesResult getOrCreateSeries(String seriesInstanceUID, String modality, String seriesDescription, int seriesNumber,
-                                                      String bodyPartExamined, String timzoneOffsetFromUtc, String studyInstanceUID, Study study, EntityTransaction tx, EntityManager em) {
+    private GetOrCreateSeriesResult getOrCreateSeries(SeriesParam seriesParam, Study study, EntityTransaction tx, EntityManager em) {
         boolean isNewSeries = false;
         Series series;
         try {
             tx.begin();
             try {
-                series = getSeries(studyInstanceUID, seriesInstanceUID, em);
+                series = getSeries(seriesParam.studyInstanceUID, seriesParam.seriesInstanceUID, em);
                 tx.commit();
 
             } catch (SeriesNotFoundException e) {
-                series = new Series(seriesInstanceUID, study);
-                series.setModality(modality);
-                series.setBodyPartExamined(bodyPartExamined);
-                series.setSeriesDescription(seriesDescription);
-                series.setSeriesNumber(seriesNumber);
-                series.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
+                series = new Series(seriesParam.seriesInstanceUID, study);
+                series.setModality(seriesParam.modality);
+                series.setBodyPartExamined(seriesParam.bodyPartExamined);
+                series.setSeriesDescription(seriesParam.seriesDescription);
+                series.setSeriesNumber(seriesParam.seriesNumber);
+                series.setTimezoneOffsetFromUTC(seriesParam.timzoneOffsetFromUtc);
                 em.persist(series);
                 tx.commit();
                 isNewSeries = true;
@@ -304,7 +343,7 @@ public class STOWResource {
             try {
                 tx.rollback();
                 tx.begin();
-                series = getSeries(studyInstanceUID, seriesInstanceUID, em);
+                series = getSeries(seriesParam.studyInstanceUID, seriesParam.seriesInstanceUID, em);
                 tx.commit();
             } catch (SeriesNotFoundException unused) {
                 throw new IllegalStateException();
@@ -385,10 +424,7 @@ public class STOWResource {
         }
     }
 
-    private GetOrCreateStudyResult getOrCreateStudy(String studyInstanceUID, String studyDate, String studyTime, String studyDescription,
-                                                    String timzoneOffsetFromUtc, String accessionNumber,
-                                                    String referringPhysicianName, String patientName, String patientId,
-                                                    String patientBirthDate, String patientSex, String studyId, EntityTransaction tx, EntityManager em) {
+    private GetOrCreateStudyResult getOrCreateStudy(StudyParam studyParam, EntityTransaction tx, EntityManager em) {
 
         boolean isNewStudy = false;
         Study study;
@@ -396,22 +432,22 @@ public class STOWResource {
         try {
             tx.begin();
             try {
-                study = getStudy(studyInstanceUID, em);
+                study = getStudy(studyParam.studyInstanceUID, em);
                 tx.commit();
 
             } catch (StudyNotFoundException e) {
-                study = new Study(studyInstanceUID);
-                study.setStudyDescription(studyDescription);
-                study.setAccessionNumber(accessionNumber);
-                study.setPatientBirthDate(patientBirthDate);
-                study.setPatientName(patientName);
-                study.setPatientID(patientId);
-                study.setPatientSex(patientSex);
-                study.setReferringPhysicianName(referringPhysicianName);
-                study.setStudyDate(studyDate);
-                study.setStudyTime(studyTime);
-                study.setTimezoneOffsetFromUTC(timzoneOffsetFromUtc);
-                study.setStudyID(studyId);
+                study = new Study(studyParam.studyInstanceUID);
+                study.setStudyDescription(studyParam.studyDescription);
+                study.setAccessionNumber(studyParam.accessionNumber);
+                study.setPatientBirthDate(studyParam.patientBirthDate);
+                study.setPatientName(studyParam.patientName);
+                study.setPatientID(studyParam.patientId);
+                study.setPatientSex(studyParam.patientSex);
+                study.setReferringPhysicianName(studyParam.referringPhysicianName);
+                study.setStudyDate(studyParam.studyDate);
+                study.setStudyTime(studyParam.studyTime);
+                study.setTimezoneOffsetFromUTC(studyParam.timzoneOffsetFromUtc);
+                study.setStudyID(studyParam.studyId);
                 em.persist(study);
                 tx.commit();
                 isNewStudy = true;
@@ -421,7 +457,7 @@ public class STOWResource {
             try {
                 tx.rollback();
                 tx.begin();
-                study = getStudy(studyInstanceUID, em);
+                study = getStudy(studyParam.studyInstanceUID, em);
                 tx.commit();
             } catch (StudyNotFoundException unused) {
                 throw new IllegalStateException();
