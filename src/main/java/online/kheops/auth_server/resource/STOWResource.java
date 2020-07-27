@@ -230,7 +230,7 @@ public class STOWResource {
             }
         }
 
-        Album destinationHashMap = null;
+        Album albumDestinationNotInbox = null; // if STOW in inbox stay null
         try {
             tx.begin();
             //add series in destination if not present
@@ -239,7 +239,7 @@ public class STOWResource {
                 destination = kheopsPrincipal.getUser().getInbox();
             } else {
                 destination = getAlbum(albumId, em);
-                destinationHashMap = destination;
+                albumDestinationNotInbox = destination;
             }
             try {
                 getAlbumSeries(destination, series, em);
@@ -262,8 +262,8 @@ public class STOWResource {
         final Source source = new Source(kheopsPrincipal.getUser());
         kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
         kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-        FooHashMap.getInstance().addHashMapData(study, series, instance, destinationHashMap, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
         FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
+        FooHashMap.getInstance().addHashMapData(study, series, instance, albumDestinationNotInbox, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
 
         KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
                 .action(KheopsLogBuilder.ActionType.STOW)
