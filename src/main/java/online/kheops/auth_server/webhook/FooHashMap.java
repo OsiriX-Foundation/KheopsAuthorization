@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static online.kheops.auth_server.album.AlbumQueries.findAlbumsWithEnabledNewSeriesWebhooks;
@@ -190,7 +191,7 @@ public class FooHashMap {
                 webhookAsyncRequest.firstRequest();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.WARNING,"", e);
         } finally {
             if (tx.isActive()) {
                 tx.rollback();

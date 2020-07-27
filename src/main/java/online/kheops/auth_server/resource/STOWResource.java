@@ -46,7 +46,7 @@ public class STOWResource {
     @Context
     private ServletContext context;
 
-    private class StudyParam {
+    private static class StudyParam {
         String studyInstanceUID;
         String studyDate;
         String studyTime;
@@ -61,7 +61,7 @@ public class STOWResource {
         String studyId;
     }
 
-    private class SeriesParam {
+    private static class SeriesParam {
         String seriesInstanceUID;
         String studyInstanceUID;
         String modality;
@@ -69,7 +69,6 @@ public class STOWResource {
         int seriesNumber;
         String bodyPartExamined;
         String timzoneOffsetFromUtc;
-
     }
 
     @POST
@@ -141,7 +140,7 @@ public class STOWResource {
         //non => action non autorisée
         //oui => gestion de mutation / webhook ==> return already exist
 
-        StudyParam studyParam = new StudyParam();
+        final StudyParam studyParam = new StudyParam();
         studyParam.studyInstanceUID = studyInstanceUID;
         studyParam.studyDate = studyDate;
         studyParam.studyTime = studyTime;
@@ -155,7 +154,7 @@ public class STOWResource {
         studyParam.patientSex = patientSex;
         studyParam.studyId = studyId;
 
-        SeriesParam seriesParam = new SeriesParam();
+        final SeriesParam seriesParam = new SeriesParam();
         seriesParam.bodyPartExamined = bodyPartExamined;
         seriesParam.modality = modality;
         seriesParam.seriesDescription = seriesDescription;
@@ -163,10 +162,10 @@ public class STOWResource {
         seriesParam.timzoneOffsetFromUtc = timzoneOffsetFromUtc;
         seriesParam.studyInstanceUID = studyInstanceUID;
 
-        boolean isNewStudy = false;
-        boolean isNewSeries = false;
-        boolean isNewInstance = false;
-        boolean isNewInDestination = false;
+        final boolean isNewStudy;
+        final boolean isNewSeries;
+        final boolean isNewInstance;
+        boolean isNewInDestination;
 
         final Study study;
         final Series series;
@@ -244,6 +243,7 @@ public class STOWResource {
             }
             try {
                 getAlbumSeries(destination, series, em);
+                isNewInDestination = false;
             } catch (NoResultException e) {
                 AlbumSeries albumSeries = new AlbumSeries(destination, series);
                 isNewInDestination = true;
