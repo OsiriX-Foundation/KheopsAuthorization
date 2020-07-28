@@ -1,4 +1,4 @@
-package online.kheops.auth_server.webhook;
+package online.kheops.auth_server.stow;
 
 import online.kheops.auth_server.entity.Instances;
 
