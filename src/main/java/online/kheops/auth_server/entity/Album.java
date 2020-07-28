@@ -184,12 +184,9 @@ public class Album {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Album album = (Album) o;
-        return pk == album.pk &&
-                id.equals(album.id);
+        return id.equals(album.id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(pk, id);
-    }
+    public int hashCode() { return id.hashCode(); }
 }

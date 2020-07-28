@@ -135,12 +135,9 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return pk == user.pk &&
-                sub.equals(user.sub);
+        return sub.equals(user.sub);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(pk, sub);
-    }
+    public int hashCode() { return sub.hashCode(); }
 }

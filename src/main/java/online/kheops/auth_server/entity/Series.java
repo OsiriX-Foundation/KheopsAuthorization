@@ -215,15 +215,12 @@ public class Series {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Series series = (Series) o;
-        return pk == series.pk &&
-                seriesNumber == series.seriesNumber &&
-                seriesInstanceUID.equals(series.seriesInstanceUID) &&
-                Objects.equals(modality, series.modality);
+        return seriesInstanceUID.equals(series.seriesInstanceUID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pk, seriesInstanceUID, modality, seriesNumber);
+        return seriesInstanceUID.hashCode();
     }
 
     @Override

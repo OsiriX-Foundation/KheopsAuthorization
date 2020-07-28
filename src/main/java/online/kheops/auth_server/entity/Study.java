@@ -257,15 +257,12 @@ public class Study {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Study study = (Study) o;
-        return pk == study.pk &&
-                studyInstanceUID.equals(study.studyInstanceUID) &&
-                Objects.equals(accessionNumber, study.accessionNumber) &&
-                Objects.equals(patientID, study.patientID);
+        return studyInstanceUID.equals(study.studyInstanceUID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pk, studyInstanceUID, accessionNumber, patientID);
+        return studyInstanceUID.hashCode();
     }
 
     @Override

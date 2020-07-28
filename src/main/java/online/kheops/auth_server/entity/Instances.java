@@ -40,8 +40,8 @@ public class Instances {
 
     public Instances(String instanceUID, Series series) {
         this.series = series;
-        series.addInstances(this);
         this.instanceUID = instanceUID;
+        series.addInstances(this);
     }
 
     public long getPk() { return pk; }
@@ -54,13 +54,12 @@ public class Instances {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Instances instances = (Instances) o;
-        return pk == instances.pk &&
-                instanceUID.equals(instances.instanceUID);
+        return instanceUID.equals(instances.instanceUID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pk, instanceUID);
+        return instanceUID.hashCode();
     }
 
     @Override
