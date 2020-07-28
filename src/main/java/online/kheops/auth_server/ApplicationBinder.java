@@ -6,7 +6,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Singleton;
 
-public class MyApplicationBinder extends AbstractBinder {
+public class ApplicationBinder extends AbstractBinder {
 
 
     @Override
