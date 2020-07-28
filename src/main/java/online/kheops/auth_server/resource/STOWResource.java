@@ -9,13 +9,14 @@ import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.instances.InstancesNotFoundException;
 import online.kheops.auth_server.principal.KheopsPrincipal;
 import online.kheops.auth_server.series.SeriesNotFoundException;
+import online.kheops.auth_server.stow.FooHashMap;
 import online.kheops.auth_server.study.StudyNotFoundException;
 import online.kheops.auth_server.user.AlbumUserPermissions;
 import online.kheops.auth_server.util.ErrorResponse;
 import online.kheops.auth_server.util.KheopsLogBuilder;
-import online.kheops.auth_server.webhook.FooHashMap;
 import online.kheops.auth_server.webhook.Source;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
@@ -70,6 +71,9 @@ public class STOWResource {
         String bodyPartExamined;
         String timzoneOffsetFromUtc;
     }
+
+    @Inject
+    FooHashMap fooHashMap;
 
     @POST
     @Secured
@@ -230,16 +234,15 @@ public class STOWResource {
             }
         }
 
-        Album albumDestinationNotInbox = null; // if STOW in inbox stay null
+        final Album destination;
+        final boolean isInbox = albumId == null;
         try {
             tx.begin();
             //add series in destination if not present
-            final Album destination;
             if (albumId == null) {
-                destination = kheopsPrincipal.getUser().getInbox();
+                destination = em.merge(kheopsPrincipal.getUser().getInbox());
             } else {
                 destination = getAlbum(albumId, em);
-                albumDestinationNotInbox = destination;
             }
             try {
                 getAlbumSeries(destination, series, em);
@@ -262,8 +265,8 @@ public class STOWResource {
         final Source source = new Source(kheopsPrincipal.getUser());
         kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
         kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-        FooHashMap.getInstance().setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
-        FooHashMap.getInstance().addHashMapData(study, series, instance, albumDestinationNotInbox, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
+        fooHashMap.setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
+        fooHashMap.addHashMapData(study, series, instance, destination, isInbox, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
 
         KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
                 .action(KheopsLogBuilder.ActionType.STOW)
