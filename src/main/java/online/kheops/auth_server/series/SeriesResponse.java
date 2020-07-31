@@ -28,18 +28,20 @@ public class SeriesResponse {
     private Set<String> instances;
 
 
-
     private SeriesResponse() { /*empty*/ }
 
-    public SeriesResponse(Series series, String kheopsInstance) {
+    public SeriesResponse(Series series, boolean uidOnly, String kheopsInstance) {
+        seriesUid = series.getSeriesInstanceUID();
+        if (uidOnly) { return; }
         modality = series.getModality();
         numberOfSeriesRelatedInstance = Long.valueOf(series.getNumberOfSeriesRelatedInstances());
         seriesDescription = series.getSeriesDescription();
-        seriesUid = series.getSeriesInstanceUID();
         timeZoneOffsetFromUTC = series.getTimezoneOffsetFromUTC();
         seriesNumber = Long.valueOf(series.getSeriesNumber());
         bodyPartExamined = series.getBodyPartExamined();
-        retrieveUrl = kheopsInstance + "/api/studies/" + series.getStudy().getStudyInstanceUID() + "/series/" + series.getSeriesInstanceUID();
+        if (kheopsInstance != null) {
+            retrieveUrl = kheopsInstance + "/api/studies/" + series.getStudy().getStudyInstanceUID() + "/series/" + series.getSeriesInstanceUID();
+        }
     }
 
     public void addInstances(String instanceUID) {
@@ -47,9 +49,5 @@ public class SeriesResponse {
             instances = new HashSet<>();
         }
         instances.add(instanceUID);
-    }
-
-    public SeriesResponse(Series series) {
-        seriesUid = series.getSeriesInstanceUID();
     }
 }

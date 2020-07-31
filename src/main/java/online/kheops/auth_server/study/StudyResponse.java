@@ -43,11 +43,11 @@ public class StudyResponse {
     @XmlElement(name = "series")
     private List<SeriesResponse> series;
 
-    private String kheopsInstance;
+    private String kheopsInstance = null;
 
     private StudyResponse() { /*empty*/ }
 
-    public StudyResponse(Study study, boolean uidOnly) {
+    public StudyResponse(Study study, boolean uidOnly, String kheopsInstance) {
         studyInstanceUID = study.getStudyInstanceUID();
         if (uidOnly) { return; }
         patientName = study.getPatientName();
@@ -61,22 +61,17 @@ public class StudyResponse {
         studyId = study.getStudyID();
         timezoneOffsetFromUtc = study.getTimezoneOffsetFromUTC();
         studyTime = study.getStudyTime();
-    }
-
-    public void setKheopsInstance(String kheopsInstance) {
-        retrieveUrl = kheopsInstance + "/api/studies/" + studyInstanceUID;
-        this.kheopsInstance = kheopsInstance;
-    }
-
-    public StudyResponse(Study study) {
-        studyInstanceUID = study.getStudyInstanceUID();
+        if(kheopsInstance != null) {
+            this.kheopsInstance = kheopsInstance;
+            retrieveUrl = kheopsInstance + "/api/studies/" + studyInstanceUID;
+        }
     }
 
     public void addSeries(Series series) {
         if(this.series == null) {
             this.series = new ArrayList<>();
         }
-        final SeriesResponse seriesResponse = new SeriesResponse(series, kheopsInstance);
+        final SeriesResponse seriesResponse = new SeriesResponse(series, true, kheopsInstance);
         series.getInstances().forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
         this.series.add(seriesResponse);
     }
@@ -85,7 +80,7 @@ public class StudyResponse {
         if(this.series == null) {
             this.series = new ArrayList<>();
         }
-        final SeriesResponse seriesResponse = new SeriesResponse(series, kheopsInstance);
+        final SeriesResponse seriesResponse = new SeriesResponse(series, false, kheopsInstance);
         instancesSet.forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
         this.series.add(seriesResponse);
     }

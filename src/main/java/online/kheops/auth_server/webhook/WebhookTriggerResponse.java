@@ -39,7 +39,7 @@ public class WebhookTriggerResponse {
             event = WebhookType.NEW_SERIES.name().toLowerCase();
             for (Series series: webhookTrigger.getSeries()) {
                 if (studyResponse == null) {
-                    studyResponse = new StudyResponse(series.getStudy());
+                    studyResponse = new StudyResponse(series.getStudy(), true, null);
                 }
                 studyResponse.addSeries(series);
             }

@@ -1,6 +1,7 @@
 package online.kheops.auth_server.resource;
 
 import online.kheops.auth_server.EntityManagerListener;
+import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.NotAlbumScopeTypeException;
 import online.kheops.auth_server.album.AlbumNotFoundException;
 import online.kheops.auth_server.annotation.Secured;
@@ -21,7 +22,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
-import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -43,9 +43,6 @@ public class STOWResource {
 
     @Context
     private SecurityContext securityContext;
-
-    @Context
-    private ServletContext context;
 
     private static class StudyParam {
         String studyInstanceUID;
@@ -74,6 +71,9 @@ public class STOWResource {
 
     @Inject
     FooHashMap fooHashMap;
+
+    @Inject
+    KheopsInstance kheopsInstance;
 
     @POST
     @Secured
@@ -106,6 +106,8 @@ public class STOWResource {
             throws AlbumNotFoundException {
 
         KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
+
+        String s = kheopsInstance.get();
 
         //si la destination est un album avons nous les droits d'écriture ?
         //si les droit sont limité à un album, avons-nous les droit d'écriture dessus ?
@@ -265,7 +267,6 @@ public class STOWResource {
         final Source source = new Source(kheopsPrincipal.getUser());
         kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
         kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-        fooHashMap.setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER));
         fooHashMap.addHashMapData(study, series, instance, destination, isInbox, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
 
         KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()

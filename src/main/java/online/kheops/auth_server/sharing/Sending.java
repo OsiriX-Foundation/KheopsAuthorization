@@ -235,7 +235,6 @@ public class Sending {
                     .isSent()
                     .setDestination(albumId)
                     .isAutomatedTrigger()
-                    .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .setSource(targetAlbumUser);
 
             final Mutation mutation;
@@ -297,7 +296,6 @@ public class Sending {
             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                     .setSource(targetAlbumUser)
                     .setDestination(albumId)
-                    .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .isAutomatedTrigger()
                     .isSent()
                     .setStudy(study);

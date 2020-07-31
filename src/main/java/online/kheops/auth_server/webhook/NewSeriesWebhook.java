@@ -1,9 +1,11 @@
 package online.kheops.auth_server.webhook;
 
+import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.study.StudyResponse;
 import online.kheops.auth_server.user.UserResponse;
 
+import javax.inject.Inject;
 import javax.xml.bind.annotation.XmlElement;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -31,11 +33,10 @@ public class NewSeriesWebhook implements WebhookResult{
     @XmlElement(name = "updated_study")
     private StudyResponse updatedStudy;
 
-
     private NewSeriesWebhook() { /*empty*/ }
 
     private NewSeriesWebhook(Builder builder) {
-        kheopsInstance = builder.kheopsInstance;
+        this.kheopsInstance = builder.kheopInstance;
         albumId = builder.albumId;
         eventTime = LocalDateTime.now();
         sourceUser = builder.sourceUser;
@@ -52,12 +53,12 @@ public class NewSeriesWebhook implements WebhookResult{
     }
 
     public static class Builder {
-        private String kheopsInstance;
         private String albumId;
         private UserResponse sourceUser;
         private boolean isManualTrigger;
         private String importSource;
         private StudyResponse updatedStudy;
+        private String kheopInstance;
         private Map<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
 
         public Builder() { /*empty*/ }
@@ -67,17 +68,6 @@ public class NewSeriesWebhook implements WebhookResult{
                 throw new IllegalStateException("destiation is null");
             }
             albumId = destination;
-            return this;
-        }
-
-        public Builder setKheopsInstance(String kheopsInstance) {
-            if (kheopsInstance == null) {
-                throw new IllegalStateException("instance is null");
-            }
-            this.kheopsInstance = kheopsInstance;
-            if (updatedStudy != null) {
-                updatedStudy.setKheopsInstance(kheopsInstance);
-            }
             return this;
         }
 
@@ -124,6 +114,11 @@ public class NewSeriesWebhook implements WebhookResult{
             return this;
         }
 
+        public Builder setKheopsInstance(String kheopsInstance) {
+            this.kheopInstance = kheopsInstance;
+            return this;
+        }
+
         public Builder isUpload() {
             importSource = "upload";
             return this;
@@ -138,10 +133,7 @@ public class NewSeriesWebhook implements WebhookResult{
             if (updatedStudy != null) {
                 throw new IllegalStateException("updatedStudy is already set");
             }
-            this.updatedStudy = new StudyResponse(study, false);
-            if(kheopsInstance != null) {
-                this.updatedStudy.setKheopsInstance(kheopsInstance);
-            }
+            this.updatedStudy = new StudyResponse(study, false, kheopInstance);
             return this;
         }
 

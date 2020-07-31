@@ -1,10 +1,12 @@
 package online.kheops.auth_server.stow;
 
 import online.kheops.auth_server.EntityManagerListener;
+import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.event.Events;
 import online.kheops.auth_server.webhook.*;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.*;
@@ -19,21 +21,17 @@ import static online.kheops.auth_server.event.Events.albumPostStudyMutation;
 
 public class FooHashMapImpl implements FooHashMap{
 
-    private static final Logger LOG = Logger.getLogger(FooHashMap.class.getName());
+    @Inject
+    KheopsInstance kheopsInstance;
 
-    private static String kheopsInstance;
-    private final static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final Logger LOG = Logger.getLogger(FooHashMapImpl.class.getName());
+
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static final int TIME_TO_LIVE = 10;//seconds
 
     private static Level0_StudyLevel level0StudyLevel = new Level0_StudyLevel();
 
-
     public FooHashMapImpl() { /*empty*/ }
-
-
-    public void setKheopsInstance(String kheopsInstance) {
-        this.kheopsInstance = kheopsInstance;
-    }
 
     public void addHashMapData(Study study, Series series, Instances instances, Album destination, boolean isInbox, boolean isNewStudy, boolean isNewSeries, boolean isNewInstance, Source source, boolean isNewInDestination) {
         scheduler.schedule(() -> addData(study, series, instances, isNewStudy, isNewSeries, isNewInstance, destination, isInbox, source, isNewInDestination), 0, TimeUnit.SECONDS);
@@ -46,7 +44,6 @@ public class FooHashMapImpl implements FooHashMap{
         }
         level0StudyLevel.put(scheduler.schedule(() -> callWebhook(study), TIME_TO_LIVE, TimeUnit.SECONDS), study, series, instances, isNewStudy, isNewSeries, isNewInstances, source, destination, isInbox, isNewInDestination);
     }
-
 
     private void callWebhook(Study studyIn) {
         String log = "callWebhook:";
@@ -83,9 +80,9 @@ public class FooHashMapImpl implements FooHashMap{
                                         .setDestination(album.getId())
                                         .isUpload()
                                         .isAutomatedTrigger()
+                                        .setKheopsInstance(kheopsInstance.get())
                                         .setStudy(study)
-                                        .setSource(source)
-                                        .setKheopsInstance(kheopsInstance);
+                                        .setSource(source);
 
                                 for (Map.Entry<Series, Level4_InstancesLevel> entry2 : level3SeriesLevel.getSeries().entrySet()) {
                                     final Series series = em.merge(entry2.getKey());
@@ -121,9 +118,9 @@ public class FooHashMapImpl implements FooHashMap{
                                 .setDestination(album.getId())
                                 .isUpload()
                                 .isAutomatedTrigger()
+                                .setKheopsInstance(kheopsInstance.get())
                                 .setStudy(study)
-                                .setSource(source)
-                                .setKheopsInstance(kheopsInstance);
+                                .setSource(source);
 
                         if (level2DestinationLevel.getDestinations().containsKey(album)) {
                             if (!level2DestinationLevel.getDestination(album).isInbox()) {

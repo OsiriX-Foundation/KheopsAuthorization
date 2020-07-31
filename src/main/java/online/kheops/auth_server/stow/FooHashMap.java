@@ -8,7 +8,6 @@ import online.kheops.auth_server.webhook.Source;
 
 
 public interface FooHashMap {
-    void setKheopsInstance(String kheopsInstance);
 
     void addHashMapData(Study study, Series series, Instances instances,
                         Album destination, boolean isInbox,
