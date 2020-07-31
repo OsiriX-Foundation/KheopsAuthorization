@@ -2,6 +2,7 @@ package online.kheops.auth_server.resource;
 
 
 import online.kheops.auth_server.EntityManagerListener;
+import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.NotAlbumScopeTypeException;
 import online.kheops.auth_server.PepAccessTokenBuilder;
 import online.kheops.auth_server.album.AlbumForbiddenException;
@@ -19,6 +20,7 @@ import org.dcm4che3.data.VR;
 import org.dcm4che3.json.JSONReader;
 import org.dcm4che3.json.JSONWriter;
 
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParser;
@@ -63,6 +65,9 @@ public class QIDOResource {
 
     @Context
     private SecurityContext securityContext;
+
+    @Inject
+    private KheopsInstance kheopsInstance;
 
     @GET
     @Secured
@@ -304,7 +309,7 @@ public class QIDOResource {
                             series.setString(CUSTOM_DICOM_TAG_FAVORITE, VR.SH, String.valueOf(favoriteValue));
                         }
                         final StringBuilder retrieveURL = new StringBuilder();
-                        retrieveURL.append(context.getInitParameter(HOST_ROOT_PARAMETER));
+                        retrieveURL.append(kheopsInstance.get());
                         retrieveURL.append("/api");
                         if(kheopsPrincipal.isLink()) {
                             retrieveURL.append("/link/").append(kheopsPrincipal.getOriginalToken());
