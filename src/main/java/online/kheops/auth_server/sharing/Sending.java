@@ -34,6 +34,7 @@ import static online.kheops.auth_server.series.Series.*;
 import static online.kheops.auth_server.series.SeriesQueries.*;
 import static online.kheops.auth_server.study.Studies.getStudy;
 import static online.kheops.auth_server.user.Users.getUser;
+import static online.kheops.auth_server.util.Consts.HOST_ROOT_PARAMETER;
 import static online.kheops.auth_server.util.ErrorResponse.Message.SERIES_NOT_FOUND;
 
 public class Sending {
@@ -231,6 +232,7 @@ public class Sending {
             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                     .setStudy(availableSeries.getStudy())
                     .addSeries(availableSeries)
+                    .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .isSent()
                     .setDestination(albumId)
                     .isAutomatedTrigger()
@@ -295,6 +297,7 @@ public class Sending {
             final NewSeriesWebhook.Builder newSeriesWebhookBuilder = NewSeriesWebhook.builder()
                     .setSource(targetAlbumUser)
                     .setDestination(albumId)
+                    .setKheopsInstance(context.getInitParameter(HOST_ROOT_PARAMETER))
                     .isAutomatedTrigger()
                     .isSent()
                     .setStudy(study);

@@ -72,9 +72,6 @@ public class STOWResource {
     @Inject
     FooHashMap fooHashMap;
 
-    @Inject
-    KheopsInstance kheopsInstance;
-
     @POST
     @Secured
     @Path("stow")
@@ -106,8 +103,6 @@ public class STOWResource {
             throws AlbumNotFoundException {
 
         KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
-
-        String s = kheopsInstance.get();
 
         //si la destination est un album avons nous les droits d'écriture ?
         //si les droit sont limité à un album, avons-nous les droit d'écriture dessus ?

@@ -1,11 +1,9 @@
 package online.kheops.auth_server.webhook;
 
-import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.study.StudyResponse;
 import online.kheops.auth_server.user.UserResponse;
 
-import javax.inject.Inject;
 import javax.xml.bind.annotation.XmlElement;
 import java.time.LocalDateTime;
 import java.util.HashMap;
