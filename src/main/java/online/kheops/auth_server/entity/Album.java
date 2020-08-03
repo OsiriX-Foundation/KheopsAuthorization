@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings({"WeakerAccess", "unused"})

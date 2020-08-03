@@ -3,7 +3,6 @@ package online.kheops.auth_server.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Objects;
 
 @NamedQueries({
         @NamedQuery(name = "Instances.findByInstancesUID",
