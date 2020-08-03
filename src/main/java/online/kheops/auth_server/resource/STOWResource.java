@@ -19,7 +19,6 @@ import online.kheops.auth_server.webhook.Source;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -194,16 +193,17 @@ public class STOWResource {
                     em.remove(instance);
                 }
                 tx.commit();
-            } finally {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
-                em.close();
+            } catch (Exception e) {
                 final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                         .message("Bad Request")
                         .detail("The series metadata is differente from Kheops")
                         .build();
                 return Response.status(BAD_REQUEST).entity(errorResponse).build();
+            } finally {
+                if (tx.isActive()) {
+                    tx.rollback();
+                }
+                em.close();
             }
         }
 
@@ -217,16 +217,17 @@ public class STOWResource {
                     em.remove(series);
                 }
                 tx.commit();
-            } finally {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
-                em.close();
+            } catch (Exception e) {
                 final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                         .message("Bad Request")
                         .detail("The study metadata is differente from Kheops")
                         .build();
                 return Response.status(BAD_REQUEST).entity(errorResponse).build();
+            } finally {
+                if (tx.isActive()) {
+                    tx.rollback();
+                }
+                em.close();
             }
         }
 
@@ -240,10 +241,9 @@ public class STOWResource {
             } else {
                 destination = getAlbum(albumId, em);
             }
-            try {
-                getAlbumSeries(destination, series, em);
+            if (destination.containsSeries(series, em)) {
                 isNewInDestination = false;
-            } catch (NoResultException e) {
+            } else {
                 AlbumSeries albumSeries = new AlbumSeries(destination, series);
                 isNewInDestination = true;
                 em.persist(albumSeries);
