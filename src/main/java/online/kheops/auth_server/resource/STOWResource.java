@@ -75,7 +75,7 @@ public class STOWResource {
     @Path("stow")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStudies(
+    public Response stow(
             @FormParam(ALBUM) String albumId,
 
             @FormParam("studyInstanceUID") @UIDValidator String studyInstanceUID,
@@ -100,7 +100,7 @@ public class STOWResource {
             @FormParam("instancesUID") @UIDValidator String instancesUID)
             throws AlbumNotFoundException {
 
-        KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
+        final KheopsPrincipal kheopsPrincipal = (KheopsPrincipal) securityContext.getUserPrincipal();
 
         //si la destination est un album avons nous les droits d'écriture ?
         //si les droit sont limité à un album, avons-nous les droit d'écriture dessus ?
@@ -164,7 +164,7 @@ public class STOWResource {
         final boolean isNewStudy;
         final boolean isNewSeries;
         final boolean isNewInstance;
-        boolean isNewInDestination;
+        final boolean isNewInDestination;
 
         final Study study;
         final Series series;
@@ -299,6 +299,69 @@ public class STOWResource {
                 (study.getStudyID() == null ? studyParam.studyId == null : study.getStudyID().equals(studyParam.studyId));
     }
 
+    private class GetOrCreateStudyResult {
+        private Study study;
+        private boolean isNewStudy;
+
+        public GetOrCreateStudyResult(Study study, boolean isNewStudy) {
+            this.study = study;
+            this.isNewStudy = isNewStudy;
+        }
+
+        public Study getStudy() {
+            return study;
+        }
+        public boolean isNewStudy() {
+            return isNewStudy;
+        }
+    }
+
+    private GetOrCreateStudyResult getOrCreateStudy(StudyParam studyParam, EntityTransaction tx, EntityManager em) {
+
+        boolean isNewStudy = false;
+        Study study;
+
+        try {
+            tx.begin();
+            try {
+                study = getStudy(studyParam.studyInstanceUID, em);
+                tx.commit();
+
+            } catch (StudyNotFoundException e) {
+                study = new Study(studyParam.studyInstanceUID);
+                study.setStudyDescription(studyParam.studyDescription);
+                study.setAccessionNumber(studyParam.accessionNumber);
+                study.setPatientBirthDate(studyParam.patientBirthDate);
+                study.setPatientName(studyParam.patientName);
+                study.setPatientID(studyParam.patientId);
+                study.setPatientSex(studyParam.patientSex);
+                study.setReferringPhysicianName(studyParam.referringPhysicianName);
+                study.setStudyDate(studyParam.studyDate);
+                study.setStudyTime(studyParam.studyTime);
+                study.setTimezoneOffsetFromUTC(studyParam.timzoneOffsetFromUtc);
+                study.setStudyID(studyParam.studyId);
+                em.persist(study);
+                tx.commit();
+                isNewStudy = true;
+            }
+
+        } catch (PersistenceException e) {
+            try {
+                tx.rollback();
+                tx.begin();
+                study = getStudy(studyParam.studyInstanceUID, em);
+                tx.commit();
+            } catch (StudyNotFoundException unused) {
+                throw new IllegalStateException();
+            }
+        } finally {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+        }
+        return new GetOrCreateStudyResult(study, isNewStudy);
+    }
+
     private class GetOrCreateSeriesResult {
         private Series series;
         private boolean isNewSeries;
@@ -311,7 +374,6 @@ public class STOWResource {
         public Series getSeries() {
             return series;
         }
-
         public boolean isNewSeries() {
             return isNewSeries;
         }
@@ -366,7 +428,6 @@ public class STOWResource {
         public Instances getInstance() {
             return instance;
         }
-
         public boolean isNewInstance() {
             return isNewInstance;
         }
@@ -402,69 +463,5 @@ public class STOWResource {
             }
         }
         return new GetOrCreateInstanceResult(instance, isNewInstance);
-    }
-
-    private class GetOrCreateStudyResult {
-        private Study study;
-        private boolean isNewStudy;
-
-        public GetOrCreateStudyResult(Study study, boolean isNewStudy) {
-            this.study = study;
-            this.isNewStudy = isNewStudy;
-        }
-
-        public Study getStudy() {
-            return study;
-        }
-
-        public boolean isNewStudy() {
-            return isNewStudy;
-        }
-    }
-
-    private GetOrCreateStudyResult getOrCreateStudy(StudyParam studyParam, EntityTransaction tx, EntityManager em) {
-
-        boolean isNewStudy = false;
-        Study study;
-
-        try {
-            tx.begin();
-            try {
-                study = getStudy(studyParam.studyInstanceUID, em);
-                tx.commit();
-
-            } catch (StudyNotFoundException e) {
-                study = new Study(studyParam.studyInstanceUID);
-                study.setStudyDescription(studyParam.studyDescription);
-                study.setAccessionNumber(studyParam.accessionNumber);
-                study.setPatientBirthDate(studyParam.patientBirthDate);
-                study.setPatientName(studyParam.patientName);
-                study.setPatientID(studyParam.patientId);
-                study.setPatientSex(studyParam.patientSex);
-                study.setReferringPhysicianName(studyParam.referringPhysicianName);
-                study.setStudyDate(studyParam.studyDate);
-                study.setStudyTime(studyParam.studyTime);
-                study.setTimezoneOffsetFromUTC(studyParam.timzoneOffsetFromUtc);
-                study.setStudyID(studyParam.studyId);
-                em.persist(study);
-                tx.commit();
-                isNewStudy = true;
-            }
-
-        } catch (PersistenceException e) {
-            try {
-                tx.rollback();
-                tx.begin();
-                study = getStudy(studyParam.studyInstanceUID, em);
-                tx.commit();
-            } catch (StudyNotFoundException unused) {
-                throw new IllegalStateException();
-            }
-        } finally {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-        }
-        return new GetOrCreateStudyResult(study, isNewStudy);
     }
 }
