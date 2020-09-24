@@ -45,6 +45,9 @@ public class EventResource {
     @Context
     private SecurityContext securityContext;
 
+    @Context
+    private UriInfo uriInfo;
+
     @GET
     @Secured
     @AlbumAccessSecured
@@ -56,7 +59,7 @@ public class EventResource {
                               @QueryParam("types") final List<String> types,
                               @QueryParam(QUERY_PARAMETER_LIMIT) @Min(0) @DefaultValue(""+Integer.MAX_VALUE) Integer limit,
                               @QueryParam(QUERY_PARAMETER_OFFSET) @Min(0) @DefaultValue("0") Integer offset)
-            throws AlbumNotFoundException {
+            throws AlbumNotFoundException, BadQueryParametersException {
 
         final KheopsPrincipal kheopsPrincipal = ((KheopsPrincipal)securityContext.getUserPrincipal());
 
@@ -76,7 +79,7 @@ public class EventResource {
             pair = Events.getCommentsAlbum(kheopsPrincipal.getUser(), albumId, offset, limit);
             kheopsLogBuilder.events("comments");
         } else if (types.contains("mutations")) {
-            pair = Events.getMutationsAlbum(albumId, offset, limit);
+            pair = Events.getMutationsAlbum(albumId, uriInfo.getQueryParameters(), offset, limit);
             kheopsLogBuilder.events("mutations");
         } else {
             pair = Events.getEventsAlbum(kheopsPrincipal.getUser(), albumId, offset, limit);

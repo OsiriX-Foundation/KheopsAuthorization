@@ -50,4 +50,8 @@ public class SeriesResponse {
         }
         instances.add(instanceUID);
     }
+
+    public void hideRetrieveUrl() {
+        retrieveUrl = null;
+    }
 }

@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static online.kheops.auth_server.album.Albums.*;
-import static online.kheops.auth_server.event.Events.MutationType.*;
-import static online.kheops.auth_server.event.Events.MutationType.EDIT_WEBHOOK;
-import static online.kheops.auth_server.event.Events.MutationType.TRIGGER_WEBHOOK;
+import static online.kheops.auth_server.event.MutationType.*;
+import static online.kheops.auth_server.event.MutationType.EDIT_WEBHOOK;
+import static online.kheops.auth_server.event.MutationType.TRIGGER_WEBHOOK;
 import static online.kheops.auth_server.series.Series.getSeries;
 import static online.kheops.auth_server.study.Studies.getStudy;
 import static online.kheops.auth_server.user.Users.getUser;
@@ -97,7 +97,9 @@ public class Webhooks {
             webhookPatchParameters.getUrl().ifPresent(webhook::setUrl);
             webhookPatchParameters.getName().ifPresent(webhook::setName);
             webhookPatchParameters.isNewSeries().ifPresent(webhook::setNewSeries);
+            webhookPatchParameters.isRemoveSeries().ifPresent(webhook::setRemoveSeries);
             webhookPatchParameters.isNewUser().ifPresent(webhook::setNewUser);
+            webhookPatchParameters.isDeleteAlbum().ifPresent(webhook::setDeleteAlbum);
             webhookPatchParameters.isEnabled().ifPresent(webhook::setEnabled);
 
             if(webhookPatchParameters.isRemoveSecret()) {

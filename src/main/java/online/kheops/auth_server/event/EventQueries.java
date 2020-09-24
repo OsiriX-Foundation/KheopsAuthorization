@@ -4,7 +4,13 @@ import online.kheops.auth_server.entity.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import javax.ws.rs.core.MultivaluedMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static online.kheops.auth_server.album.Albums.getAlbum;
 
 public class EventQueries {
 
@@ -51,6 +57,62 @@ public class EventQueries {
         TypedQuery<Long> query = em.createNamedQuery("Mutation.countAllByAlbum", Long.class);
         query.setParameter("album", album);
         return query.getSingleResult();
+    }
+
+    public static long getTotalMutationByAlbum(String albumId, MutationQueryParams mutationQueryParams, EntityManager em) {
+
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Long> c = cb.createQuery(Long.class);
+        final Root<Mutation> mutation = c.from(Mutation.class);
+        c.select(cb.countDistinct(mutation));
+
+        final List<Predicate> filters = new ArrayList<>();
+
+        filters.add(cb.equal(mutation.get("album").get("id"), albumId));
+
+        mutationQueryParams.getReportProviders().ifPresent(lst -> filters.add(cb.or(mutation.join("reportProvider", JoinType.LEFT).get("clientId").in(lst))));
+        mutationQueryParams.getSeries().ifPresent(lst -> filters.add(cb.or(mutation.join("series", JoinType.LEFT).get("seriesInstanceUID").in(lst))));
+        mutationQueryParams.getStudies().ifPresent(lst -> filters.add(cb.or(mutation.join("study", JoinType.LEFT).get("studyInstanceUID").in(lst))));
+        mutationQueryParams.getTypes().ifPresent(lst -> filters.add(cb.or(mutation.get("mutationType").in(lst))));
+        mutationQueryParams.getCapabilityTokens().ifPresent(lst -> filters.add(cb.or(mutation.join("capability", JoinType.LEFT).get("id").in(lst))));
+        mutationQueryParams.getUsers().ifPresent(lst -> filters.add(cb.or(cb.or(mutation.join("user", JoinType.LEFT).get("sub").in(lst)), cb.or(mutation.join("toUser", JoinType.LEFT).get("sub").in(lst)))));
+
+        mutationQueryParams.getStartDate().ifPresent(date -> filters.add(cb.greaterThanOrEqualTo(mutation.get("eventTime"), date)));
+        mutationQueryParams.getEndDate().ifPresent(date -> filters.add(cb.lessThanOrEqualTo(mutation.get("eventTime"), date)));
+
+        c.where(cb.and(filters.toArray(new Predicate[0])));
+
+        TypedQuery<Long> q = em.createQuery(c);
+        return q.getSingleResult();
+    }
+
+    public static List<Mutation> getMutationByAlbum(String albumId, MutationQueryParams mutationQueryParams, Integer offset, Integer limit, EntityManager em) {
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Mutation> c = cb.createQuery(Mutation.class);
+        final Root<Mutation> mutation = c.from(Mutation.class);
+        c.select(mutation);
+        c.distinct(true);
+
+        final List<Predicate> filters = new ArrayList<>();
+
+        filters.add(cb.equal(mutation.get("album").get("id"), albumId));
+
+        mutationQueryParams.getReportProviders().ifPresent(lst -> filters.add(cb.or(mutation.join("reportProvider", JoinType.LEFT).get("clientId").in(lst))));
+        mutationQueryParams.getSeries().ifPresent(lst -> filters.add(cb.or(mutation.join("series", JoinType.LEFT).get("seriesInstanceUID").in(lst))));
+        mutationQueryParams.getStudies().ifPresent(lst -> filters.add(cb.or(mutation.join("study", JoinType.LEFT).get("studyInstanceUID").in(lst))));
+        mutationQueryParams.getTypes().ifPresent(lst -> filters.add(cb.or(mutation.get("mutationType").in(lst))));
+        mutationQueryParams.getCapabilityTokens().ifPresent(lst -> filters.add(cb.or(mutation.join("capability", JoinType.LEFT).get("id").in(lst))));
+        mutationQueryParams.getUsers().ifPresent(lst -> filters.add(cb.or(cb.or(mutation.join("user", JoinType.LEFT).get("sub").in(lst)), cb.or(mutation.join("toUser", JoinType.LEFT).get("sub").in(lst)))));
+
+        mutationQueryParams.getStartDate().ifPresent(date -> filters.add(cb.greaterThanOrEqualTo(mutation.get("eventTime"), date)));
+        mutationQueryParams.getEndDate().ifPresent(date -> filters.add(cb.lessThanOrEqualTo(mutation.get("eventTime"), date)));
+
+        c.where(cb.and(filters.toArray(new Predicate[0])));
+        c.orderBy(cb.desc(mutation.get("eventTime")));
+
+        TypedQuery<Mutation> q = em.createQuery(c);
+        q.setMaxResults(limit).setFirstResult(offset);
+        return q.getResultList();
     }
 
     public static List<Comment> getCommentsByStudy(User user, String studyUID, Integer offset, Integer limit, EntityManager em) {

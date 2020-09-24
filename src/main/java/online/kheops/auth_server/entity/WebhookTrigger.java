@@ -34,6 +34,10 @@ public class WebhookTrigger {
     private Boolean newSeries;
 
     @Basic(optional = false)
+    @Column(name = "remove_series")
+    private Boolean removeSeries;
+
+    @Basic(optional = false)
     @Column(name = "new_user")
     private Boolean newUser;
 
@@ -67,9 +71,15 @@ public class WebhookTrigger {
         if(type.equals(WebhookType.NEW_USER)) {
             this.newUser = true;
             this.newSeries = false;
+            this.removeSeries = false;
         } else if (type.equals(WebhookType.NEW_SERIES)) {
             this.newUser = false;
             this.newSeries = true;
+            this.removeSeries = false;
+        } else if (type.equals(WebhookType.REMOVE_SERIES)) {
+            this.newUser = false;
+            this.newSeries = false;
+            this.removeSeries = true;
         }
     }
 
@@ -83,6 +93,7 @@ public class WebhookTrigger {
 
     public Boolean isManualTrigger() { return isManualTrigger; }
     public Boolean getNewSeries() { return newSeries; }
+    public Boolean getRemoveSeries() { return removeSeries; }
     public Boolean getNewUser() { return newUser; }
     public String getId() { return id; }
     public long getPk() { return pk; }

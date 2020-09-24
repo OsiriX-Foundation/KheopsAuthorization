@@ -3,6 +3,7 @@ package online.kheops.auth_server.album;
 import online.kheops.auth_server.EntityManagerListener;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.event.Events;
+import online.kheops.auth_server.event.MutationType;
 import online.kheops.auth_server.user.UserNotFoundException;
 import online.kheops.auth_server.user.UserResponse;
 import online.kheops.auth_server.user.UsersPermission;
@@ -127,8 +128,8 @@ public class Albums {
         return findAlbumsByUserPk(albumQueryParams);
     }
 
-    public static void deleteAlbum(User callingUser, String albumId)
-            throws AlbumNotFoundException {
+    public static void deleteAlbum(ServletContext context, User callingUser, String albumId)
+            throws AlbumNotFoundException, UserNotMemberException {
 
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
@@ -138,6 +139,16 @@ public class Albums {
 
             callingUser = em.merge(callingUser);
             final Album album = getAlbum(albumId, em);
+            final AlbumUser callingAlbumUser = getAlbumUser(album, callingUser, em);
+
+            final DeleteAlbumWebhook deleteAlbumWebhook = new DeleteAlbumWebhook(albumId, callingAlbumUser, context.getInitParameter(HOST_ROOT_PARAMETER), false);
+            final List<WebhookAsyncRequestDeleteAlbum> webhookAsyncRequests = new ArrayList<>();
+
+            for (Webhook webhook : album.getWebhooks()) {
+                if (webhook.getDeleteAlbum() && webhook.isEnabled()) {
+                    webhookAsyncRequests.add(new WebhookAsyncRequestDeleteAlbum(webhook.getUrl(), deleteAlbumWebhook, webhook.getSecret()));
+                }
+            }
 
             if (album.getPk() == callingUser.getInbox().getPk()) {
                 throw new AlbumNotFoundException();
@@ -172,6 +183,9 @@ public class Albums {
             em.remove(album);
 
             tx.commit();
+
+            webhookAsyncRequests.forEach(WebhookAsyncRequestDeleteAlbum::firstRequest);
+
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
@@ -250,7 +264,7 @@ public class Albums {
                     if (!targetAlbumUser.isAdmin() && isAdmin) {
                         //Here, the targetUser is an normal member and he will be promot as admin
                         targetAlbumUser.setAdmin(isAdmin);
-                        final Mutation mutationPromoteAdmin = Events.albumPostUserMutation(callingUser, album, Events.MutationType.PROMOTE_ADMIN, targetUser);
+                        final Mutation mutationPromoteAdmin = Events.albumPostUserMutation(callingUser, album, MutationType.PROMOTE_ADMIN, targetUser);
                         em.persist(mutationPromoteAdmin);
                     }
 
@@ -260,11 +274,11 @@ public class Albums {
             } else {
                 final AlbumUser targetAlbumUser = new AlbumUser(album, targetUser, isAdmin);
 
-                final Events.MutationType mutationType;
+                final MutationType mutationType;
                 if (isAdmin) {
-                    mutationType = Events.MutationType.ADD_ADMIN;
+                    mutationType = MutationType.ADD_ADMIN;
                 } else {
-                    mutationType = Events.MutationType.ADD_USER;
+                    mutationType = MutationType.ADD_USER;
                 }
 
                 final Mutation mutation = Events.albumPostUserMutation(callingUser, album, mutationType, targetUser);
@@ -294,7 +308,7 @@ public class Albums {
         }
     }
 
-    public static User deleteUser(User callingUser, String userName,  String albumId)
+    public static User deleteUser(ServletContext context, User callingUser, String userName,  String albumId)
             throws UserNotFoundException, AlbumNotFoundException, UserNotMemberException, AlbumForbiddenException{
 
         final EntityManager em = EntityManagerListener.createEntityManager();
@@ -309,18 +323,18 @@ public class Albums {
 
             //Delete the album if it is the last User
             if (album.getAlbumUser().size() == 1) {
-                deleteAlbum(callingUser, albumId);
+                deleteAlbum(context, callingUser, albumId);
             } else {
 
                 final AlbumUser callingAlbumUser = getAlbumUser(album, callingUser, em);
                 final AlbumUser removedAlbumUser = getAlbumUser(album, removedUser, em);
 
-                final Events.MutationType mutationType;
+                final MutationType mutationType;
 
                 if (callingUser.getPk() == removedUser.getPk()) {
-                    mutationType = Events.MutationType.LEAVE_ALBUM;
+                    mutationType = MutationType.LEAVE_ALBUM;
                 } else if (callingAlbumUser.isAdmin()) {
-                    mutationType = Events.MutationType.REMOVE_USER;
+                    mutationType = MutationType.REMOVE_USER;
                 } else {
                     final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                             .message(AUTHORIZATION_ERROR)
@@ -367,7 +381,7 @@ public class Albums {
             final Album targetAlbum = getAlbum(albumId, em);
             final AlbumUser removedAlbumUser = getAlbumUser(targetAlbum, removedUser, em);
 
-            final Mutation mutation = Events.albumPostUserMutation(callingUser, targetAlbum, Events.MutationType.DEMOTE_ADMIN, removedUser);
+            final Mutation mutation = Events.albumPostUserMutation(callingUser, targetAlbum, MutationType.DEMOTE_ADMIN, removedUser);
 
             em.persist(mutation);
             removedAlbumUser.setAdmin(false);

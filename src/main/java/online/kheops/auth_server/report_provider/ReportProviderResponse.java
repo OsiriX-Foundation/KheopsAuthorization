@@ -54,5 +54,5 @@ public class ReportProviderResponse {
     public ReportProviderResponse(ReportProvider reportProvider, Type type) {
         type.buildResponse(this, reportProvider);
     }
-
 }
+

@@ -17,6 +17,7 @@ public class ErrorResponse implements Serializable {
         public static final String SERIES_NOT_FOUND = "Series Not Found";
         public static final String INSTANCES_NOT_FOUND = "Instances Not Found";
         public static final String STUDY_NOT_FOUND = "Study Not Found";
+        public static final String REPORT_PROVIDER_NOT_FOUND = "Report Provider Not Found";
         public static final String AUTHORIZATION_ERROR = "Authorization error";
     }
 

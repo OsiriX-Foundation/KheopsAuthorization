@@ -14,6 +14,7 @@ import online.kheops.auth_server.util.PairListXTotalCount;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.album.Albums.isMemberOfAlbum;
+import static online.kheops.auth_server.event.EventQueries.getMutationByAlbum;
 import static online.kheops.auth_server.study.Studies.canAccessStudy;
 import static online.kheops.auth_server.study.Studies.getStudy;
 import static online.kheops.auth_server.user.Users.getUser;
@@ -31,13 +33,6 @@ public class Events {
     private Events() {
         throw new IllegalStateException("Utility class");
     }
-
-    public enum MutationType {ADD_USER, ADD_ADMIN, REMOVE_USER, PROMOTE_ADMIN, DEMOTE_ADMIN,
-        CREATE_ALBUM, LEAVE_ALBUM,
-        IMPORT_STUDY, IMPORT_SERIES, REMOVE_STUDY, REMOVE_SERIES,
-        EDIT_ALBUM, ADD_FAV, REMOVE_FAV,
-        CREATE_REPORT_PROVIDER, EDIT_REPORT_PROVIDER, DELETE_REPORT_PROVIDER, NEW_REPORT,
-        CREATE_WEBHOOK, DELETE_WEBHOOK, EDIT_WEBHOOK, TRIGGER_WEBHOOK}
 
     public static void albumPostComment(User callingUser, String albumId, String commentContent, String user)
             throws UserNotFoundException, AlbumNotFoundException {
@@ -87,16 +82,16 @@ public class Events {
         return new Mutation(callingUser, album, mutationType, targetUser);
     }
 
-    public static Mutation reportProviderMutation(User callingUser, Album album, ReportProvider reportProvider, Events.MutationType mutationType) {
+    public static Mutation reportProviderMutation(User callingUser, Album album, ReportProvider reportProvider, MutationType mutationType) {
         return new Mutation(callingUser, album, reportProvider, mutationType);
     }
 
-    public static Mutation newReport(User callingUser, Album album, ReportProvider reportProvider, Events.MutationType mutationType, Series series) {
+    public static Mutation newReport(User callingUser, Album album, ReportProvider reportProvider, MutationType mutationType, Series series) {
         return new Mutation(callingUser, album, reportProvider, mutationType, series);
     }
 
     public static Mutation albumPostNewAlbumMutation(User callingUser, Album album) {
-        return new Mutation(callingUser, album, Events.MutationType.CREATE_ALBUM);
+        return new Mutation(callingUser, album, MutationType.CREATE_ALBUM);
     }
 
     public static Mutation albumPostSeriesMutation(User callingUser, Album album, MutationType mutationType, Series series) {
@@ -140,7 +135,6 @@ public class Events {
                 userMember.put(albumUser.getUser().getSub(), albumUser.isAdmin());
             }
 
-            List<Event> eventlist = EventQueries.getEventsByAlbum(callingUser, album, offset, limit, em);
             for (Event e : EventQueries.getEventsByAlbum(callingUser, album, offset, limit, em)) {
                 eventResponses.add(new EventResponse(e, userMember, em));
             }
@@ -152,8 +146,8 @@ public class Events {
         return new PairListXTotalCount<>(XTotalCount, eventResponses);
     }
 
-    public static PairListXTotalCount<EventResponse> getMutationsAlbum(String albumId, Integer offset, Integer limit)
-            throws AlbumNotFoundException {
+    public static PairListXTotalCount<EventResponse> getMutationsAlbum(String albumId, MultivaluedMap<String, String> queryParameters, Integer offset, Integer limit)
+            throws AlbumNotFoundException, BadQueryParametersException {
 
         final List<EventResponse> eventResponses = new ArrayList<>();
         final long XTotalCount;
@@ -161,17 +155,21 @@ public class Events {
         final EntityManager em = EntityManagerListener.createEntityManager();
 
         try {
+            MutationQueryParams mutationQueryParams = new MutationQueryParams(queryParameters, albumId, em);
+
             final Album album = getAlbum(albumId, em);
             final Map<String, Boolean> userMember = new HashMap<>();
             for(AlbumUser albumUser : album.getAlbumUser()) {
                 userMember.put(albumUser.getUser().getSub(), albumUser.isAdmin());
             }
 
-            for (Mutation m : EventQueries.getMutationByAlbum(album, offset, limit, em)) {
+            final List<Mutation> mutationLst = getMutationByAlbum(albumId, mutationQueryParams, offset, limit, em);
+
+            for (Mutation m : mutationLst) {
                 eventResponses.add(new EventResponse(m, userMember, em));
             }
 
-            XTotalCount = EventQueries.getTotalMutationByAlbum(album, em);
+            XTotalCount = EventQueries.getTotalMutationByAlbum(albumId, mutationQueryParams, em);
         } finally {
             em.close();
         }
@@ -242,7 +240,6 @@ public class Events {
         }
         return new PairListXTotalCount<>(XTotalCount, eventResponses);
     }
-
 
     public static void studyPostComment(User callingUser, String studyInstanceUID, String commentContent, String targetUserPk)
             throws UserNotFoundException, StudyNotFoundException, BadQueryParametersException {

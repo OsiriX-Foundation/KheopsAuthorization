@@ -23,7 +23,7 @@ import java.util.Set;
         @NamedQuery(name = "Webhook.countByAlbumAndUrl",
         query = "SELECT count(w) FROM Webhook w JOIN w.album a WHERE a = :album AND w.url = :url"),
         @NamedQuery(name = "Webhook.findAllEnabledAndForNewSeriesByStudyUID",
-        query = "SELECT w FROM Album a JOIN a.albumSeries als JOIN als.series s JOIN s.study st JOIN a.webhooks w WHERE st.studyInstanceUID = :StudyInstanceUID AND w.enabled = true AND w.newSeries = true")
+        query = "SELECT DISTINCT w FROM Album a JOIN a.albumSeries als JOIN als.series s JOIN s.study st JOIN a.webhooks w WHERE st.studyInstanceUID = :StudyInstanceUID AND w.enabled = true AND w.newSeries = true")
 })
 
 @Entity
@@ -58,6 +58,14 @@ public class Webhook {
     private Boolean newSeries;
 
     @Basic(optional = false)
+    @Column(name = "remove_series")
+    private Boolean removeSeries;
+
+    @Basic(optional = false)
+    @Column(name = "delete_album")
+    private Boolean deleteAlbum;
+
+    @Basic(optional = false)
     @Column(name = "new_user")
     private Boolean newUser;
 
@@ -90,7 +98,9 @@ public class Webhook {
         this.id = id;
         this.secret = webhookPostParameters.getSecret();
         this.newSeries = webhookPostParameters.isNewSeries();
+        this.removeSeries = webhookPostParameters.isRemoveSeries();
         this.newUser = webhookPostParameters.isNewUser();
+        this.deleteAlbum = webhookPostParameters.isDeleteAlbum();
         this.album = album;
         this.user = user;
         this.enabled = webhookPostParameters.isEnabled();
@@ -122,9 +132,16 @@ public class Webhook {
 
     public boolean isNewSeries() { return newSeries; }
 
-    public boolean isNewUser() { return newUser; }
 
-    public boolean isEnabled() { return enabled; }
+    public Boolean getRemoveSeries() { return removeSeries; }
+
+    public boolean getNewUser() {
+        return newUser;
+    }
+
+    public boolean getDeleteAlbum() { return deleteAlbum; }
+
+    public Boolean isEnabled() { return enabled; }
 
     public Album getAlbum() {
         return album;
@@ -160,9 +177,13 @@ public class Webhook {
         this.newSeries = newSeries;
     }
 
+    public void setRemoveSeries(Boolean removeSeries) { this.removeSeries = removeSeries; }
+
     public void setNewUser(Boolean newUser) {
         this.newUser = newUser;
     }
+
+    public void setDeleteAlbum(Boolean deleteAlbum) { this.deleteAlbum = deleteAlbum; }
 
     public void setEnabled(Boolean enabled) { this.enabled = enabled; }
 
