@@ -31,7 +31,7 @@ public class RemoveSeriesWebhook implements WebhookResult{
 
     public RemoveSeriesWebhook(String albumId, AlbumUser sourceUser, Series series, String instance, boolean isManualTrigger) {
         this(albumId, sourceUser, instance, isManualTrigger);
-        removedStudy = new StudyResponse(series.getStudy(), instance);
+        removedStudy = new StudyResponse(series.getStudy(),false, instance);
         removedStudy.addSeries(series);
         removedStudy.hideRetrieveUrl();
     }
@@ -46,7 +46,7 @@ public class RemoveSeriesWebhook implements WebhookResult{
 
     public void addSeries(Series series) {
         if(removedStudy == null) {
-            removedStudy = new StudyResponse(series.getStudy(), instance);
+            removedStudy = new StudyResponse(series.getStudy(),false, instance);
         }
         removedStudy.addSeries(series);
         removedStudy.hideRetrieveUrl();

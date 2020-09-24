@@ -4,6 +4,7 @@ import online.kheops.auth_server.EntityManagerListener;
 import online.kheops.auth_server.KheopsInstance;
 import online.kheops.auth_server.entity.*;
 import online.kheops.auth_server.event.Events;
+import online.kheops.auth_server.event.MutationType;
 import online.kheops.auth_server.webhook.*;
 
 import javax.inject.Inject;
@@ -103,9 +104,9 @@ public class FooHashMapImpl implements FooHashMap{
 
                             source.getCapabilityToken().ifPresentOrElse(
                                     capability ->
-                                            em.persist(albumPostStudyMutation(em.merge(capability), album, Events.MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet()))),
+                                            em.persist(albumPostStudyMutation(em.merge(capability), album, MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet()))),
                                     () ->
-                                            em.persist(albumPostStudyMutation(em.merge(source.getUser()), album, Events.MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet())))
+                                            em.persist(albumPostStudyMutation(em.merge(source.getUser()), album, MutationType.IMPORT_STUDY, study, new ArrayList<>(level3SeriesLevel.getSeries().keySet())))
                             );
                         }
                     }
@@ -140,9 +141,9 @@ public class FooHashMapImpl implements FooHashMap{
                                 if (!newSeriesInDestinationLst.isEmpty()) {
                                     source.getCapabilityToken().ifPresentOrElse(
                                             capability ->
-                                                    em.persist(albumPostStudyMutation(em.merge(capability), album, Events.MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst)),
+                                                    em.persist(albumPostStudyMutation(em.merge(capability), album, MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst)),
                                             () ->
-                                                    em.persist(albumPostStudyMutation(em.merge(source.getUser()), album, Events.MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst))
+                                                    em.persist(albumPostStudyMutation(em.merge(source.getUser()), album, MutationType.IMPORT_STUDY, study, newSeriesInDestinationLst))
                                     );
                                 }
                             }
