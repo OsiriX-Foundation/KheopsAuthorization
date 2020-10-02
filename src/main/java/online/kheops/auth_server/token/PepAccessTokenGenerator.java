@@ -85,7 +85,6 @@ class PepAccessTokenGenerator {
             throw new TokenRequestException(TokenRequestException.Error.INVALID_GRANT, "The user does not have access to the given StudyInstanceUID and SeriesInstanceUID pair", e);
         }
 
-        LOG.info(() -> "Returning pep token for user: " + accessToken.getSubject() + "for studyInstanceUID " + studyInstanceUID +" seriesInstanceUID " + seriesInstanceUID);
         PepAccessTokenBuilder tokenBuilder =  PepAccessTokenBuilder.newBuilder(accessToken)
                 .withExpiresIn(expiresIn)
                 .withStudyUID(studyInstanceUID)

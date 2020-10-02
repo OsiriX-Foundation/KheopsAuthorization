@@ -17,6 +17,9 @@
 
 
     <listener>
+        <listener-class>online.kheops.auth_server.LogContextListener</listener-class>
+    </listener>
+    <listener>
         <listener-class>online.kheops.auth_server.OIDCProviderContextListener</listener-class>
     </listener>
     <listener>

@@ -91,6 +91,9 @@ do
   sed -i "s|\${$filename}|$value|" ${REPLACE_FILE_PATH}
 done
 
+CATALINA_OPTS="$CATALINA_OPTS -Dorg.jooq.no-logo=true"
+CATALINA_OPTS="$CATALINA_OPTS -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+CLASSPATH=$CATALINA_HOME/log4j2/lib/*:$CATALINA_HOME/log4j2/conf
 
 #get env var
 

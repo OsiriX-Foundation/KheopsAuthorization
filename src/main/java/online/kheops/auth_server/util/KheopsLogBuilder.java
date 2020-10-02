@@ -3,10 +3,13 @@ package online.kheops.auth_server.util;
 import online.kheops.auth_server.accesstoken.AccessToken;
 import online.kheops.auth_server.token.TokenProvenance;
 import online.kheops.auth_server.user.UsersPermission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
+
 
 public class KheopsLogBuilder {
 
@@ -25,7 +28,8 @@ public class KheopsLogBuilder {
         NEW_WEBHOOK, REMOVE_WEBHOOK, GET_WEBHOOK, EDIT_WEBHOOK, LIST_WEBHOOK, TRIGGER_WEBHOOK}
 
     private ArrayList<LogEntry> logEntry;
-    private static final Logger LOG = Logger.getLogger(KheopsLogBuilder.class.getName());
+    //private static final Logger LOG = Logger.getLogger(KheopsLogBuilder.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(KheopsLogBuilder.class);
 
 
     public KheopsLogBuilder() {
@@ -126,7 +130,10 @@ public class KheopsLogBuilder {
         for (LogEntry pair: logEntry) {
             logString.append(pair.getKey()).append("=").append(pair.getValue()).append(" ");
         }
-        LOG.log(KheopsLevel.KHEOPS, logString::toString);
+        //LOG.log(KheopsLevel.KHEOPS, logString::toString);
+        String s = logString.toString();
+        LOGGER.info(s);
+
     }
 
     private final class LogEntry implements Map.Entry<String, String> {

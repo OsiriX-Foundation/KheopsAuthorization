@@ -122,7 +122,6 @@ class ViewerAccessTokenGenerator {
             jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A128KW);
             jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
             jwe.setKey(JweAesKey.getInstance().getKey());
-            LOG.info(() -> "Returning viewer token for user: " + accessToken.getSubject() + "for studyInstanceUID " + studyInstanceUID);
             return jwe.getCompactSerialization();
         } catch (JoseException e) {
             LOG.log(Level.SEVERE, "JoseException", e);

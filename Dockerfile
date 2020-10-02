@@ -39,5 +39,23 @@ COPY metricbeat/http.yml /etc/metricbeat/modules.d/http.yml
 RUN chmod go-w /etc/metricbeat/metricbeat.yml
 RUN chmod go-w /etc/metricbeat/modules.d/http.yml
 
+
+#RUN mkdir -pv $CATALINA_HOME/log4j2/lib
+#RUN mkdir -pv $CATALINA_HOME/log4j2/conf
+
+# Download api and core libraries $CATALINA_HOME/log4j2/lib has to be added to the CLASSPATH
+#RUN curl -o $CATALINA_HOME/log4j2/lib/log4j-api-2.13.3.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.13.3/log4j-api-2.13.3.jar
+#RUN curl -o $CATALINA_HOME/log4j2/lib/log4j-core-2.13.3.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.13.3/log4j-core-2.13.3.jar
+# Download appserver library. This one replaces the old log4j "extras" one
+#RUN curl -o $CATALINA_HOME/log4j2/lib/log4j-appserver-2.13.3.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-appserver/2.13.3/log4j-appserver-2.13.3.jar
+# Log4j JDK Logging Adapter. Allow apps to use java.util.logging via log4j2
+#RUN curl -o $CATALINA_HOME/log4j2/lib/log4j-jul-2.13.3.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-jul/2.13.3/log4j-jul-2.13.3.jar
+
+# Copy the log4j2-tomcat.xml in $CATALINA_HOME/log4j2/conf
+#COPY log4j2-tomcat.xml $CATALINA_HOME/log4j2/conf/log4j2-tomcat.xml
+#COPY server.xml $CATALINA_HOME/conf/server.xml
+
+RUN rm $CATALINA_HOME/conf/logging.properties
+
 CMD ["catalina.sh", "run"]
 ENTRYPOINT ["/kheops-entrypoint.sh"]

@@ -395,7 +395,6 @@ public class ReportProviderResource {
             clientMetadataResponse = getClientMetadata(url);
             clientMetadataResponse.setValid(true);
         } catch (ReportProviderUriNotValidException e) {
-            LOG.log(INFO, "error validating the configuration url", e);
             clientMetadataResponse.setValid(false);
             clientMetadataResponse.setErrorDescription(e.getMessage());
         }

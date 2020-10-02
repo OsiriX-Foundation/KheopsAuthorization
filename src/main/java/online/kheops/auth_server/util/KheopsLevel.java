@@ -4,7 +4,7 @@ import java.util.logging.Level;
 
 public class KheopsLevel extends Level {
 
-    public static final Level KHEOPS = new KheopsLevel("KHEOPS", Level.INFO.intValue());
+    public static final Level KHEOPS = new KheopsLevel("KHEOPS", Level.INFO.intValue()+10);
 
     public KheopsLevel(String name, int value) {
         super(name, value);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="test">
+    <Properties>
+        <Property name="LOG_PATTERN">TITI %d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %-7level %marker %logger{36} - %msg%n</Property>
+    </Properties>
+    <Appenders>
+        <Servlet name="Servlet" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Servlet>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Servlet" level="info"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
