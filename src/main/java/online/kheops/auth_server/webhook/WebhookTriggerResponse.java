@@ -54,7 +54,7 @@ public class WebhookTriggerResponse {
             event = WebhookType.REMOVE_SERIES.name().toLowerCase();
             for (Series series: webhookTrigger.getSeries()) {
                 if (studyResponse == null) {
-                    studyResponse = new StudyResponse(series.getStudy());
+                    studyResponse = new StudyResponse(series.getStudy(), false, "toto");//todo instance of kheops
                 }
                 studyResponse.addSeries(series, false);
             }
