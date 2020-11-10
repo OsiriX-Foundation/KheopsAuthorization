@@ -385,9 +385,9 @@ public class Studies {
             if (filter.startsWith("*") && filter.endsWith("*")) {
                 condition = column.containsIgnoreCase(parameterNoStar);
             } else if (filter.startsWith("*")) {
-                condition = column.endsWithIgnoreCase(parameterNoStar.toLowerCase());
+                condition = column.endsWithIgnoreCase(parameterNoStar);
             } else if (filter.endsWith("*")) {
-                condition = column.startsWithIgnoreCase(parameterNoStar.toLowerCase());
+                condition = column.startsWithIgnoreCase(parameterNoStar);
             } else {
                 condition = column.equalIgnoreCase(parameterNoStar);
             }

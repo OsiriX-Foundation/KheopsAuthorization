@@ -33,6 +33,7 @@ public class NewSeriesWebhook implements WebhookResult{
 
     private NewSeriesWebhook() { /*empty*/ }
 
+
     private NewSeriesWebhook(Builder builder) {
         this.kheopsInstance = builder.kheopInstance;
         albumId = builder.albumId;

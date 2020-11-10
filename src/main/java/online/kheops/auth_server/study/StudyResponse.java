@@ -67,7 +67,7 @@ public class StudyResponse {
         }
     }
 
-    public void addSeries(Series series) {
+    public void addSeries(Series series, boolean hideRetrieveUrl) {
         if(this.series == null) {
             this.series = new ArrayList<>();
         }
@@ -95,8 +95,5 @@ public class StudyResponse {
 
     public void hideRetrieveUrl() {
         retrieveUrl = null;
-        for (SeriesResponse s:series) {
-            s.hideRetrieveUrl();
-        }
     }
 }
