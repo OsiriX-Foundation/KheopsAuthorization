@@ -103,7 +103,7 @@ public class InstancesContextListener implements ServletContextListener {
                     }
                 }
                 iteration++;
-            } while (seriesList.isEmpty());
+            } while (!seriesList.isEmpty());
 
             tx.commit();
 
