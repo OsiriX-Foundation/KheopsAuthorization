@@ -9,10 +9,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static online.kheops.auth_server.generated.Tables.*;
-import static online.kheops.auth_server.generated.tables.AlbumSeries.ALBUM_SERIES;
-import static online.kheops.auth_server.generated.tables.Albums.ALBUMS;
-import static online.kheops.auth_server.generated.tables.Series.SERIES;
-import static online.kheops.auth_server.generated.tables.Studies.STUDIES;
 import static org.jooq.impl.DSL.*;
 
 public class InboxQueries {
@@ -30,7 +26,7 @@ public class InboxQueries {
 
             query.addSelect(countDistinct(SERIES.STUDY_FK).as("number_of_studies"),
                     countDistinct(SERIES.PK).as("number_of_series"),
-                    sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES).as("number_of_instances"),
+                    isnull(sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES), 0).as("number_of_instances"),
                     groupConcatDistinct(SERIES.MODALITY).as("modalities"));
 
             query.addFrom(USERS);

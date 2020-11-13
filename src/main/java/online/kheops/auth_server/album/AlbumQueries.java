@@ -19,13 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static online.kheops.auth_server.generated.tables.AlbumSeries.ALBUM_SERIES;
-import static online.kheops.auth_server.generated.tables.AlbumUser.ALBUM_USER;
-import static online.kheops.auth_server.generated.tables.Albums.ALBUMS;
-import static online.kheops.auth_server.generated.tables.Events.EVENTS;
-import static online.kheops.auth_server.generated.tables.Series.SERIES;
-import static online.kheops.auth_server.generated.tables.Studies.STUDIES;
-import static online.kheops.auth_server.generated.tables.Users.USERS;
+
+import static online.kheops.auth_server.generated.Tables.*;
 import static online.kheops.auth_server.util.ErrorResponse.Message.BAD_QUERY_PARAMETER;
 import static online.kheops.auth_server.util.JOOQTools.createDateCondition;
 import static org.jooq.impl.DSL.*;

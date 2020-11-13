@@ -32,10 +32,6 @@ import java.util.function.Supplier;
 
 import static online.kheops.auth_server.album.Albums.getAlbum;
 import static online.kheops.auth_server.generated.Tables.*;
-import static online.kheops.auth_server.generated.tables.AlbumUser.ALBUM_USER;
-import static online.kheops.auth_server.generated.tables.Series.SERIES;
-import static online.kheops.auth_server.generated.tables.Studies.STUDIES;
-import static online.kheops.auth_server.generated.tables.Users.USERS;
 import static online.kheops.auth_server.series.Series.editSeriesFavorites;
 import static online.kheops.auth_server.series.SeriesQueries.findSeriesListByStudyUIDFromAlbum;
 import static online.kheops.auth_server.series.SeriesQueries.findSeriesListByStudyUIDFromInbox;
