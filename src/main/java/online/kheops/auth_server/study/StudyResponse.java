@@ -1,6 +1,5 @@
 package online.kheops.auth_server.study;
 
-import online.kheops.auth_server.entity.Instances;
 import online.kheops.auth_server.entity.Series;
 import online.kheops.auth_server.entity.Study;
 import online.kheops.auth_server.series.SeriesResponse;
@@ -8,7 +7,7 @@ import online.kheops.auth_server.series.SeriesResponse;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 
 public class StudyResponse {
 
@@ -72,18 +71,9 @@ public class StudyResponse {
             this.series = new ArrayList<>();
         }
         final SeriesResponse seriesResponse = new SeriesResponse(series, true, kheopsInstance);
-        series.getInstances().forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
         this.series.add(seriesResponse);
     }
 
-    public void addSeriesWithInstances(Series series, Set<Instances> instancesSet) {
-        if(this.series == null) {
-            this.series = new ArrayList<>();
-        }
-        final SeriesResponse seriesResponse = new SeriesResponse(series, false, kheopsInstance);
-        instancesSet.forEach(instances -> seriesResponse.addInstances(instances.getInstanceUID()));
-        this.series.add(seriesResponse);
-    }
 
     public boolean containSeries() {
         if (series == null) {

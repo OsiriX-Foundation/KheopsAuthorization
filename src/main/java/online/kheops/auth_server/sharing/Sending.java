@@ -409,7 +409,7 @@ public class Sending {
                 for (Webhook webhook : targetAlbum.getWebhooksNewSeriesEnabled()) {
                     final WebhookTrigger webhookTrigger = new WebhookTrigger(new WebhookRequestId(em).getRequestId(), false, WebhookType.NEW_SERIES, webhook);
                     em.persist(webhookTrigger);
-                    newSeriesWebhookBuilder.getSeriesInstancesHashMap().keySet().forEach(webhookTrigger::addSeries);
+                    newSeriesWebhookBuilder.getSeries().forEach(webhookTrigger::addSeries);
                     webhookAsyncRequests.add(new WebhookAsyncRequest(webhook, newSeriesWebhook, webhookTrigger));
                 }
             }

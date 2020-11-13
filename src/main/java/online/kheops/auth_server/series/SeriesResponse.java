@@ -24,8 +24,6 @@ public class SeriesResponse {
     private String bodyPartExamined;
     @XmlElement(name = "retrieve_url")
     private String retrieveUrl;
-    @XmlElement(name = "instances_uid")
-    private Set<String> instances;
 
 
     private SeriesResponse() { /*empty*/ }
@@ -44,12 +42,6 @@ public class SeriesResponse {
         }
     }
 
-    public void addInstances(String instanceUID) {
-        if(instances == null) {
-            instances = new HashSet<>();
-        }
-        instances.add(instanceUID);
-    }
 
     public void hideRetrieveUrl() {
         retrieveUrl = null;

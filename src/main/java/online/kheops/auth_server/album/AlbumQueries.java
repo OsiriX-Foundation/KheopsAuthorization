@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static online.kheops.auth_server.generated.Tables.INSTANCES;
 import static online.kheops.auth_server.generated.tables.AlbumSeries.ALBUM_SERIES;
 import static online.kheops.auth_server.generated.tables.AlbumUser.ALBUM_USER;
 import static online.kheops.auth_server.generated.tables.Albums.ALBUMS;
@@ -104,7 +103,7 @@ public class AlbumQueries {
                     countDistinct(EVENTS.PK).as("number_of_comments"),
                     countDistinct(STUDIES.PK).as("number_of_studies"),
                     countDistinct(SERIES.PK).as("number_of_series"),
-                    isnull(count(INSTANCES.PK), 0).as("number_of_instances"),
+                    isnull(sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES), 0).as("number_of_instances"),
                     ALBUMS.ADD_USER_PERMISSION.as("add_user_permission"),
                     ALBUMS.DOWNLOAD_SERIES_PERMISSION.as("download_user_permission"),
                     ALBUMS.SEND_SERIES_PERMISSION.as("send_series_permission"),
@@ -120,7 +119,6 @@ public class AlbumQueries {
             query.addFrom(ALBUMS);
             query.addJoin(ALBUM_SERIES,JoinType.LEFT_OUTER_JOIN, ALBUM_SERIES.ALBUM_FK.eq(ALBUMS.PK));
             query.addJoin(SERIES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(ALBUM_SERIES.SERIES_FK));
-            query.addJoin(INSTANCES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(INSTANCES.SERIES_FK));
             query.addJoin(STUDIES,JoinType.LEFT_OUTER_JOIN, STUDIES.PK.eq(SERIES.STUDY_FK));
             query.addJoin(ALBUM_USER, ALBUM_USER.ALBUM_FK.eq(ALBUMS.PK));
             query.addJoin(USERS, ALBUM_USER.USER_FK.eq(USERS.PK));
@@ -220,7 +218,7 @@ public class AlbumQueries {
                     countDistinct(EVENTS.PK).as("number_of_comments"),
                     countDistinct(STUDIES.PK).as("number_of_studies"),
                     countDistinct(SERIES.PK).as("number_of_series"),
-                    isnull(count(INSTANCES.PK), 0).as("number_of_instances"),
+                    isnull(sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES), 0).as("number_of_instances"),
                     ALBUMS.ADD_USER_PERMISSION.as("add_user_permission"),
                     ALBUMS.DOWNLOAD_SERIES_PERMISSION.as("download_user_permission"),
                     ALBUMS.SEND_SERIES_PERMISSION.as("send_series_permission"),
@@ -236,7 +234,6 @@ public class AlbumQueries {
             query.addFrom(ALBUMS);
             query.addJoin(ALBUM_SERIES,JoinType.LEFT_OUTER_JOIN, ALBUM_SERIES.ALBUM_FK.eq(ALBUMS.PK));
             query.addJoin(SERIES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(ALBUM_SERIES.SERIES_FK));
-            query.addJoin(INSTANCES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(INSTANCES.SERIES_FK));
             query.addJoin(STUDIES,JoinType.LEFT_OUTER_JOIN, STUDIES.PK.eq(SERIES.STUDY_FK));
             query.addJoin(ALBUM_USER, ALBUM_USER.ALBUM_FK.eq(ALBUMS.PK));
 
@@ -273,13 +270,12 @@ public class AlbumQueries {
                     isnull(ALBUMS.DESCRIPTION,"NULL").as("album_description"),
                     countDistinct(STUDIES.PK).as("number_of_studies"),
                     countDistinct(SERIES.PK).as("number_of_series"),
-                    isnull(count(INSTANCES.PK), 0).as("number_of_instances"),
+                    isnull(sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES), 0).as("number_of_instances"),
                     groupConcatDistinct(SERIES.MODALITY).as("modalities"));
 
             query.addFrom(ALBUMS);
             query.addJoin(ALBUM_SERIES,JoinType.LEFT_OUTER_JOIN, ALBUM_SERIES.ALBUM_FK.eq(ALBUMS.PK));
             query.addJoin(SERIES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(ALBUM_SERIES.SERIES_FK));
-            query.addJoin(INSTANCES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(INSTANCES.SERIES_FK));
 
             query.addJoin(STUDIES,JoinType.LEFT_OUTER_JOIN, STUDIES.PK.eq(SERIES.STUDY_FK));
 

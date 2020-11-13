@@ -6,7 +6,6 @@ import online.kheops.auth_server.album.AlbumNotFoundException;
 import online.kheops.auth_server.annotation.Secured;
 import online.kheops.auth_server.annotation.UIDValidator;
 import online.kheops.auth_server.entity.*;
-import online.kheops.auth_server.instances.InstancesNotFoundException;
 import online.kheops.auth_server.principal.KheopsPrincipal;
 import online.kheops.auth_server.series.SeriesNotFoundException;
 import online.kheops.auth_server.stow.FooHashMap;
@@ -28,8 +27,6 @@ import javax.ws.rs.core.SecurityContext;
 
 import static javax.ws.rs.core.Response.Status.*;
 import static online.kheops.auth_server.album.Albums.getAlbum;
-import static online.kheops.auth_server.album.AlbumsSeries.getAlbumSeries;
-import static online.kheops.auth_server.instances.Instances.getInstances;
 import static online.kheops.auth_server.report_provider.ReportProviderQueries.getReportProviderWithClientId;
 import static online.kheops.auth_server.series.Series.getSeries;
 import static online.kheops.auth_server.study.Studies.getStudy;
@@ -168,7 +165,6 @@ public class STOWResource {
 
         final Study study;
         final Series series;
-        final Instances instance;
 
         final EntityManager em = EntityManagerListener.createEntityManager();
         final EntityTransaction tx = em.getTransaction();
@@ -181,43 +177,20 @@ public class STOWResource {
         series = getOrCreateSeriesResult.getSeries();
         isNewSeries = getOrCreateSeriesResult.isNewSeries();
 
-        final GetOrCreateInstanceResult getOrCreateInstanceResult = getOrCreateInstance(instancesUID, series, tx, em);
-        instance = getOrCreateInstanceResult.getInstance();
-        isNewInstance = getOrCreateInstanceResult.isNewInstance();
-
-
         if (!isNewSeries && !compareSeries(series, seriesParam)) {
-            try {
-                tx.begin();
-                if (isNewInstance) {
-                    em.remove(instance);
-                }
-                tx.commit();
-            } catch (Exception e) {
-                final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
-                        .message("Bad Request")
-                        .detail("The series metadata is differente from Kheops")
-                        .build();
-                return Response.status(BAD_REQUEST).entity(errorResponse).build();
-            } finally {
-                if (tx.isActive()) {
-                    tx.rollback();
-                }
-                em.close();
-            }
+
+             //TODO
         }
 
         if (!isNewStudy && !compareStudy(study, studyParam)) {
             try {
                 tx.begin();
-                if (isNewInstance) {
-                    em.remove(instance);
-                }
                 if (isNewSeries) {
                     em.remove(series);
                 }
                 tx.commit();
             } catch (Exception e) {
+                //TODO : in catch or in else ????
                 final ErrorResponse errorResponse = new ErrorResponse.ErrorResponseBuilder()
                         .message("Bad Request")
                         .detail("The study metadata is differente from Kheops")
@@ -261,7 +234,7 @@ public class STOWResource {
         final Source source = new Source(kheopsPrincipal.getUser());
         kheopsPrincipal.getCapability().ifPresent(source::setCapabilityToken);
         kheopsPrincipal.getClientId().ifPresent(clienrtId -> source.setReportProviderClientId(getReportProviderWithClientId(clienrtId, em)));
-        fooHashMap.addHashMapData(study, series, instance, destination, isInbox, isNewStudy, isNewSeries, isNewInstance, source, isNewInDestination);
+        fooHashMap.addHashMapData(study, series, destination, isInbox, isNewStudy, isNewSeries, source, isNewInDestination);
 
         KheopsLogBuilder kheopsLogBuilder = kheopsPrincipal.getKheopsLogBuilder()
                 .action(KheopsLogBuilder.ActionType.STOW)
@@ -416,52 +389,4 @@ public class STOWResource {
         return new GetOrCreateSeriesResult(series, isNewSeries);
     }
 
-    private class GetOrCreateInstanceResult {
-        private Instances instance;
-        private boolean isNewInstance;
-
-        public GetOrCreateInstanceResult(Instances instance, boolean isNewInstance) {
-            this.instance = instance;
-            this.isNewInstance = isNewInstance;
-        }
-
-        public Instances getInstance() {
-            return instance;
-        }
-        public boolean isNewInstance() {
-            return isNewInstance;
-        }
-    }
-
-    private GetOrCreateInstanceResult getOrCreateInstance(String instancesUID, Series series, EntityTransaction tx, EntityManager em) {
-
-        boolean isNewInstance = false;
-        Instances instance;
-        try  {
-            tx.begin();
-            try {
-                instance = getInstances(instancesUID, em);
-                tx.commit();
-            } catch (InstancesNotFoundException e) {
-                instance = new Instances(instancesUID, series);
-                em.persist(instance);
-                tx.commit();
-                isNewInstance = true;
-            }
-        } catch(PersistenceException e) {
-            try {
-                tx.rollback();
-                tx.begin();
-                instance = getInstances(instancesUID, em);
-                tx.commit();
-            } catch (InstancesNotFoundException unused) {
-                throw new IllegalStateException();
-            }
-        } finally {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-        }
-        return new GetOrCreateInstanceResult(instance, isNewInstance);
-    }
 }

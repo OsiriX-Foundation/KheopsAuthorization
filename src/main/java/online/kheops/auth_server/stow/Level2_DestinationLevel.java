@@ -1,7 +1,6 @@
 package online.kheops.auth_server.stow;
 
 import online.kheops.auth_server.entity.Album;
-import online.kheops.auth_server.entity.Instances;
 import online.kheops.auth_server.entity.Series;
 
 import java.util.*;
@@ -9,34 +8,20 @@ import java.util.*;
 public class Level2_DestinationLevel {
     //             Destination
     private Map<Album, Level3_SeriesLevel> level3;
-    private Map<Series, Set<Instances>> seriesNewInstances;
 
-    public Level2_DestinationLevel(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Album destination, boolean isInbox, boolean isNewInDestination) {
+    public Level2_DestinationLevel(Series series, boolean isNewSeries, Album destination, boolean isInbox, boolean isNewInDestination) {
         level3 = new HashMap<>();
-        seriesNewInstances = new HashMap<>();
-        level3.put(destination, new Level3_SeriesLevel(series, instances, isNewSeries, isNewInstances, isInbox, isNewInDestination));
-        if (isNewInstances) {
-            final Set<Instances> instanceSet = new HashSet<>();
-            instanceSet.add(instances);
-            seriesNewInstances.put(series, instanceSet);
-        }
+        level3.put(destination, new Level3_SeriesLevel(series, isNewSeries, isInbox, isNewInDestination));
     }
 
-    public void addDestination(Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Album destination, boolean isInbox, boolean isNewInDestination) {
+    public void addDestination(Series series, boolean isNewSeries, Album destination, boolean isInbox, boolean isNewInDestination) {
         if (level3.containsKey(destination)) {
-            level3.get(destination).addSeries(series, instances, isNewSeries, isNewInstances, isInbox, isNewInDestination);
+            level3.get(destination).addSeries(series, isNewSeries, isInbox, isNewInDestination);
         } else {
-            level3.put(destination, new Level3_SeriesLevel(series, instances, isNewSeries, isNewInstances, isInbox, isNewInDestination));
-        }
-        if (isNewInstances) {
-            seriesNewInstances.computeIfAbsent(series, value -> new HashSet<>()).add(instances);
+            level3.put(destination, new Level3_SeriesLevel(series, isNewSeries, isInbox, isNewInDestination));
         }
     }
 
-    public Set<Instances> getSeriesNewInstances(Series series) {
-        return seriesNewInstances.containsKey(series) ? seriesNewInstances.get(series) : new HashSet<>();
-    }
-    public Map<Series, Set<Instances>> getSeriesNewInstances() { return seriesNewInstances; }
 
     public Map<Album, Level3_SeriesLevel> getDestinations() { return level3; }
     public Level3_SeriesLevel getDestination(Album destination) { return level3.get(destination); }

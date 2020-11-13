@@ -4,6 +4,7 @@ import online.kheops.auth_server.entity.AlbumUser;
 import online.kheops.auth_server.user.UserResponse;
 import org.jooq.Record;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class AlbumResponseBuilder {
         this.numberOfStudies = (Integer) r.getValue("number_of_studies");
         this.numberOfSeries = (Integer) r.getValue("number_of_series");
         try {
-            this.numberOfInstances = (Integer) r.getValue("number_of_instances");
+            this.numberOfInstances = ((BigDecimal) r.getValue("number_of_instances")).intValue();
         } catch(NullPointerException e) {
             this.numberOfInstances = 0;
         }
@@ -78,7 +79,7 @@ public class AlbumResponseBuilder {
         this.numberOfStudies = (Integer) r.getValue("number_of_studies");
         this.numberOfSeries = (Integer) r.getValue("number_of_series");
         try {
-            this.numberOfInstances = (Integer) r.getValue("number_of_instances");
+            this.numberOfInstances = ((BigDecimal) r.getValue("number_of_instances")).intValue();
         } catch(NullPointerException e) {
             this.numberOfInstances = 0;
         }
@@ -88,7 +89,7 @@ public class AlbumResponseBuilder {
             this.modalities = new String[0];
         }
         try {
-            this.numberOfInstances = (Integer) r.getValue("number_of_instances");
+            this.numberOfInstances = ((BigDecimal) r.getValue("number_of_instances")).intValue();
         } catch(NullPointerException e) {
             this.numberOfInstances = 0;
         }

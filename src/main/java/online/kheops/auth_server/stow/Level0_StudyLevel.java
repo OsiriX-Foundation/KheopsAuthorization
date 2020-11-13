@@ -1,7 +1,6 @@
 package online.kheops.auth_server.stow;
 
 import online.kheops.auth_server.entity.Album;
-import online.kheops.auth_server.entity.Instances;
 import online.kheops.auth_server.entity.Series;
 import online.kheops.auth_server.entity.Study;
 import online.kheops.auth_server.webhook.Source;
@@ -26,13 +25,13 @@ public class Level0_StudyLevel {
         return studyHashMap.get(study);
     }
 
-    public Level1_SourceLevel put(ScheduledFuture<?> scheduledFuture, Study study, Series series, Instances instances, boolean isNewStudy, boolean isNewSeries, boolean isNewInstances, Source source, Album destination, boolean isInbox, boolean isNewInDestination) {
+    public Level1_SourceLevel put(ScheduledFuture<?> scheduledFuture, Study study, Series series, boolean isNewStudy, boolean isNewSeries, Source source, Album destination, boolean isInbox, boolean isNewInDestination) {
         if (studyHashMap.containsKey(study)) {
-            studyHashMap.get(study).addSeries(scheduledFuture, series, instances, isNewSeries, isNewInstances, source, destination, isInbox, isNewInDestination);
+            studyHashMap.get(study).addSeries(scheduledFuture, series, isNewSeries, source, destination, isInbox, isNewInDestination);
             return studyHashMap.get(study);
         } else {
             Level1_SourceLevel level1SourceLevel = new Level1_SourceLevel(scheduledFuture, isNewStudy);
-            level1SourceLevel.addSeries(scheduledFuture, series, instances, isNewSeries, isNewInstances, source, destination, isInbox, isNewInDestination);
+            level1SourceLevel.addSeries(scheduledFuture, series, isNewSeries, source, destination, isInbox, isNewInDestination);
             return studyHashMap.put(study, level1SourceLevel);
         }
     }

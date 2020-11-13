@@ -143,7 +143,7 @@ public class Studies {
                 isnull(STUDIES.PATIENT_SEX, "").as(STUDIES.PATIENT_SEX.getName()),
                 isnull(STUDIES.STUDY_ID, "").as(STUDIES.STUDY_ID.getName()),
                 countDistinct(SERIES.PK).as("count:" + SERIES.PK.getName()),
-                isnull(count(INSTANCES.PK),0).as("sum:" + INSTANCES.PK.getName()),
+                isnull(sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES),0).as("sum:" + SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES.getName()),
                 isnull(groupConcatDistinct(SERIES.MODALITY), "NULL").as("modalities"),
                 countDistinct(when(ALBUM_SERIES.FAVORITE.eq(true), ALBUM_SERIES.PK)).as("sum_fav"),
                 countDistinct(EVENTS).as("sum_comments"));
@@ -157,7 +157,6 @@ public class Studies {
         selectQuery.addJoin(ALBUMS, ALBUMS.PK.eq(ALBUM_USER.ALBUM_FK));
         selectQuery.addJoin(ALBUM_SERIES, ALBUM_SERIES.ALBUM_FK.eq(ALBUMS.PK));
         selectQuery.addJoin(SERIES, SERIES.PK.eq(ALBUM_SERIES.SERIES_FK));
-        selectQuery.addJoin(INSTANCES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(INSTANCES.SERIES_FK));
         selectQuery.addJoin(STUDIES, STUDIES.PK.eq(SERIES.STUDY_FK));
         selectQuery.addJoin(EVENTS,JoinType.LEFT_OUTER_JOIN, EVENTS.EVENT_TYPE.eq("Comment").and(EVENTS.STUDY_FK.eq(STUDIES.PK)).and(EVENTS.PRIVATE_TARGET_USER_FK.isNull().or(EVENTS.USER_FK.eq(USERS.PK)).or(EVENTS.PRIVATE_TARGET_USER_FK.eq(USERS.PK))));
 
@@ -219,7 +218,7 @@ public class Studies {
             safeAttributeSetString(attributes, Tag.PatientSex, VR.CS, r.getValue(STUDIES.PATIENT_SEX.getName()).toString());
             safeAttributeSetString(attributes, Tag.StudyID, VR.SH, r.getValue(STUDIES.STUDY_ID.getName()).toString());
             attributes.setInt(Tag.NumberOfStudyRelatedSeries, VR.IS, ((Integer) r.getValue("count:" + SERIES.PK.getName())));
-            attributes.setInt(Tag.NumberOfStudyRelatedInstances, VR.IS, (Integer) r.getValue("sum:" + INSTANCES.PK.getName()));
+            attributes.setInt(Tag.NumberOfStudyRelatedInstances, VR.IS, (Integer) r.getValue("sum:" + SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES.getName()));
 
             //Tag Type (3) Optional
             if(qidoParams.includeStudyDescriptionField() && r.getValue(STUDIES.STUDY_DESCRIPTION.getName()) != null) {

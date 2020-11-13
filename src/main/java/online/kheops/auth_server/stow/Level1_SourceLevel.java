@@ -1,7 +1,6 @@
 package online.kheops.auth_server.stow;
 
 import online.kheops.auth_server.entity.Album;
-import online.kheops.auth_server.entity.Instances;
 import online.kheops.auth_server.entity.Series;
 import online.kheops.auth_server.webhook.Source;
 
@@ -20,12 +19,12 @@ public class Level1_SourceLevel {
         this.isNewStudy = isNewStudy;
     }
 
-    public void addSeries(ScheduledFuture<?> scheduledFuture, Series series, Instances instances, boolean isNewSeries, boolean isNewInstances, Source source, Album destination, boolean isInbox, boolean isNewInDestination) {
+    public void addSeries(ScheduledFuture<?> scheduledFuture, Series series, boolean isNewSeries, Source source, Album destination, boolean isInbox, boolean isNewInDestination) {
         this.scheduledFuture = scheduledFuture;
         if (level2.containsKey(source)) {
-            level2.get(source).addDestination(series, instances, isNewSeries, isNewInstances, destination, isInbox, isNewInDestination);
+            level2.get(source).addDestination(series, isNewSeries, destination, isInbox, isNewInDestination);
         } else {
-            level2.put(source, new Level2_DestinationLevel(series, instances, isNewSeries, isNewInstances, destination, isInbox, isNewInDestination));
+            level2.put(source, new Level2_DestinationLevel(series, isNewSeries, destination, isInbox, isNewInDestination));
         }
     }
 

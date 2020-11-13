@@ -30,14 +30,13 @@ public class InboxQueries {
 
             query.addSelect(countDistinct(SERIES.STUDY_FK).as("number_of_studies"),
                     countDistinct(SERIES.PK).as("number_of_series"),
-                    count(INSTANCES.PK).as("number_of_instances"),
+                    sum(SERIES.NUMBER_OF_SERIES_RELATED_INSTANCES).as("number_of_instances"),
                     groupConcatDistinct(SERIES.MODALITY).as("modalities"));
 
             query.addFrom(USERS);
             query.addJoin(ALBUMS, ALBUMS.PK.eq(USERS.INBOX_FK));
             query.addJoin(ALBUM_SERIES,JoinType.LEFT_OUTER_JOIN, ALBUM_SERIES.ALBUM_FK.eq(ALBUMS.PK));
             query.addJoin(SERIES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(ALBUM_SERIES.SERIES_FK));
-            query.addJoin(INSTANCES,JoinType.LEFT_OUTER_JOIN, SERIES.PK.eq(INSTANCES.SERIES_FK));
             query.addJoin(STUDIES,JoinType.LEFT_OUTER_JOIN, STUDIES.PK.eq(SERIES.STUDY_FK));
 
             query.addConditions(USERS.PK.eq(userPk));

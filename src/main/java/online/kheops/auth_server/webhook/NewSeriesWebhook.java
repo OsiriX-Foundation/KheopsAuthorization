@@ -6,9 +6,7 @@ import online.kheops.auth_server.user.UserResponse;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static online.kheops.auth_server.report_provider.ReportProviderResponse.Type.WEBHOOK;
@@ -58,7 +56,7 @@ public class NewSeriesWebhook implements WebhookResult{
         private String importSource;
         private StudyResponse updatedStudy;
         private String kheopInstance;
-        private Map<Series,Set<Instances>> seriesInstancesHashMap = new HashMap<>();
+        private Set<Series> series = new HashSet<>();
 
         public Builder() { /*empty*/ }
 
@@ -137,21 +135,15 @@ public class NewSeriesWebhook implements WebhookResult{
         }
 
         public Builder addSeries(Series series) {
-            seriesInstancesHashMap.computeIfAbsent(series, series1 -> new HashSet<>());
+            this.series.add(series);
             return this;
         }
 
-        public Builder addInstances(Instances instances) {
-            seriesInstancesHashMap.computeIfAbsent(instances.getSeries(), series1 -> new HashSet<>()).add(instances);
-            return this;
-        }
+        public Set<Series> getSeries() { return series; }
 
-        public Map<Series, Set<Instances>> getSeriesInstancesHashMap() { return seriesInstancesHashMap; }
-
-        public boolean containSeries() { return !seriesInstancesHashMap.isEmpty(); }
+        public boolean containSeries() { return !series.isEmpty(); }
 
         public NewSeriesWebhook build() {
-            seriesInstancesHashMap.forEach(updatedStudy::addSeriesWithInstances);
             return new NewSeriesWebhook(this);
         }
 

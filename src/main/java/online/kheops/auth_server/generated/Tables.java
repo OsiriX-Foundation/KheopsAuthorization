@@ -10,7 +10,6 @@ import online.kheops.auth_server.generated.tables.Albums;
 import online.kheops.auth_server.generated.tables.Capabilities;
 import online.kheops.auth_server.generated.tables.EventSeries;
 import online.kheops.auth_server.generated.tables.Events;
-import online.kheops.auth_server.generated.tables.Instances;
 import online.kheops.auth_server.generated.tables.ReportProviders;
 import online.kheops.auth_server.generated.tables.Series;
 import online.kheops.auth_server.generated.tables.Studies;
@@ -22,7 +21,7 @@ import online.kheops.auth_server.generated.tables.Webhooks;
 
 
 /**
- * Convenience access to all tables in public
+ * Convenience access to all tables in public.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
@@ -56,11 +55,6 @@ public class Tables {
      * The table <code>public.events</code>.
      */
     public static final Events EVENTS = Events.EVENTS;
-
-    /**
-     * The table <code>public.instances</code>.
-     */
-    public static final Instances INSTANCES = Instances.INSTANCES;
 
     /**
      * The table <code>public.report_providers</code>.

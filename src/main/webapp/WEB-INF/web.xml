@@ -28,9 +28,6 @@
     <listener>
         <listener-class>online.kheops.auth_server.liquibase.LiquibaseContextListener</listener-class>
     </listener>
-    <listener>
-        <listener-class>online.kheops.auth_server.instances.InstancesContextListener</listener-class>
-    </listener>
 
 
     <context-param>

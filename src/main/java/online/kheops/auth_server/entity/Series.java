@@ -82,15 +82,15 @@ public class Series {
     @Column(name = "series_number")
     private int seriesNumber;
 
+    @Column(name = "number_of_series_related_instances")
+    private  int numberOfSeriesRelatedInstances;
+
     @ManyToOne
     @JoinColumn(name = "study_fk", insertable = true, updatable=false)
     private Study study;
 
     @OneToMany(mappedBy = "series")
     private Set<AlbumSeries> albumsSeries = new HashSet<>();
-
-    @OneToMany(mappedBy = "series", fetch = FetchType.EAGER)
-    private Set<Instances> instances = new HashSet<>();
 
     public Series() {}
 
@@ -201,13 +201,10 @@ public class Series {
 
     public String getBodyPartExamined() { return bodyPartExamined; }
 
-    public int getNumberOfSeriesRelatedInstances() { return instances.size(); }
+    public int getNumberOfSeriesRelatedInstances() { return numberOfSeriesRelatedInstances; }
 
     public void setBodyPartExamined(String bodyPartExamined) { this.bodyPartExamined = bodyPartExamined; }
 
-    public Set<Instances> getInstances() { return instances; }
-
-    public void addInstances(Instances instance) { instances.add(instance); }
 
     @Override
     public boolean equals(Object o) {
