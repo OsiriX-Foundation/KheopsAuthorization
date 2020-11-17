@@ -18,7 +18,11 @@ ENV KHEOPS_AUTHDB_USER=kheopsuser \
     KHEOPS_AUTHDB_PASS_FILE=/run/secrets/kheops_authdb_pass \
     KHEOPS_AUTH_HMASECRET_FILE=/run/secrets/kheops_auth_hmasecret \
     KHEOPS_CLIENT_DICOMWEBPROXY_SECRET_FILE=/run/secrets/kheops_client_dicomwebproxysecret \
-    KHEOPS_CLIENT_ZIPPER_SECRET_FILE=/run/secrets/kheops_client_zippersecret
+    KHEOPS_CLIENT_ZIPPER_SECRET_FILE=/run/secrets/kheops_client_zippersecret \
+    KHEOPS_AUTHORIZATION_ENABLE_ELASTIC=false \
+    KHEOPS_AUTHORIZATION_ELASTIC_INSTANCE=only_if_KHEOPS_AUTHORIZATION_ENABLE_ELASTIC_is_true \
+    KHEOPS_AUTHORIZATION_LOGSTASH_URL=only_if_KHEOPS_AUTHORIZATION_ENABLE_ELASTIC_is_true \
+    
 
 COPY KheopsAuthorization.war /usr/local/tomcat/webapps/authorization.war
 COPY context.xml /usr/local/tomcat/conf/context.xml
