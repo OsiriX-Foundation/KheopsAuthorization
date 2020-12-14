@@ -58,7 +58,11 @@ public class NewSeriesWebhook implements WebhookResult{
     public void setCapabilityToken(Capability capability) { sourceUser.setCapabilityToken(capability); }
 
     public boolean containSeries() {
-        return updatedStudy.containSeries();
+        if (updatedStudy != null) {
+            return updatedStudy.containSeries();
+        } else {
+            return false;
+        }
     }
 
     public void setFetch() {
