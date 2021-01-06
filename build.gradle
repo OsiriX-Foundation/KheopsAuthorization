@@ -2,9 +2,14 @@ plugins {
     id "org.sonarqube" version "3.0"
 }
 
+apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'java-library'
 apply from: 'https://raw.github.com/gretty-gradle-plugin/gretty/master/pluginScripts/gretty.plugin'
 apply plugin: 'war'
+
+group = 'test.test'
+version 'test'
 
 repositories {
     mavenCentral()
