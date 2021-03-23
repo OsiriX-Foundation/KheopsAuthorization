@@ -1,10 +1,10 @@
 package online.kheops.auth_server.util;
 
+import javax.ws.rs.core.MultivaluedMap;
 import online.kheops.auth_server.album.BadQueryParametersException;
 import org.jooq.Condition;
 import org.jooq.Field;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.OptionalInt;
