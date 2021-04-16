@@ -40,7 +40,7 @@ public class WebhookAsyncRequestDeleteAlbum {
     }
 
     public void retry(int cnt) {
-        SCHEDULER.schedule(()->request(cnt),SECONDE_BEFORE_RETRY_WEBHOOK * cnt, TimeUnit.SECONDS);
+        SCHEDULER.schedule(()->request(cnt), (long) SECONDE_BEFORE_RETRY_WEBHOOK * cnt, TimeUnit.SECONDS);
     }
 
     private void request(int cnt) {

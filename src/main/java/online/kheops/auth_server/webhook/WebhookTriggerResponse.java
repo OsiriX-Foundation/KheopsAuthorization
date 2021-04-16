@@ -48,7 +48,9 @@ public class WebhookTriggerResponse {
                 }
                 studyResponseBuilder.addSeries(series);
             }
-            studyResponse = studyResponseBuilder.build();
+            if (studyResponseBuilder != null) {
+                studyResponse = studyResponseBuilder.build();
+            }
 
         } else if(webhookTrigger.getNewUser()) {
             event = WebhookType.NEW_USER.name().toLowerCase();
@@ -68,7 +70,9 @@ public class WebhookTriggerResponse {
                 }
                 studyResponseBuilder.addSeries(series);
             }
-            studyResponse = studyResponseBuilder.build();
+            if (studyResponseBuilder != null) {
+                studyResponse = studyResponseBuilder.build();
+            }
         }
 
         if(!webhookTrigger.getWebhookAttempts().isEmpty()) {
