@@ -367,7 +367,7 @@ public class AlbumResource {
         try {
             targetUser = Albums.removeAdmin(kheopsPrincipal.getUser(), user, albumId);
         } catch (UserNotMemberException e) {
-            LOG.log(Level.INFO, "Remove an admin userName:"+user+" from the album id:" +albumId+  " by user :"+kheopsPrincipal.getName()+ " FAILED", e);
+            LOG.log(Level.INFO, e, () -> "Remove an admin userName:"+user+" from the album id:" +albumId+  " by user :"+kheopsPrincipal.getName()+ " FAILED");
             return Response.status(NOT_FOUND).entity(e.getMessage()).build();
         }
 

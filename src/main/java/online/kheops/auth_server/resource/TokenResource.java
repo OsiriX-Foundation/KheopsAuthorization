@@ -136,7 +136,7 @@ public class TokenResource
                 LOG.log(WARNING, "Unable to get the Report Provider's redirect_uri", e);
                 return Response.status(OK).entity(IntrospectResponse.getInactiveResponseJson()).build();
             } catch (NoResultException e) {
-                LOG.log(WARNING, "ClientId: "+ clientId + " Not Found", e);
+                LOG.log(WARNING, e, () -> "ClientId: "+ clientId + " Not Found");
                 return Response.status(OK).entity(IntrospectResponse.getInactiveResponseJson()).build();
             } finally {
                 if (tx.isActive()) {
