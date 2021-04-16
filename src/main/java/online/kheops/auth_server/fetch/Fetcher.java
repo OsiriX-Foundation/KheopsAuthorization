@@ -71,7 +71,7 @@ public abstract class Fetcher {
             logResponseProcessingException(e, studyInstanceUID);
             return result;
         } catch (ProcessingException | WebApplicationException e) {
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyInstanceUID, e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyInstanceUID);
             return result;
         }
 
@@ -126,7 +126,7 @@ public abstract class Fetcher {
             logResponseProcessingException(e, studyUID, seriesUID);
             return result;
         } catch (ProcessingException | WebApplicationException e) {
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID, e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID);
             return result;
         }
 
@@ -143,7 +143,7 @@ public abstract class Fetcher {
 
             tx.commit();
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error while storing series: " + seriesUID, e);
+            LOG.log(Level.SEVERE, e, () -> "Error while storing series: " + seriesUID);
         } finally {
             if (tx.isActive()) {
                 tx.rollback();
@@ -156,10 +156,10 @@ public abstract class Fetcher {
         final Response response = e.getResponse();
         try {
             String responseString = e.getResponse().readEntity(String.class);
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " status:" + response.getStatus() +
-                    " response:\n" + responseString, e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " status:" + response.getStatus() +
+                    " response:\n" + responseString);
         } catch (ProcessingException | IllegalStateException exception) {
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " status:" + response.getStatus(), e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " status:" + response.getStatus());
             LOG.log(Level.SEVERE, "Error while getting the response string", exception);
         }
     }
@@ -168,11 +168,11 @@ public abstract class Fetcher {
         final Response response = e.getResponse();
         try {
             String responseString = e.getResponse().readEntity(String.class);
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID +
-                    " status:" + response.getStatus() + " response:\n" + responseString, e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID +
+                    " status:" + response.getStatus() + " response:\n" + responseString);
         } catch (ProcessingException | IllegalStateException exception) {
-            LOG.log(Level.SEVERE, "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID +
-                    " status:" + response.getStatus(), e);
+            LOG.log(Level.SEVERE, e, () -> "Unable to fetch QIDO data for StudyInstanceUID:" + studyUID + " SeriesInstanceUID: " + seriesUID +
+                    " status:" + response.getStatus());
             LOG.log(Level.SEVERE, "Error while getting the response string", exception);
         }
     }

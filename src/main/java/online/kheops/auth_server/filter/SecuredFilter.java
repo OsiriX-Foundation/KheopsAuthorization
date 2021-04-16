@@ -48,7 +48,7 @@ public class SecuredFilter implements ContainerRequestFilter {
         try {
             token = getToken(requestContext.getHeaderString(HttpHeaders.AUTHORIZATION));
         } catch (IllegalArgumentException e) {
-            LOG.log(Level.WARNING, "IllegalArgumentException " + getRequestString(requestContext), e);
+            LOG.log(Level.WARNING, e, () -> "IllegalArgumentException " + getRequestString(requestContext));
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                     .header(WWW_AUTHENTICATE,"Basic").header(WWW_AUTHENTICATE,"Bearer").build());
             return;
@@ -58,7 +58,7 @@ public class SecuredFilter implements ContainerRequestFilter {
         try {
             accessToken = AccessTokenVerifier.authenticateAccessToken(servletContext, token.getAccessToken());
         } catch (AccessTokenVerificationException e) {
-            LOG.log(Level.WARNING, "Received bad accesstoken" + getRequestString(requestContext), e);
+            LOG.log(Level.WARNING, e, () -> "Received bad accesstoken" + getRequestString(requestContext));
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             return;
         }
@@ -67,7 +67,7 @@ public class SecuredFilter implements ContainerRequestFilter {
         try {
             user = getUser(accessToken.getSubject());
         } catch (UserNotFoundException e) {
-            LOG.log(Level.WARNING, "User not found" + requestContext.getUriInfo().getRequestUri(), e);
+            LOG.log(Level.WARNING, e, () -> "User not found" + requestContext.getUriInfo().getRequestUri());
             requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
             return;
         }
@@ -120,7 +120,7 @@ public class SecuredFilter implements ContainerRequestFilter {
                 final String decoded = new String(Base64.getDecoder().decode(encodedAuthorization), StandardCharsets.UTF_8);
                 String[] split = decoded.split(":");
                 if (split.length != 2) {
-                    LOG.log(Level.WARNING, "Basic authentication doesn't have a username and password");
+                    LOG.log(Level.WARNING, () -> "Basic authentication doesn't have a username and password");
                     throw new IllegalArgumentException();
                 }
 
